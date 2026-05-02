@@ -1,22 +1,19 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { motion, useInView, AnimatePresence } from 'framer-motion'
+import { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
-  Shield, ShieldCheck, ShieldHalf, ShieldAlert, Check, CheckCircle2,
-  ArrowRight, Phone, Mail, User, MapPin, Clock, HelpCircle,
-  FileText, Car, Award, Zap, HeadphonesIcon, RefreshCcw, CircleDot,
-  AlertTriangle, Search, FileCheck, ClipboardList, ThumbsUp
+  Shield, ShieldCheck, ShieldAlert, ShieldX, ShieldPlus, ArrowUpRight,
+  Check, Car, FileText, Phone, MapPin, Mail, Send, Truck,
+  BadgeCheck, Heart, AlertTriangle, Clock
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
@@ -24,11 +21,11 @@ import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from '@/components/ui/accordion'
 import {
-  Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
-} from '@/components/ui/form'
-import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
+import {
+  Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
+} from '@/components/ui/form'
 import { useAppStore } from '@/lib/store'
 
 // ─── Animation Helpers ──────────────────────────────────────────────
@@ -51,177 +48,185 @@ function FadeInSection({ children, className = '', delay = 0 }: {
   )
 }
 
-// ─── Schema ──────────────────────────────────────────────────────────
+// ─── Insurance Schema ───────────────────────────────────────────────
 
-const insuranceFormSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
+const insuranceSchema = z.object({
+  name: z.string().min(2, 'Name is required'),
   email: z.string().email('Invalid email').optional().or(z.literal('')),
   phone: z.string().min(10, 'Phone must be at least 10 digits'),
-  registrationNumber: z.string().optional(),
-  brand: z.string().optional(),
-  model: z.string().optional(),
-  year: z.string().optional(),
-  previousExpiry: z.string().optional(),
-  claimHistory: z.string().optional(),
+  registrationNumber: z.string().min(1, 'Registration number is required'),
+  carBrand: z.string().min(1, 'Brand is required'),
+  carModel: z.string().min(1, 'Model is required'),
+  carYear: z.string().min(1, 'Year is required'),
 })
 
-type InsuranceFormData = z.infer<typeof insuranceFormSchema>
+type InsuranceFormData = z.infer<typeof insuranceSchema>
 
 // ─── Data ────────────────────────────────────────────────────────────
 
 const years = Array.from({ length: 25 }, (_, i) => String(2025 - i))
+const brands = [
+  'Maruti Suzuki', 'Hyundai', 'Honda', 'Toyota', 'Tata', 'Mahindra',
+  'Kia', 'MG', 'Volkswagen', 'Skoda', 'BMW', 'Mercedes-Benz', 'Audi', 'Other'
+]
+
+// ─── Insurance Types ────────────────────────────────────────────────
 
 const insuranceTypes = [
   {
-    icon: ShieldCheck,
-    title: 'Comprehensive Insurance',
-    desc: 'Complete coverage for your vehicle including third-party liability, own damage, theft, fire, and natural disasters. Best overall protection.',
-    features: ['Third-Party Liability', 'Own Damage Cover', 'Theft Protection', 'Natural Calamities', 'Personal Accident Cover'],
-    color: 'from-emerald-500 to-green-600',
-    badge: 'Most Popular',
-  },
-  {
     icon: Shield,
-    title: 'Third-Party Insurance',
-    desc: 'Mandatory by law. Covers damage to third-party property and injuries. Basic protection at an affordable price.',
-    features: ['Third-Party Liability', 'Legal Compliance', 'Personal Accident', 'Affordable Premium'],
-    color: 'from-blue-500 to-cyan-600',
-    badge: 'Mandatory',
-  },
-  {
-    icon: ShieldHalf,
-    title: 'Zero Depreciation',
-    desc: 'Get full claim amount without depreciation deduction. Ideal for new and luxury cars. No out-of-pocket expenses.',
-    features: ['No Depreciation Cut', 'Full Claim Amount', 'New Parts Coverage', 'Higher Premium Value'],
-    color: 'from-violet-500 to-purple-600',
-    badge: 'Recommended',
+    title: 'Comprehensive',
+    tagline: 'Complete Protection',
+    color: 'bg-emerald-100 text-emerald-600',
+    borderColor: 'border-emerald-200',
+    badgeColor: 'bg-emerald-500',
+    features: [
+      'Third-party liability coverage',
+      'Own damage coverage',
+      'Personal accident cover',
+      'Natural disaster protection',
+      'Theft & burglary cover',
+      'Zero depreciation add-on',
+    ],
   },
   {
     icon: ShieldAlert,
+    title: 'Third Party',
+    tagline: 'Mandatory Coverage',
+    color: 'bg-blue-100 text-blue-600',
+    borderColor: 'border-blue-200',
+    badgeColor: 'bg-blue-500',
+    features: [
+      'Third-party liability cover',
+      'Legal liability protection',
+      'Personal accident cover',
+      'Mandatory by law',
+      'Affordable premium',
+      'Basic protection',
+    ],
+  },
+  {
+    icon: ShieldPlus,
+    title: 'Zero Depreciation',
+    tagline: 'Full Claim Value',
+    color: 'bg-purple-100 text-purple-600',
+    borderColor: 'border-purple-200',
+    badgeColor: 'bg-purple-500',
+    features: [
+      'No depreciation deduction',
+      'Full claim on parts',
+      'Higher claim amount',
+      'Best for new cars',
+      'Peace of mind',
+      'Reduces out-of-pocket cost',
+    ],
+  },
+  {
+    icon: ShieldX,
     title: 'Own Damage',
-    desc: 'Covers damage to your own vehicle due to accidents, fire, theft, and natural calamities. Standalone damage protection.',
-    features: ['Accident Cover', 'Fire & Theft', 'Natural Disasters', 'Faster Claims'],
-    color: 'from-orange-500 to-amber-600',
-    badge: 'Flexible',
+    tagline: 'Protect Your Car',
+    color: 'bg-orange-100 text-orange-600',
+    borderColor: 'border-orange-200',
+    badgeColor: 'bg-orange-500',
+    features: [
+      'Damage to your own car',
+      'Accident coverage',
+      'Fire & explosion cover',
+      'Flood & natural calamity',
+      'Theft protection',
+      'Standalone policy',
+    ],
   },
 ]
 
-const benefits = [
-  { icon: Zap, title: 'Quick Claims', desc: 'Get your claims processed within 7 working days', color: 'bg-amber-100 text-amber-600' },
-  { icon: CheckCircle2, title: 'Cashless Network', desc: '1500+ network garages across India', color: 'bg-green-100 text-green-600' },
-  { icon: HeadphonesIcon, title: '24/7 Support', desc: 'Round-the-clock assistance for emergencies', color: 'bg-blue-100 text-blue-600' },
-  { icon: RefreshCcw, title: 'Renewal Assistance', desc: 'Timely reminders and hassle-free renewal', color: 'bg-purple-100 text-purple-600' },
+// ─── Coverage Comparison Data ───────────────────────────────────────
+
+const coverageData = [
+  { feature: 'Third-Party Liability', comprehensive: true, thirdParty: true, zeroDep: true, ownDamage: false },
+  { feature: 'Own Damage Cover', comprehensive: true, thirdParty: false, zeroDep: true, ownDamage: true },
+  { feature: 'Personal Accident', comprehensive: true, thirdParty: true, zeroDep: true, ownDamage: false },
+  { feature: 'Zero Depreciation', comprehensive: true, thirdParty: false, zeroDep: true, ownDamage: false },
+  { feature: 'Theft Protection', comprehensive: true, thirdParty: false, zeroDep: true, ownDamage: true },
+  { feature: 'Natural Disaster', comprehensive: true, thirdParty: false, zeroDep: true, ownDamage: true },
+  { feature: 'Fire & Explosion', comprehensive: true, thirdParty: false, zeroDep: true, ownDamage: true },
+  { feature: 'Engine Protection', comprehensive: false, thirdParty: false, zeroDep: true, ownDamage: false },
+  { feature: 'Roadside Assistance', comprehensive: true, thirdParty: false, zeroDep: true, ownDamage: false },
+  { feature: 'Return to Invoice', comprehensive: false, thirdParty: false, zeroDep: true, ownDamage: false },
 ]
+
+// ─── Claim Process Steps ────────────────────────────────────────────
 
 const claimSteps = [
   {
-    step: 1,
-    icon: AlertTriangle,
-    title: 'Report Incident',
-    desc: 'Call our 24/7 helpline or report online. Keep all documents ready.',
+    icon: Phone,
+    title: 'Report the Claim',
+    desc: 'Call the insurance helpline or file online within 24 hours of the incident',
   },
   {
-    step: 2,
-    icon: Search,
-    title: 'Inspection',
-    desc: 'Our surveyor will inspect your vehicle and assess the damage within 48 hours.',
+    icon: FileText,
+    title: 'Submit Documents',
+    desc: 'Provide required documents like FIR copy, photos, and claim form',
   },
   {
-    step: 3,
-    icon: FileCheck,
-    title: 'Documentation',
-    desc: 'Submit required documents — FIR copy (if any), photos, registration certificate.',
+    icon: Car,
+    title: 'Vehicle Inspection',
+    desc: 'Surveyor will inspect your vehicle and assess the damage',
   },
   {
-    step: 4,
-    icon: ThumbsUp,
+    icon: BadgeCheck,
     title: 'Claim Settlement',
-    desc: 'Get your claim approved and amount credited within 7 working days.',
+    desc: 'Once approved, the claim amount is disbursed directly to you or garage',
   },
 ]
 
-const faqs = [
-  {
-    q: 'What is the difference between comprehensive and third-party insurance?',
-    a: 'Third-party insurance only covers damage to third-party persons/property and is mandatory by law. Comprehensive insurance covers both third-party liability AND damage to your own vehicle due to accidents, theft, fire, floods, etc.',
-  },
-  {
-    q: 'Is zero depreciation cover worth it?',
-    a: 'Zero depreciation is highly recommended for new cars (under 5 years). It ensures you get the full claim amount without any depreciation deduction, which can save you 20-40% on claim settlement.',
-  },
-  {
-    q: 'How long does it take to get an insurance claim settled?',
-    a: 'With Shani Finserve, most claims are processed within 7 working days. Cashless claims at network garages are even faster. Complex cases may take up to 15 days.',
-  },
-  {
-    q: 'Can I transfer my existing insurance to a new car?',
-    a: 'Yes, you can transfer your No Claim Bonus (NCB) to your new car. The NCB discount can range from 20% to 50% depending on your claim-free years.',
-  },
-  {
-    q: 'What happens if my policy expires?',
-    a: 'If your policy expires, you lose benefits like NCB and may face legal issues. A lapsed policy also means your vehicle is uninsured. We recommend renewing at least 30 days before expiry.',
-  },
-]
+// ─── Main InsurancePage Component ───────────────────────────────────
 
-// ─── Coverage Comparison Table Data ──────────────────────────────────
-
-const coverageData = [
-  { feature: 'Third-Party Liability', comprehensive: true, thirdParty: true, zeroDep: true },
-  { feature: 'Own Damage', comprehensive: true, thirdParty: false, zeroDep: true },
-  { feature: 'Theft Coverage', comprehensive: true, thirdParty: false, zeroDep: true },
-  { feature: 'Fire Damage', comprehensive: true, thirdParty: false, zeroDep: true },
-  { feature: 'Natural Calamities', comprehensive: true, thirdParty: false, zeroDep: true },
-  { feature: 'Personal Accident', comprehensive: true, thirdParty: true, zeroDep: true },
-  { feature: 'Zero Depreciation', comprehensive: false, thirdParty: false, zeroDep: true },
-  { feature: 'Engine Protection', comprehensive: false, thirdParty: false, zeroDep: true },
-  { feature: 'Roadside Assistance', comprehensive: false, thirdParty: false, zeroDep: true },
-  { feature: 'No Claim Bonus', comprehensive: true, thirdParty: true, zeroDep: true },
-  { feature: 'Cashless Claims', comprehensive: true, thirdParty: true, zeroDep: true },
-]
-
-// ─── Get Quote Form Component ────────────────────────────────────────
-
-function GetQuoteForm() {
-  const [brands, setBrands] = useState<{ id: string; name: string }[]>([])
-  const [models, setModels] = useState<{ id: string; name: string }[]>([])
+export function InsurancePage() {
+  const [brandsData, setBrandsData] = useState<{ id: string; name: string }[]>([])
+  const [modelsData, setModelsData] = useState<{ id: string; name: string }[]>([])
+  const [formSubmitted, setFormSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    fetch('/api/brands').then(r => r.json()).then(d => setBrands(d.brands || [])).catch(() => {})
-  }, [])
-
   const form = useForm<InsuranceFormData>({
-    resolver: zodResolver(insuranceFormSchema),
-    defaultValues: { name: '', email: '', phone: '', registrationNumber: '', brand: '', model: '', year: '', previousExpiry: '', claimHistory: '' },
+    resolver: zodResolver(insuranceSchema),
+    defaultValues: { name: '', email: '', phone: '', registrationNumber: '', carBrand: '', carModel: '', carYear: '' },
   })
 
-  const selectedBrand = form.watch('brand')
+  const selectedBrand = form.watch('carBrand')
+
+  useEffect(() => {
+    fetch('/api/brands').then(r => r.json()).then(d => setBrandsData(d.brands || [])).catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (selectedBrand) {
-      fetch(`/api/models?brandId=${selectedBrand}`).then(r => r.json()).then(d => setModels(d.models || [])).catch(() => setModels([]))
+      fetch(`/api/models?brandId=${selectedBrand}`)
+        .then(r => r.json())
+        .then(d => setModelsData(d.models || []))
+        .catch(() => setModelsData([]))
     } else {
-      setModels([])
+      setModelsData([])
     }
   }, [selectedBrand])
 
-  const onSubmit = async (data: InsuranceFormData) => {
+  const handleFormSubmit = async () => {
+    const valid = await form.trigger()
+    if (!valid) return
+
     setLoading(true)
     setError('')
 
     try {
+      const vals = form.getValues()
       const payload = {
-        name: data.name,
-        email: data.email || undefined,
-        phone: data.phone,
-        registrationNumber: data.registrationNumber || undefined,
-        carBrand: data.brand || undefined,
-        carModel: data.model || undefined,
-        carYear: data.year ? Number(data.year) : undefined,
-        existingPolicy: !!data.previousExpiry,
-        previousClaim: data.claimHistory === 'yes',
+        name: vals.name,
+        email: vals.email || undefined,
+        phone: vals.phone,
+        registrationNumber: vals.registrationNumber,
+        carBrand: vals.carBrand,
+        carModel: vals.carModel,
+        carYear: Number(vals.carYear),
       }
 
       const res = await fetch('/api/leads/insurance', {
@@ -235,7 +240,7 @@ function GetQuoteForm() {
         throw new Error(d.error || 'Failed to submit')
       }
 
-      setSubmitted(true)
+      setFormSubmitted(true)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong')
     } finally {
@@ -243,434 +248,365 @@ function GetQuoteForm() {
     }
   }
 
-  if (submitted) {
-    return (
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-8">
-        <div className="size-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle2 className="size-8 text-green-600" />
-        </div>
-        <h3 className="text-xl font-bold text-brand mb-2">Quote Request Submitted!</h3>
-        <p className="text-sm text-slate-500 mb-4">
-          Our insurance team from Shani Finserve will contact you within 24 hours with the best insurance quotes.
-        </p>
-        <Button
-          onClick={() => useAppStore.getState().navigateTo('home')}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl"
-        >
-          Back to Home
-        </Button>
-      </motion.div>
-    )
-  }
-
   return (
-    <Card className="p-6 rounded-2xl shadow-sm border-slate-200/60">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="size-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-          <ShieldCheck className="size-5 text-emerald-600" />
-        </div>
-        <div>
-          <h3 className="font-bold text-brand text-lg">Get Insurance Quote</h3>
-          <p className="text-xs text-slate-400">Compare quotes from top insurers instantly</p>
-        </div>
-      </div>
-
-      <AnimatePresence>
-        {error && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl p-3 mb-4">{error}</motion.div>
-        )}
-      </AnimatePresence>
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <FormField control={form.control} name="name" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Full Name</FormLabel>
-                <FormControl><Input placeholder="Your name" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="email" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl><Input type="email" placeholder="your@email.com" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="phone" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Phone</FormLabel>
-                <FormControl><Input type="tel" placeholder="10-digit number" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-          </div>
-
-          <FormField control={form.control} name="registrationNumber" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Car Registration Number</FormLabel>
-              <FormControl><Input placeholder="e.g. AS 01 AB 1234" className="uppercase" {...field} /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <FormField control={form.control} name="brand" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Brand</FormLabel>
-                <Select value={field.value || ''} onValueChange={(v) => { field.onChange(v); form.setValue('model', '') }}>
-                  <FormControl><SelectTrigger><SelectValue placeholder="Select Brand" /></SelectTrigger></FormControl>
-                  <SelectContent>
-                    {brands.map((b) => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="model" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Model</FormLabel>
-                <Select value={field.value || ''} onValueChange={field.onChange} disabled={!selectedBrand}>
-                  <FormControl><SelectTrigger><SelectValue placeholder="Select Model" /></SelectTrigger></FormControl>
-                  <SelectContent>
-                    {models.map((m) => (<SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="year" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Year</FormLabel>
-                <Select value={field.value || ''} onValueChange={field.onChange}>
-                  <FormControl><SelectTrigger><SelectValue placeholder="Year" /></SelectTrigger></FormControl>
-                  <SelectContent>
-                    {years.map((y) => (<SelectItem key={y} value={y}>{y}</SelectItem>))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )} />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField control={form.control} name="previousExpiry" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Previous Policy Expiry</FormLabel>
-                <FormControl>
-                  <input type="date" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="claimHistory" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Previous Claim History</FormLabel>
-                <Select value={field.value || ''} onValueChange={field.onChange}>
-                  <FormControl><SelectTrigger><SelectValue placeholder="Any previous claims?" /></SelectTrigger></FormControl>
-                  <SelectContent>
-                    <SelectItem value="no">No Claims</SelectItem>
-                    <SelectItem value="yes">Had Claims</SelectItem>
-                    <SelectItem value="new">First Time Insurance</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )} />
-          </div>
-
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-12 text-base font-semibold gap-2"
-          >
-            {loading ? (
-              <>
-                <div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Getting Quotes...
-              </>
-            ) : (
-              <>
-                <ShieldCheck className="size-4" />
-                Get Insurance Quotes
-              </>
-            )}
-          </Button>
-        </form>
-      </Form>
-
-      <p className="text-[10px] text-slate-400 text-center mt-3">
-        Your information is secure. We only share it with verified insurance partners.
-      </p>
-    </Card>
-  )
-}
-
-// ─── Main InsurancePage Export ───────────────────────────────────────
-
-export function InsurancePage() {
-  const navigateTo = useAppStore((s) => s.navigateTo)
-
-  return (
-    <div>
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-green-600 to-teal-600">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 size-60 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-20 size-40 bg-white rounded-full blur-3xl" />
-        </div>
-        <div className="container mx-auto px-4 relative z-10 py-12 md:py-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center"
-          >
-            <Badge className="bg-white/20 text-white border-0 mb-4 text-xs">
-              <ShieldHalf className="size-3 mr-1" />
-              Insurance Partner: Shani Finserve
-            </Badge>
-            <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
-              Car Insurance by Shani Finserve
-            </h1>
-            <p className="text-green-100/90 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
-              Secure your car before your first drive. Get comprehensive coverage, third-party insurance, zero depreciation plans from top insurers at the best rates.
-            </p>
-          </motion.div>
+      <section className="relative bg-gradient-to-br from-emerald-600 via-green-500 to-teal-400 py-16 md:py-24 px-4">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnYyaDR2MmgtNHYyem0wLTE2aC0ydi00aDJ2Mmg0djJoLTR2MnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30" />
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="text-center max-w-2xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Badge className="bg-white/20 text-white border-white/30 mb-4 text-sm px-4 py-1">
+                <Shield className="size-3.5 mr-1.5" />
+                Powered by Shani Finserve
+              </Badge>
+              <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
+                Car <span className="text-emerald-100">Insurance</span> by Shani Finserve
+              </h1>
+              <p className="text-white/90 text-lg md:text-xl">
+                Protect your car with the best insurance plans. Compare, choose, and get instant quotes.
+              </p>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Insurance Types */}
-      <section className="py-12 md:py-16 bg-white">
-        <div className="container mx-auto px-4">
+      {/* Insurance Types Section */}
+      <section className="py-12 md:py-16 px-4">
+        <div className="max-w-6xl mx-auto">
           <FadeInSection>
             <div className="text-center mb-10">
-              <h2 className="text-2xl md:text-3xl font-bold text-brand mb-2">Insurance Types</h2>
-              <p className="text-slate-500 text-sm">Choose the right coverage for your vehicle</p>
+              <h2 className="text-2xl md:text-3xl font-bold text-brand mb-3">
+                Choose Your Insurance Type
+              </h2>
+              <p className="text-slate-500 max-w-lg mx-auto">
+                We offer all types of car insurance to suit your needs and budget
+              </p>
             </div>
           </FadeInSection>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl mx-auto">
-            {insuranceTypes.map((ins, i) => (
-              <FadeInSection key={ins.title} delay={i * 0.08}>
-                <motion.div
-                  whileHover={{ y: -4 }}
-                  className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-lg transition-all relative overflow-hidden"
-                >
-                  <Badge className={`absolute top-4 right-4 text-[10px] px-2 py-0.5 rounded-full bg-gradient-to-r ${ins.color} text-white border-0`}>
-                    {ins.badge}
-                  </Badge>
-                  <div className={`size-12 rounded-xl bg-gradient-to-br ${ins.color} flex items-center justify-center mb-4`}>
-                    <ins.icon className="size-6 text-white" />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {insuranceTypes.map((item, i) => (
+              <FadeInSection key={item.title} delay={i * 0.1}>
+                <Card className={`p-6 rounded-2xl border ${item.borderColor} hover:shadow-lg transition-all duration-300 group`}>
+                  <div className={`size-14 ${item.color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                    <item.icon className="size-7" />
                   </div>
-                  <h3 className="font-bold text-brand text-lg mb-2">{ins.title}</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed mb-4">{ins.desc}</p>
-                  <div className="space-y-2">
-                    {ins.features.map((f) => (
-                      <div key={f} className="flex items-center gap-2">
-                        <Check className="size-3.5 text-emerald-500 flex-shrink-0" />
-                        <span className="text-xs text-slate-600">{f}</span>
-                      </div>
+                  <h3 className="font-bold text-brand text-lg mb-1">{item.title}</h3>
+                  <p className="text-xs text-slate-400 mb-4">{item.tagline}</p>
+                  <ul className="space-y-2">
+                    {item.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-2 text-sm text-slate-600">
+                        <Check className="size-3.5 text-green-500 mt-0.5 shrink-0" />
+                        {feature}
+                      </li>
                     ))}
-                  </div>
-                </motion.div>
+                  </ul>
+                </Card>
               </FadeInSection>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Benefits */}
-      <section className="py-12 md:py-16 bg-slate-50">
-        <div className="container mx-auto px-4">
+      {/* Get Quote Form Section */}
+      <section className="py-12 md:py-16 px-4 bg-slate-50/50">
+        <div className="max-w-3xl mx-auto">
           <FadeInSection>
             <div className="text-center mb-10">
-              <h2 className="text-2xl md:text-3xl font-bold text-brand mb-2">Insurance Benefits</h2>
-              <p className="text-slate-500 text-sm">Why choose Shani Finserve for your car insurance</p>
+              <h2 className="text-2xl md:text-3xl font-bold text-brand mb-3">
+                Get Insurance Quote
+              </h2>
+              <p className="text-slate-500 max-w-lg mx-auto">
+                Enter your car details and get a free insurance quote from Shani Finserve
+              </p>
             </div>
           </FadeInSection>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            {benefits.map((b, i) => (
-              <FadeInSection key={b.title} delay={i * 0.08}>
-                <motion.div whileHover={{ y: -3 }} className="bg-white rounded-2xl p-5 text-center border border-slate-100 shadow-sm hover:shadow-md transition-all">
-                  <div className={`size-12 rounded-xl flex items-center justify-center mx-auto mb-3 ${b.color}`}>
-                    <b.icon className="size-6" />
-                  </div>
-                  <h3 className="font-semibold text-brand text-sm mb-1">{b.title}</h3>
-                  <p className="text-xs text-slate-400">{b.desc}</p>
-                </motion.div>
-              </FadeInSection>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Get Quote Form */}
-      <section className="py-12 md:py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <FadeInSection>
-            <div className="text-center mb-10">
-              <h2 className="text-2xl md:text-3xl font-bold text-brand mb-2">Get Insurance Quote</h2>
-              <p className="text-slate-500 text-sm">Fill in your car details to get quotes from top insurers</p>
-            </div>
-          </FadeInSection>
           <FadeInSection delay={0.1}>
-            <div className="max-w-2xl mx-auto">
-              <GetQuoteForm />
-            </div>
+            {formSubmitted ? (
+              <Card className="p-8 rounded-2xl border-slate-200/60 text-center">
+                <div className="size-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Check className="size-10 text-green-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-brand mb-3">Quote Request Submitted!</h3>
+                <p className="text-slate-500 mb-6">
+                  Thank you! Shani Finserve will contact you within 24 hours with customized insurance quotes for your car.
+                </p>
+                <Button
+                  onClick={() => { setFormSubmitted(false); form.reset() }}
+                  variant="outline"
+                  className="rounded-xl"
+                >
+                  Get Another Quote
+                </Button>
+              </Card>
+            ) : (
+              <Card className="p-6 md:p-8 rounded-2xl border-slate-200/60">
+                <AnimatePresence>
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl p-3 mb-4"
+                    >
+                      {error}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <Form {...form}>
+                  <div className="space-y-4">
+                    <FormField control={form.control} name="registrationNumber" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Registration Number</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. AS 01 AB 1234" className="uppercase" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField control={form.control} name="name" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Your full name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+
+                      <FormField control={form.control} name="phone" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <Input type="tel" placeholder="10-digit mobile number" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField control={form.control} name="carBrand" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Brand</FormLabel>
+                          <Select value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('carModel', '') }}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="Select Brand" /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              {brandsData.map((b) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+
+                      <FormField control={form.control} name="carModel" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Model</FormLabel>
+                          <Select value={field.value} onValueChange={field.onChange} disabled={!selectedBrand}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="Select Model" /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              {modelsData.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField control={form.control} name="carYear" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Year</FormLabel>
+                          <Select value={field.value} onValueChange={field.onChange}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="Select Year" /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              {years.map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+
+                      <FormField control={form.control} name="email" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email (Optional)</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="your@email.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
+
+                    <Button
+                      type="button"
+                      onClick={handleFormSubmit}
+                      disabled={loading}
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-12 text-base font-semibold btn-shine"
+                    >
+                      {loading ? (
+                        <>
+                          <div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="size-4 mr-2" />
+                          Get Free Quote
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </Form>
+              </Card>
+            )}
           </FadeInSection>
         </div>
       </section>
 
       {/* Coverage Comparison Table */}
-      <section className="py-12 md:py-16 bg-slate-50">
-        <div className="container mx-auto px-4">
+      <section className="py-12 md:py-16 px-4">
+        <div className="max-w-6xl mx-auto">
           <FadeInSection>
             <div className="text-center mb-10">
-              <h2 className="text-2xl md:text-3xl font-bold text-brand mb-2">Coverage Comparison</h2>
-              <p className="text-slate-500 text-sm">Compare different insurance types side by side</p>
+              <h2 className="text-2xl md:text-3xl font-bold text-brand mb-3">
+                Coverage Comparison
+              </h2>
+              <p className="text-slate-500 max-w-lg mx-auto">
+                Compare different insurance types to choose the right one for you
+              </p>
             </div>
           </FadeInSection>
+
           <FadeInSection delay={0.1}>
-            <div className="max-w-3xl mx-auto overflow-x-auto">
-              <Card className="rounded-2xl shadow-sm border-slate-200/60 overflow-hidden">
+            <Card className="rounded-2xl border-slate-200/60 overflow-hidden">
+              <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-slate-50 hover:bg-slate-50">
-                      <TableHead className="font-bold text-brand text-sm">Coverage</TableHead>
-                      <TableHead className="font-bold text-center text-sm">
-                        <div className="flex flex-col items-center">
-                          <ShieldCheck className="size-4 text-emerald-500 mb-1" />
-                          Comprehensive
-                        </div>
-                      </TableHead>
-                      <TableHead className="font-bold text-center text-sm">
-                        <div className="flex flex-col items-center">
-                          <Shield className="size-4 text-blue-500 mb-1" />
-                          Third Party
-                        </div>
-                      </TableHead>
-                      <TableHead className="font-bold text-center text-sm">
-                        <div className="flex flex-col items-center">
-                          <ShieldHalf className="size-4 text-violet-500 mb-1" />
-                          Zero Dep
-                        </div>
-                      </TableHead>
+                    <TableRow className="bg-slate-50">
+                      <TableHead className="font-semibold text-brand">Coverage</TableHead>
+                      <TableHead className="font-semibold text-center text-emerald-700">Comprehensive</TableHead>
+                      <TableHead className="font-semibold text-center text-blue-700">Third Party</TableHead>
+                      <TableHead className="font-semibold text-center text-purple-700">Zero Dep</TableHead>
+                      <TableHead className="font-semibold text-center text-orange-700">Own Damage</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {coverageData.map((row, i) => (
-                      <TableRow key={row.feature} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                        <TableCell className="text-sm font-medium text-slate-700">{row.feature}</TableCell>
+                    {coverageData.map((row) => (
+                      <TableRow key={row.feature}>
+                        <TableCell className="font-medium text-slate-700">{row.feature}</TableCell>
                         <TableCell className="text-center">
-                          {row.comprehensive ? (
-                            <Check className="size-4 text-emerald-500 mx-auto" />
-                          ) : (
-                            <span className="text-slate-300 text-sm">&mdash;</span>
-                          )}
+                          {row.comprehensive ? <Check className="size-4 text-green-600 mx-auto" /> : <span className="text-slate-300">—</span>}
                         </TableCell>
                         <TableCell className="text-center">
-                          {row.thirdParty ? (
-                            <Check className="size-4 text-emerald-500 mx-auto" />
-                          ) : (
-                            <span className="text-slate-300 text-sm">&mdash;</span>
-                          )}
+                          {row.thirdParty ? <Check className="size-4 text-green-600 mx-auto" /> : <span className="text-slate-300">—</span>}
                         </TableCell>
                         <TableCell className="text-center">
-                          {row.zeroDep ? (
-                            <Check className="size-4 text-emerald-500 mx-auto" />
-                          ) : (
-                            <span className="text-slate-300 text-sm">&mdash;</span>
-                          )}
+                          {row.zeroDep ? <Check className="size-4 text-green-600 mx-auto" /> : <span className="text-slate-300">—</span>}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {row.ownDamage ? <Check className="size-4 text-green-600 mx-auto" /> : <span className="text-slate-300">—</span>}
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
-              </Card>
-            </div>
+              </div>
+            </Card>
           </FadeInSection>
         </div>
       </section>
 
-      {/* Claim Process Steps */}
-      <section className="py-12 md:py-16 bg-white">
-        <div className="container mx-auto px-4">
+      {/* Claim Process Section */}
+      <section className="py-12 md:py-16 px-4 bg-slate-50/50">
+        <div className="max-w-6xl mx-auto">
           <FadeInSection>
             <div className="text-center mb-10">
-              <h2 className="text-2xl md:text-3xl font-bold text-brand mb-2">Claim Process</h2>
-              <p className="text-slate-500 text-sm">Simple 4-step claim settlement process</p>
+              <h2 className="text-2xl md:text-3xl font-bold text-brand mb-3">
+                Claim Process
+              </h2>
+              <p className="text-slate-500 max-w-lg mx-auto">
+                Simple 4-step process to get your claim settled quickly
+              </p>
             </div>
           </FadeInSection>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
-            {claimSteps.map((s, i) => (
-              <FadeInSection key={s.step} delay={i * 0.1}>
-                <motion.div whileHover={{ y: -3 }} className="relative text-center">
-                  {/* Connector Line */}
-                  {i < claimSteps.length - 1 && (
-                    <div className="hidden lg:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-emerald-200 z-0" />
-                  )}
-                  <div className="relative z-10 size-16 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <s.icon className="size-7 text-white" />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {claimSteps.map((step, i) => (
+              <FadeInSection key={step.title} delay={i * 0.1}>
+                <Card className="p-6 rounded-2xl border-slate-200/60 hover:shadow-lg transition-all duration-300 text-center group relative">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 size-7 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    {i + 1}
                   </div>
-                  <div className="size-6 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2 -mt-2 border-2 border-white">
-                    <span className="text-xs font-bold text-emerald-600">{s.step}</span>
+                  <div className="size-14 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4 mt-2 group-hover:scale-110 transition-transform">
+                    <step.icon className="size-7 text-emerald-600" />
                   </div>
-                  <h3 className="font-bold text-brand text-sm mb-1">{s.title}</h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">{s.desc}</p>
-                </motion.div>
+                  <h3 className="font-bold text-brand mb-2">{step.title}</h3>
+                  <p className="text-sm text-slate-500 leading-relaxed">{step.desc}</p>
+                </Card>
               </FadeInSection>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-12 md:py-16 bg-slate-50">
-        <div className="container mx-auto px-4">
+      {/* Powered By Badge */}
+      <section className="py-8 px-4">
+        <div className="max-w-6xl mx-auto">
           <FadeInSection>
-            <div className="text-center mb-10">
-              <h2 className="text-2xl md:text-3xl font-bold text-brand mb-2">Insurance FAQ</h2>
-              <p className="text-slate-500 text-sm">Common questions about car insurance</p>
-            </div>
-          </FadeInSection>
-          <FadeInSection delay={0.1}>
-            <div className="max-w-3xl mx-auto">
-              <Accordion type="single" collapsible className="space-y-3">
-                {faqs.map((faq, i) => (
-                  <AccordionItem
-                    key={i}
-                    value={`faq-${i}`}
-                    className="border border-slate-200 rounded-xl px-4 data-[state=open]:border-emerald-300 data-[state=open]:bg-emerald-50/30 transition-colors"
-                  >
-                    <AccordionTrigger className="text-sm font-semibold text-brand hover:no-underline py-4">
-                      <span className="text-left flex items-start gap-2">
-                        <HelpCircle className="size-4 mt-0.5 text-emerald-500 flex-shrink-0" />
-                        {faq.q}
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionContent className="text-sm text-slate-500 leading-relaxed pb-4 pl-6">
-                      {faq.a}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </div>
+            <Card className="p-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 text-white flex flex-col md:flex-row items-center justify-center gap-4">
+              <div className="size-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <Shield className="size-6" />
+              </div>
+              <div className="text-center md:text-left">
+                <h3 className="font-bold text-lg">Powered by Shani Finserve</h3>
+                <p className="text-white/70 text-sm">Your trusted partner for car insurance solutions across Northeast India</p>
+              </div>
+              <Badge className="bg-white/20 text-white border-white/30 ml-0 md:ml-auto">
+                Verified Partner
+              </Badge>
+            </Card>
           </FadeInSection>
         </div>
       </section>
 
-      {/* Shani Finserve Badge */}
-      <section className="py-8 bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600">
-        <div className="container mx-auto px-4 text-center">
+      {/* CTA Section */}
+      <section className="py-12 md:py-16 px-4">
+        <div className="max-w-4xl mx-auto">
           <FadeInSection>
-            <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-3">
-              <Award className="size-6 text-yellow-400" />
-              <div className="text-left">
-                <p className="text-white font-bold text-sm">Insurance support powered by</p>
-                <p className="text-green-200 text-xs">Shani Finserve - Your Trusted Insurance Partner</p>
+            <Card className="p-8 md:p-12 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 text-white text-center">
+              <h2 className="text-2xl md:text-3xl font-bold mb-3">
+                Still Uninsured? Don&apos;t Risk It!
+              </h2>
+              <p className="text-white/80 mb-6 max-w-lg mx-auto">
+                Get comprehensive car insurance starting from just ₹2,000/year. Protect your car and your family today.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  onClick={() => document.getElementById('quote-form')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="bg-white text-emerald-600 hover:bg-slate-100 rounded-xl h-12 px-8 text-base font-semibold"
+                >
+                  Get Free Quote
+                  <ArrowUpRight className="size-4 ml-2" />
+                </Button>
+                <Button
+                  onClick={() => useAppStore.getState().navigateTo('contact')}
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white/10 rounded-xl h-12 px-8 text-base font-semibold"
+                >
+                  Talk to Expert
+                </Button>
               </div>
-            </div>
+            </Card>
           </FadeInSection>
         </div>
       </section>

@@ -1,20 +1,24 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { motion, AnimatePresence, useInView } from 'framer-motion'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import {
-  MapPin, Phone, Mail, Clock, Send, CheckCircle2, AlertCircle,
-  MessageCircle, Instagram, Facebook, Twitter, Youtube, Navigation
+  MapPin, Phone, Mail, Clock, Send, Check, MessageSquare,
+  ArrowUpRight, Globe, Building2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import { Textarea } from '@/components/ui/textarea'
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/components/ui/select'
+  Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
+} from '@/components/ui/form'
+import { useAppStore } from '@/lib/store'
 
 // ─── Animation Helpers ──────────────────────────────────────────────
 
@@ -36,379 +40,352 @@ function FadeInSection({ children, className = '', delay = 0 }: {
   )
 }
 
-// ─── Contact Page ───────────────────────────────────────────────────
+// ─── Contact Schema ─────────────────────────────────────────────────
+
+const contactSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email'),
+  phone: z.string().min(10, 'Phone must be at least 10 digits'),
+  subject: z.string().min(3, 'Subject is required'),
+  message: z.string().min(10, 'Message must be at least 10 characters'),
+})
+
+type ContactFormData = z.infer<typeof contactSchema>
+
+// ─── Contact Info Cards ─────────────────────────────────────────────
+
+const contactInfo = [
+  {
+    icon: MapPin,
+    title: 'Our Address',
+    detail: 'Dibrugarh, Assam 786001, India',
+    subDetail: 'Northeast India',
+    color: 'bg-blue-100 text-blue-600',
+  },
+  {
+    icon: Phone,
+    title: 'Phone Number',
+    detail: '+91 98765 43210',
+    subDetail: 'Mon-Sat, 9 AM - 7 PM',
+    color: 'bg-emerald-100 text-emerald-600',
+  },
+  {
+    icon: Mail,
+    title: 'Email Address',
+    detail: 'hello@meripehligadi.com',
+    subDetail: 'We reply within 24 hours',
+    color: 'bg-amber-100 text-amber-600',
+  },
+  {
+    icon: Clock,
+    title: 'Business Hours',
+    detail: 'Mon - Sat: 9:00 AM - 7:00 PM',
+    subDetail: 'Sunday: Closed',
+    color: 'bg-purple-100 text-purple-600',
+  },
+]
+
+// ─── Main ContactPage Component ─────────────────────────────────────
 
 export function ContactPage() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    subject: '',
-    message: '',
+  const [formSubmitted, setFormSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const form = useForm<ContactFormData>({
+    resolver: zodResolver(contactSchema),
+    defaultValues: { name: '', email: '', phone: '', subject: '', message: '' },
   })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
-  const contactInfo = [
-    {
-      icon: MapPin,
-      title: 'Visit Our Office',
-      detail: 'MUKUL SHAH, C/O, opposite Vishal Mega Mart, KARTIC PARA, Dibrugarh, Assam 786001',
-      color: 'bg-orange-50 text-orange-600',
-      borderColor: 'border-orange-200',
-    },
-    {
-      icon: Phone,
-      title: 'Call Us',
-      detail: '087219 32757',
-      link: 'tel:08721932757',
-      color: 'bg-emerald-50 text-emerald-600',
-      borderColor: 'border-emerald-200',
-    },
-    {
-      icon: Mail,
-      title: 'Email Us',
-      detail: 'info@meripehligadi.com',
-      link: 'mailto:info@meripehligadi.com',
-      color: 'bg-blue-50 text-blue-600',
-      borderColor: 'border-blue-200',
-    },
-    {
-      icon: Clock,
-      title: 'Business Hours',
-      detail: 'Monday - Saturday: 9:00 AM - 7:00 PM',
-      subDetail: 'Sunday: Closed',
-      color: 'bg-purple-50 text-purple-600',
-      borderColor: 'border-purple-200',
-    },
-  ]
+  const handleFormSubmit = async () => {
+    const valid = await form.trigger()
+    if (!valid) return
 
-  const subjects = [
-    'General Inquiry',
-    'Buy a Car',
-    'Sell My Car',
-    'Car Finance',
-    'Car Insurance',
-    'Test Drive',
-    'Complaint',
-    'Partnership',
-    'Other',
-  ]
-
-  const socialLinks = [
-    { icon: Instagram, label: 'Instagram', href: '#', color: 'hover:text-pink-600' },
-    { icon: Facebook, label: 'Facebook', href: '#', color: 'hover:text-blue-600' },
-    { icon: Twitter, label: 'Twitter', href: '#', color: 'hover:text-sky-500' },
-    { icon: Youtube, label: 'YouTube', href: '#', color: 'hover:text-red-600' },
-  ]
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setSubmitStatus('idle')
+    setLoading(true)
+    setError('')
 
     try {
-      const response = await fetch('/api/leads', {
+      const vals = form.getValues()
+      const payload = {
+        name: vals.name,
+        email: vals.email,
+        phone: vals.phone,
+        message: `[${vals.subject}] ${vals.message}`,
+        type: 'CONTACT',
+      }
+
+      const res = await fetch('/api/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'CONTACT',
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          subject: formData.subject,
-          message: formData.message,
-        }),
+        body: JSON.stringify(payload),
       })
 
-      if (response.ok) {
-        setSubmitStatus('success')
-        setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
-      } else {
-        setSubmitStatus('error')
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}))
+        throw new Error(d.error || 'Failed to submit')
       }
-    } catch {
-      setSubmitStatus('error')
+
+      setFormSubmitted(true)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Something went wrong')
     } finally {
-      setIsSubmitting(false)
+      setLoading(false)
     }
   }
 
   return (
-    <div>
-      {/* Hero Banner */}
-      <section className="bg-gradient-to-br from-[#0a1628] via-[#1a2a4a] to-[#0a1628] py-16 md:py-20 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-[10%] size-40 rounded-full bg-orange-500 blur-3xl" />
-          <div className="absolute bottom-10 right-[10%] size-60 rounded-full bg-blue-500 blur-3xl" />
-        </div>
-        <div className="container mx-auto px-4 relative z-10 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <Badge className="bg-white/10 text-white border-0 mb-4 text-xs">
-              <Phone className="size-3 mr-1" />
-              We&apos;re Here to Help
-            </Badge>
-            <h1 className="text-3xl md:text-5xl font-extrabold mb-4">
-              <span className="bg-gradient-to-r from-white via-blue-200 to-orange-300 bg-clip-text text-transparent">
-                Contact Us
-              </span>
-            </h1>
-            <p className="text-slate-400 text-sm md:text-base max-w-xl mx-auto">
-              Have a question, need help, or want to know more about our services? 
-              Reach out to us and we&apos;ll get back to you as soon as possible.
-            </p>
-          </motion.div>
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-slate-700 via-slate-600 to-slate-500 py-16 md:py-24 px-4">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnYyaDR2MmgtNHYyem0wLTE2aC0ydi00aDJ2Mmg0djJoLTR2MnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30" />
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="text-center max-w-2xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Badge className="bg-white/20 text-white border-white/30 mb-4 text-sm px-4 py-1">
+                <MessageSquare className="size-3.5 mr-1.5" />
+                Get in Touch
+              </Badge>
+              <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
+                Contact <span className="text-sky-300">Us</span>
+              </h1>
+              <p className="text-white/90 text-lg md:text-xl">
+                Have a question or need help? We&apos;re here to assist you. Reach out to us anytime.
+              </p>
+            </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Contact Info Cards */}
-      <section className="py-12 md:py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
-            {contactInfo.map((info, i) => (
-              <FadeInSection key={info.title} delay={i * 0.1}>
-                <motion.div whileHover={{ y: -4 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
-                  <Card className={`p-5 rounded-2xl border ${info.borderColor} bg-white shadow-sm hover:shadow-md transition-shadow h-full`}>
-                    <div className={`size-11 rounded-xl ${info.color} flex items-center justify-center mb-3`}>
-                      <info.icon className="size-5" />
-                    </div>
-                    <h3 className="font-bold text-brand text-sm mb-1">{info.title}</h3>
-                    {info.link ? (
-                      <a href={info.link} className="text-slate-600 text-xs leading-relaxed hover:text-accent-blue transition-colors">
-                        {info.detail}
-                      </a>
-                    ) : (
-                      <>
-                        <p className="text-slate-600 text-xs leading-relaxed">{info.detail}</p>
-                        {info.subDetail && (
-                          <p className="text-slate-400 text-xs mt-0.5">{info.subDetail}</p>
-                        )}
-                      </>
-                    )}
-                  </Card>
-                </motion.div>
+      <section className="py-12 md:py-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {contactInfo.map((item, i) => (
+              <FadeInSection key={item.title} delay={i * 0.1}>
+                <Card className="p-6 rounded-2xl border-slate-200/60 hover:shadow-lg transition-all duration-300 group">
+                  <div className={`size-12 ${item.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                    <item.icon className="size-6" />
+                  </div>
+                  <h3 className="font-bold text-brand mb-2">{item.title}</h3>
+                  <p className="text-sm text-slate-600 font-medium">{item.detail}</p>
+                  <p className="text-xs text-slate-400 mt-1">{item.subDetail}</p>
+                </Card>
               </FadeInSection>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Contact Form + Map */}
-      <section className="py-12 md:py-16 bg-slate-50">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+      {/* Contact Form + Map Section */}
+      <section className="py-12 md:py-16 px-4 bg-slate-50/50">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Contact Form */}
             <FadeInSection>
-              <Card className="p-6 md:p-8 rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="flex items-center gap-2 mb-6">
-                  <Send className="size-5 text-accent-orange" />
-                  <h2 className="text-xl font-bold text-brand">Send Us a Message</h2>
+              <Card className="p-6 md:p-8 rounded-2xl border-slate-200/60">
+                <div className="mb-6">
+                  <h2 className="text-xl font-bold text-brand mb-2">Send us a Message</h2>
+                  <p className="text-sm text-slate-500">Fill out the form below and we&apos;ll get back to you within 24 hours</p>
                 </div>
 
-                {submitStatus === 'success' ? (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="text-center py-10"
-                  >
-                    <CheckCircle2 className="size-16 text-emerald-500 mx-auto mb-4" />
-                    <h3 className="text-lg font-bold text-brand mb-2">Message Sent Successfully!</h3>
-                    <p className="text-slate-500 text-sm mb-6">
-                      Thank you for reaching out. We&apos;ll get back to you within 24 hours.
+                {formSubmitted ? (
+                  <div className="text-center py-8">
+                    <div className="size-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Check className="size-10 text-green-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-brand mb-3">Message Sent!</h3>
+                    <p className="text-slate-500 mb-6">
+                      Thank you for reaching out. Our team will get back to you within 24 hours.
                     </p>
                     <Button
-                      onClick={() => setSubmitStatus('idle')}
+                      onClick={() => { setFormSubmitted(false); form.reset() }}
                       variant="outline"
-                      className="rounded-lg"
+                      className="rounded-xl"
                     >
                       Send Another Message
                     </Button>
-                  </motion.div>
+                  </div>
                 ) : (
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="name" className="text-sm font-medium text-slate-700">
-                          Full Name <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                          id="name"
-                          placeholder="Your full name"
-                          required
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          className="rounded-lg h-10"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email" className="text-sm font-medium text-slate-700">
-                          Email <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="your@email.com"
-                          required
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className="rounded-lg h-10"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="phone" className="text-sm font-medium text-slate-700">
-                          Phone Number <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          placeholder="Your phone number"
-                          required
-                          value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          className="rounded-lg h-10"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="subject" className="text-sm font-medium text-slate-700">
-                          Subject <span className="text-red-500">*</span>
-                        </Label>
-                        <Select
-                          value={formData.subject}
-                          onValueChange={(v) => setFormData({ ...formData, subject: v })}
-                          required
+                  <>
+                    <AnimatePresence>
+                      {error && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl p-3 mb-4"
                         >
-                          <SelectTrigger className="w-full h-10 rounded-lg">
-                            <SelectValue placeholder="Select subject" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {subjects.map((s) => (
-                              <SelectItem key={s} value={s}>{s}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="message" className="text-sm font-medium text-slate-700">
-                        Message <span className="text-red-500">*</span>
-                      </Label>
-                      <Textarea
-                        id="message"
-                        placeholder="Tell us how we can help you..."
-                        required
-                        rows={5}
-                        value={formData.message}
-                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                        className="rounded-lg resize-none"
-                      />
-                    </div>
-
-                    {submitStatus === 'error' && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-4 py-3"
-                      >
-                        <AlertCircle className="size-4 text-red-500 flex-shrink-0" />
-                        <p className="text-sm text-red-700">
-                          Something went wrong. Please try again or contact us via WhatsApp.
-                        </p>
-                      </motion.div>
-                    )}
-
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full bg-brand hover:bg-brand-light text-white font-semibold rounded-xl h-11"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="size-4 mr-2" />
-                          Send Message
-                        </>
+                          {error}
+                        </motion.div>
                       )}
-                    </Button>
-                  </form>
+                    </AnimatePresence>
+
+                    <Form {...form}>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField control={form.control} name="name" render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Full Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Your full name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )} />
+
+                          <FormField control={form.control} name="email" render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input type="email" placeholder="your@email.com" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )} />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField control={form.control} name="phone" render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Phone Number</FormLabel>
+                              <FormControl>
+                                <Input type="tel" placeholder="10-digit mobile number" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )} />
+
+                          <FormField control={form.control} name="subject" render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Subject</FormLabel>
+                              <FormControl>
+                                <Input placeholder="What is this about?" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )} />
+                        </div>
+
+                        <FormField control={form.control} name="message" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Message</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Tell us how we can help you..."
+                                rows={5}
+                                className="resize-none"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+
+                        <Button
+                          type="button"
+                          onClick={handleFormSubmit}
+                          disabled={loading}
+                          className="w-full bg-brand hover:bg-brand-light text-white rounded-xl h-12 text-base font-semibold btn-shine"
+                        >
+                          {loading ? (
+                            <>
+                              <div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                              Sending...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="size-4 mr-2" />
+                              Send Message
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </Form>
+                  </>
                 )}
               </Card>
             </FadeInSection>
 
             {/* Map Placeholder */}
             <FadeInSection delay={0.15}>
-              <div className="space-y-4">
-                <Card className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                  <div className="bg-slate-100 h-64 md:h-80 flex flex-col items-center justify-center relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-200 to-slate-300 opacity-50" />
-                    <div className="relative z-10 text-center">
-                      <div className="size-16 mx-auto mb-3 rounded-full bg-white shadow-lg flex items-center justify-center">
-                        <Navigation className="size-8 text-brand" />
-                      </div>
-                      <h3 className="text-lg font-bold text-slate-700 mb-1">Visit Us</h3>
-                      <p className="text-slate-500 text-xs px-4 max-w-xs">
-                        Opposite Vishal Mega Mart, Kartic Para, Dibrugarh, Assam 786001
-                      </p>
+              <div className="space-y-6">
+                <Card className="rounded-2xl border-slate-200/60 overflow-hidden">
+                  <div className="bg-slate-200 aspect-[4/3] flex items-center justify-center relative">
+                    <div className="text-center">
+                      <MapPin className="size-12 text-slate-400 mx-auto mb-3" />
+                      <p className="text-slate-500 font-medium">Map Placeholder</p>
+                      <p className="text-xs text-slate-400 mt-1">Dibrugarh, Assam, India</p>
                     </div>
-                    {/* Decorative dots */}
-                    <div className="absolute bottom-4 left-4 grid grid-cols-5 gap-1">
-                      {Array.from({ length: 25 }).map((_, i) => (
-                        <div key={i} className="size-1 rounded-full bg-slate-400/40" />
-                      ))}
+                    <div className="absolute bottom-3 right-3">
+                      <Badge className="bg-white text-slate-600 border border-slate-200 shadow-sm">
+                        <Building2 className="size-3 mr-1" />
+                        Dibrugarh HQ
+                      </Badge>
                     </div>
                   </div>
                 </Card>
 
-                {/* Social Media Links */}
-                <Card className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm">
-                  <h3 className="font-bold text-brand text-sm mb-3">Follow Us</h3>
-                  <div className="flex gap-3">
-                    {socialLinks.map((social) => (
-                      <motion.a
-                        key={social.label}
-                        href={social.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="size-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-colors"
-                        aria-label={social.label}
-                      >
-                        <social.icon className="size-4" />
-                      </motion.a>
-                    ))}
+                {/* Quick Contact */}
+                <Card className="p-6 rounded-2xl bg-gradient-to-r from-brand to-brand-light text-white">
+                  <h3 className="font-bold text-lg mb-3">Need Quick Help?</h3>
+                  <p className="text-white/80 text-sm mb-4">
+                    Call us directly or WhatsApp us for instant support
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <a href="tel:+919876543210" className="inline-flex items-center gap-2 text-sm font-medium bg-white/20 hover:bg-white/30 rounded-xl px-4 py-2.5 transition-colors">
+                      <Phone className="size-4" />
+                      +91 98765 43210
+                    </a>
+                    <a
+                      href="https://wa.me/919876543210"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-sm font-medium bg-green-500 hover:bg-green-600 rounded-xl px-4 py-2.5 transition-colors"
+                    >
+                      <MessageSquare className="size-4" />
+                      WhatsApp Us
+                    </a>
                   </div>
                 </Card>
-
-                {/* WhatsApp CTA */}
-                <a
-                  href="https://wa.me/918721932757?text=Hi%20MeriPehli%20Gadi%2C%20I%20need%20help%20with..."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block"
-                >
-                  <Card className="p-4 rounded-2xl border border-emerald-200 bg-emerald-50 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                    <div className="flex items-center gap-3">
-                      <div className="size-10 rounded-xl bg-emerald-500 flex items-center justify-center">
-                        <MessageCircle className="size-5 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-emerald-800 text-sm">Chat on WhatsApp</h3>
-                        <p className="text-emerald-600 text-xs">Get instant response from our team</p>
-                      </div>
-                    </div>
-                  </Card>
-                </a>
               </div>
             </FadeInSection>
           </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-12 md:py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <FadeInSection>
+            <Card className="p-8 md:p-12 rounded-2xl bg-gradient-to-r from-brand to-brand-light text-white text-center">
+              <h2 className="text-2xl md:text-3xl font-bold mb-3">
+                Have More Questions?
+              </h2>
+              <p className="text-white/80 mb-6 max-w-lg mx-auto">
+                Check out our frequently asked questions or browse our help center for quick answers.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  onClick={() => useAppStore.getState().navigateTo('faq')}
+                  className="bg-white text-brand hover:bg-slate-100 rounded-xl h-12 px-8 text-base font-semibold"
+                >
+                  View FAQs
+                  <ArrowUpRight className="size-4 ml-2" />
+                </Button>
+                <Button
+                  onClick={() => useAppStore.getState().navigateTo('about')}
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white/10 rounded-xl h-12 px-8 text-base font-semibold"
+                >
+                  About Us
+                </Button>
+              </div>
+            </Card>
+          </FadeInSection>
         </div>
       </section>
     </div>

@@ -1,17 +1,18 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import Image from 'next/image'
 import {
-  BookOpen, Calendar, User, ArrowRight, ChevronLeft, Clock, Tag,
-  Share2, Facebook, Twitter, Linkedin, Link2, Eye, Search
+  Calendar, Clock, ArrowLeft, ArrowUpRight, Share2, Facebook,
+  Twitter, Link2, BookOpen, User, Eye, Tag, ChevronRight
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Input } from '@/components/ui/input'
+import {
+  Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import { useAppStore } from '@/lib/store'
 
 // ─── Animation Helpers ──────────────────────────────────────────────
@@ -36,631 +37,549 @@ function FadeInSection({ children, className = '', delay = 0 }: {
 
 // ─── Types ──────────────────────────────────────────────────────────
 
-interface Blog {
+interface BlogPost {
   id: string
   title: string
   slug: string
-  excerpt: string
-  content: string
-  coverImage: string
-  category: string
-  author: string
+  excerpt: string | null
+  content: string | null
+  coverImage: string | null
   status: string
   viewsCount: number
   createdAt: string
-  updatedAt: string
+  author?: { id: string; name: string; avatar?: string | null } | null
+  category?: { id: string; name: string; slug: string } | null
 }
 
-// ─── Blog Listing Page ──────────────────────────────────────────────
+interface RelatedBlog extends BlogPost {
+  categoryId?: string
+}
 
-function BlogListingPage() {
-  const navigateTo = useAppStore((s) => s.navigateTo)
-  const [blogs, setBlogs] = useState<Blog[]>([])
+// ─── Blog Listing Component ─────────────────────────────────────────
+
+function BlogListing() {
+  const [blogs, setBlogs] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeCategory, setActiveCategory] = useState('All')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [page, setPage] = useState(1)
-  const [totalBlogs, setTotalBlogs] = useState(0)
-  const pageSize = 9
+  const navigateTo = useAppStore((s) => s.navigateTo)
 
-  const categories = ['All', 'Buying Guide', 'Selling Tips', 'Finance', 'Insurance', 'Industry News', 'Car Maintenance']
-
-  const fetchBlogs = (showLoader: boolean) => {
-    if (showLoader) setLoading(true)
-    const params = new URLSearchParams({
-      status: 'PUBLISHED',
-      page: page.toString(),
-      limit: pageSize.toString(),
-    })
-    if (searchQuery) params.set('search', searchQuery)
-
-    fetch(`/api/blogs?${params}`)
+  useEffect(() => {
+    fetch('/api/blogs?limit=12')
       .then((r) => r.json())
       .then((d) => {
         setBlogs(d.blogs || [])
-        setTotalBlogs(d.total || 0)
         setLoading(false)
       })
       .catch(() => setLoading(false))
-  }
+  }, [])
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchBlogs(true)
-  }, [page, searchQuery])
-
-  const filteredBlogs = useMemo(() => {
-    if (activeCategory === 'All') return blogs
-    return blogs.filter((b) => b.category === activeCategory)
-  }, [blogs, activeCategory])
-
-  const totalPages = Math.ceil(totalBlogs / pageSize)
-
-  const getCategoryColor = (cat: string): string => {
-    const colors: Record<string, string> = {
-      'Buying Guide': 'bg-blue-100 text-blue-700',
-      'Selling Tips': 'bg-emerald-100 text-emerald-700',
-      'Finance': 'bg-orange-100 text-orange-700',
-      'Insurance': 'bg-purple-100 text-purple-700',
-      'Industry News': 'bg-rose-100 text-rose-700',
-      'Car Maintenance': 'bg-amber-100 text-amber-700',
-    }
-    return colors[cat] || 'bg-slate-100 text-slate-700'
-  }
-
-  const formatDate = (dateStr: string): string => {
-    return new Date(dateStr).toLocaleDateString('en-IN', {
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('en-IN', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     })
   }
 
-  const handleCopyLink = (slug: string) => {
-    navigator.clipboard.writeText(`${window.location.origin}/blog/${slug}`)
+  const handleReadBlog = (blog: BlogPost) => {
+    useAppStore.getState().navigateTo('blog-detail', { id: blog.id })
+  }
+
+  const handleCopyLink = (e: React.MouseEvent, title: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    navigator.clipboard.writeText(`${window.location.origin}/blog/${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`)
   }
 
   return (
-    <div>
-      {/* Hero Banner */}
-      <section className="bg-gradient-to-br from-[#0a1628] via-[#1a2a4a] to-[#0a1628] py-16 md:py-20 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-[10%] size-40 rounded-full bg-orange-500 blur-3xl" />
-          <div className="absolute bottom-10 right-[10%] size-60 rounded-full bg-blue-500 blur-3xl" />
-        </div>
-        <div className="container mx-auto px-4 relative z-10 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <Badge className="bg-white/10 text-white border-0 mb-4 text-xs">
-              <BookOpen className="size-3 mr-1" />
-              Knowledge Hub
-            </Badge>
-            <h1 className="text-3xl md:text-5xl font-extrabold mb-4">
-              <span className="bg-gradient-to-r from-white via-blue-200 to-orange-300 bg-clip-text text-transparent">
-                Blog & News
-              </span>
-            </h1>
-            <p className="text-slate-400 text-sm md:text-base max-w-xl mx-auto mb-8">
-              Stay updated with the latest car buying tips, industry news, and guides from MeriPehli Gadi.
-            </p>
-
-            {/* Search */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="max-w-md mx-auto"
-            >
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-                <Input
-                  placeholder="Search articles..."
-                  value={searchQuery}
-                  onChange={(e) => { setSearchQuery(e.target.value); setPage(1) }}
-                  className="pl-10 h-12 rounded-xl bg-white/10 border-white/20 text-white placeholder:text-white/50 focus-visible:border-accent-orange focus-visible:ring-accent-orange/30"
-                />
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Category Filters */}
-      <section className="py-6 bg-white border-b border-slate-100">
-        <div className="container mx-auto px-4">
+    <>
+      {/* Blog Grid */}
+      <section className="py-12 md:py-16 px-4">
+        <div className="max-w-6xl mx-auto">
           <FadeInSection>
-            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-              {categories.map((cat) => (
-                <motion.button
-                  key={cat}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => { setActiveCategory(cat); setPage(1) }}
-                  className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    activeCategory === cat
-                      ? 'bg-brand text-white shadow-md'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  {cat}
-                </motion.button>
-              ))}
+            <div className="text-center mb-10">
+              <h2 className="text-2xl md:text-3xl font-bold text-brand mb-3">Latest Articles</h2>
+              <p className="text-slate-500 max-w-lg mx-auto">
+                Stay updated with the latest news, tips, and guides about cars and the automobile industry
+              </p>
             </div>
           </FadeInSection>
-        </div>
-      </section>
 
-      {/* Blog Grid */}
-      <section className="py-12 md:py-16 bg-slate-50">
-        <div className="container mx-auto px-4">
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
-                <Card key={i} className="rounded-xl overflow-hidden">
-                  <Skeleton className="aspect-[16/9] w-full" />
-                  <div className="p-4 space-y-3">
-                    <Skeleton className="h-5 w-20 rounded-full" />
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-4 w-full" />
+                <Card key={i} className="rounded-2xl overflow-hidden border-slate-200/60">
+                  <Skeleton className="h-48 w-full" />
+                  <div className="p-5">
+                    <Skeleton className="h-4 w-20 mb-3" />
+                    <Skeleton className="h-5 w-full mb-2" />
+                    <Skeleton className="h-5 w-3/4 mb-3" />
+                    <Skeleton className="h-4 w-full mb-1" />
                     <Skeleton className="h-4 w-2/3" />
-                    <div className="flex gap-2">
-                      <Skeleton className="h-3 w-20" />
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                      <Skeleton className="h-3 w-24" />
                       <Skeleton className="h-3 w-16" />
                     </div>
                   </div>
                 </Card>
               ))}
             </div>
-          ) : filteredBlogs.length === 0 ? (
+          ) : blogs.length === 0 ? (
             <div className="text-center py-16">
-              <BookOpen className="size-12 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-600 mb-2">No Articles Found</h3>
-              <p className="text-slate-400 text-sm">
-                {searchQuery
-                  ? `No articles matching "${searchQuery}". Try a different search.`
-                  : `No articles in "${activeCategory}" yet. Check back soon!`}
-              </p>
+              <BookOpen className="size-16 text-slate-300 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-brand mb-2">No Articles Yet</h3>
+              <p className="text-slate-500 mb-6">We&apos;re working on some great content. Check back soon!</p>
+              <Button
+                onClick={() => navigateTo('home')}
+                variant="outline"
+                className="rounded-xl"
+              >
+                Back to Home
+              </Button>
             </div>
           ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredBlogs.map((blog, i) => (
-                  <FadeInSection key={blog.id} delay={i * 0.05}>
-                    <motion.div whileHover={{ y: -4 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
-                      <Card className="rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-lg transition-shadow h-full flex flex-col">
-                        {/* Cover Image */}
-                        <div className="relative aspect-[16/9] bg-slate-200 overflow-hidden group cursor-pointer"
-                          onClick={() => navigateTo('blog-detail', { id: blog.id })}
-                        >
-                          {blog.coverImage ? (
-                            <Image
-                              src={blog.coverImage}
-                              alt={blog.title}
-                              fill
-                              className="object-cover transition-transform duration-500 group-hover:scale-105"
-                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                              unoptimized
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
-                              <BookOpen className="size-10 text-slate-400" />
-                            </div>
-                          )}
-                          {/* Category Badge */}
-                          <div className="absolute top-3 left-3">
-                            <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${getCategoryColor(blog.category)}`}>
-                              {blog.category}
-                            </span>
-                          </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {blogs.map((blog, i) => (
+                <FadeInSection key={blog.id} delay={i * 0.05}>
+                  <Card
+                    className="rounded-2xl overflow-hidden border-slate-200/60 hover:shadow-lg transition-all duration-300 group cursor-pointer car-card-hover"
+                    onClick={() => handleReadBlog(blog)}
+                  >
+                    {/* Cover Image */}
+                    <div className="relative h-48 overflow-hidden bg-slate-100">
+                      {blog.coverImage ? (
+                        <img
+                          src={blog.coverImage}
+                          alt={blog.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
+                          <img
+                            src="/images/blog/blog-default.png"
+                            alt={blog.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none'
+                              ;(e.target as HTMLImageElement).parentElement!.innerHTML = `
+                                <div class="w-full h-full bg-gradient-to-br from-brand/10 to-brand/5 flex items-center justify-center">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-brand/30"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>
+                                </div>
+                              `
+                            }}
+                          />
                         </div>
-
-                        {/* Content */}
-                        <div className="flex flex-col flex-1 p-4">
-                          <h3
-                            className="font-bold text-brand text-base leading-tight line-clamp-2 mb-2 cursor-pointer hover:text-accent-blue transition-colors"
-                            onClick={() => navigateTo('blog-detail', { id: blog.id })}
-                          >
-                            {blog.title}
-                          </h3>
-                          <p className="text-slate-500 text-sm leading-relaxed line-clamp-2 mb-4 flex-1">
-                            {blog.excerpt}
-                          </p>
-
-                          {/* Meta */}
-                          <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                            <div className="flex items-center gap-3 text-xs text-slate-400">
-                              <span className="flex items-center gap-1">
-                                <Calendar className="size-3" />
-                                {formatDate(blog.createdAt)}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Eye className="size-3" />
-                                {blog.viewsCount}
-                              </span>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-accent-blue hover:text-blue-700 p-0 h-auto text-xs font-semibold"
-                              onClick={() => navigateTo('blog-detail', { id: blog.id })}
-                            >
-                              Read More <ArrowRight className="size-3 ml-1" />
-                            </Button>
-                          </div>
-                        </div>
-                      </Card>
-                    </motion.div>
-                  </FadeInSection>
-                ))}
-              </div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <FadeInSection delay={0.2}>
-                  <div className="flex items-center justify-center gap-2 mt-10">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage(Math.max(1, page - 1))}
-                      disabled={page === 1}
-                      className="rounded-lg"
-                    >
-                      <ChevronLeft className="size-4" />
-                      Previous
-                    </Button>
-                    <div className="flex gap-1">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1)
-                        .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
-                        .map((p, i, arr) => (
-                          <span key={p} className="flex items-center gap-1">
-                            {i > 0 && arr[i - 1] !== p - 1 && (
-                              <span className="text-slate-400 text-xs px-1">...</span>
-                            )}
-                            <Button
-                              variant={page === p ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => setPage(p)}
-                              className={`rounded-lg w-9 h-9 ${page === p ? 'bg-brand hover:bg-brand-light text-white' : ''}`}
-                            >
-                              {p}
-                            </Button>
-                          </span>
-                        ))}
+                      )}
+                      {/* Category Badge */}
+                      {blog.category && (
+                        <Badge className="absolute top-3 left-3 bg-white/90 text-brand border-0 text-xs font-medium shadow-sm">
+                          <Tag className="size-3 mr-1" />
+                          {blog.category.name}
+                        </Badge>
+                      )}
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage(Math.min(totalPages, page + 1))}
-                      disabled={page === totalPages}
-                      className="rounded-lg"
-                    >
-                      Next
-                      <ArrowRight className="size-4" />
-                    </Button>
-                  </div>
+
+                    {/* Content */}
+                    <div className="p-5">
+                      <div className="flex items-center gap-3 text-xs text-slate-400 mb-3">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="size-3" />
+                          {formatDate(blog.createdAt)}
+                        </span>
+                        {blog.viewsCount > 0 && (
+                          <span className="flex items-center gap-1">
+                            <Eye className="size-3" />
+                            {blog.viewsCount}
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="font-bold text-brand text-base mb-2 line-clamp-2 group-hover:text-accent-blue transition-colors">
+                        {blog.title}
+                      </h3>
+
+                      <p className="text-sm text-slate-500 line-clamp-2 mb-4 leading-relaxed">
+                        {blog.excerpt || 'Read this article to learn more about cars and the automobile industry.'}
+                      </p>
+
+                      <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                        <div className="flex items-center gap-2">
+                          <div className="size-7 bg-brand rounded-full flex items-center justify-center">
+                            {blog.author?.avatar ? (
+                              <img src={blog.author.avatar} alt={blog.author.name} className="size-full rounded-full" />
+                            ) : (
+                              <User className="size-3.5 text-white" />
+                            )}
+                          </div>
+                          <span className="text-xs font-medium text-slate-600">
+                            {blog.author?.name || 'MeriPehli Gadi'}
+                          </span>
+                        </div>
+                        <span className="text-xs font-medium text-accent-orange flex items-center gap-1 group-hover:gap-2 transition-all">
+                          Read More
+                          <ChevronRight className="size-3" />
+                        </span>
+                      </div>
+                    </div>
+                  </Card>
                 </FadeInSection>
-              )}
-            </>
+              ))}
+            </div>
           )}
         </div>
       </section>
-    </div>
+    </>
   )
 }
 
-// ─── Blog Detail Page ───────────────────────────────────────────────
+// ─── Blog Detail Component ──────────────────────────────────────────
 
-function BlogDetailPage() {
-  const { pageParams, navigateTo, goBack } = useAppStore()
-  const [blog, setBlog] = useState<Blog | null>(null)
-  const [relatedBlogs, setRelatedBlogs] = useState<Blog[]>([])
+function BlogDetail() {
+  const { pageParams, goBack } = useAppStore()
+  const [blog, setBlog] = useState<BlogPost | null>(null)
+  const [relatedBlogs, setRelatedBlogs] = useState<RelatedBlog[]>([])
   const [loading, setLoading] = useState(true)
+  const blogId = pageParams.id
 
   useEffect(() => {
-    if (!pageParams.id) return
-    const controller = new AbortController()
-    fetch(`/api/blogs/${pageParams.id}`, { signal: controller.signal })
+    if (!blogId) return
+
+    fetch(`/api/blogs/${blogId}`)
       .then((r) => r.json())
       .then((d) => {
         setBlog(d.blog || null)
         setRelatedBlogs(d.relatedBlogs || [])
         setLoading(false)
       })
-      .catch((err) => { if (err.name !== 'AbortError') setLoading(false) })
-    return () => controller.abort()
-  }, [pageParams.id])
+      .catch(() => setLoading(false))
+  }, [blogId])
 
-  const formatDate = (dateStr: string): string => {
-    return new Date(dateStr).toLocaleDateString('en-IN', {
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('en-IN', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     })
   }
 
-  const getCategoryColor = (cat: string): string => {
-    const colors: Record<string, string> = {
-      'Buying Guide': 'bg-blue-100 text-blue-700',
-      'Selling Tips': 'bg-emerald-100 text-emerald-700',
-      'Finance': 'bg-orange-100 text-orange-700',
-      'Insurance': 'bg-purple-100 text-purple-700',
-      'Industry News': 'bg-rose-100 text-rose-700',
-      'Car Maintenance': 'bg-amber-100 text-amber-700',
-    }
-    return colors[cat] || 'bg-slate-100 text-slate-700'
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href)
   }
 
-  const handleShare = (platform: string) => {
-    const url = window.location.href
-    const title = blog?.title || ''
-    switch (platform) {
-      case 'facebook':
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank')
-        break
-      case 'twitter':
-        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank')
-        break
-      case 'linkedin':
-        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank')
-        break
-      case 'copy':
-        navigator.clipboard.writeText(url)
-        break
-    }
+  const handleShareFacebook = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank')
+  }
+
+  const handleShareTwitter = () => {
+    window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(blog?.title || '')}`, '_blank')
   }
 
   if (loading) {
     return (
-      <div className="py-16 md:py-24">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <Skeleton className="h-4 w-40 mb-6" />
-          <Skeleton className="h-8 w-full mb-3" />
-          <Skeleton className="h-8 w-3/4 mb-6" />
-          <Skeleton className="aspect-[16/9] w-full rounded-2xl mb-8" />
+      <section className="py-12 px-4">
+        <div className="max-w-3xl mx-auto">
+          <Skeleton className="h-6 w-32 mb-6" />
+          <Skeleton className="h-10 w-full mb-4" />
+          <Skeleton className="h-6 w-2/3 mb-8" />
+          <Skeleton className="h-64 w-full rounded-2xl mb-8" />
           <div className="space-y-3">
-            {Array.from({ length: 8 }).map((_, i) => (
+            {Array.from({ length: 6 }).map((_, i) => (
               <Skeleton key={i} className="h-4 w-full" />
             ))}
           </div>
         </div>
-      </div>
+      </section>
     )
   }
 
   if (!blog) {
     return (
-      <div className="py-16 md:py-24 text-center">
-        <BookOpen className="size-16 text-slate-300 mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-slate-600 mb-2">Article Not Found</h2>
-        <p className="text-slate-400 text-sm mb-6">The article you&apos;re looking for doesn&apos;t exist or has been removed.</p>
-        <Button onClick={() => navigateTo('blog')} className="rounded-lg bg-brand hover:bg-brand-light text-white">
-          <ArrowRight className="size-4 mr-2" />
-          Back to Blog
-        </Button>
-      </div>
+      <section className="py-20 px-4">
+        <div className="max-w-3xl mx-auto text-center">
+          <BookOpen className="size-16 text-slate-300 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-brand mb-2">Article Not Found</h3>
+          <p className="text-slate-500 mb-6">The article you&apos;re looking for doesn&apos;t exist or has been removed.</p>
+          <Button onClick={goBack} variant="outline" className="rounded-xl">
+            <ArrowLeft className="size-4 mr-2" />
+            Go Back
+          </Button>
+        </div>
+      </section>
     )
   }
 
   return (
-    <div>
-      {/* Breadcrumb + Back */}
-      <section className="py-4 bg-white border-b border-slate-100">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-2 text-sm">
-            <button
+    <>
+      <section className="py-8 md:py-12 px-4">
+        <div className="max-w-3xl mx-auto">
+          {/* Back Button */}
+          <FadeInSection>
+            <Button
+              variant="ghost"
               onClick={goBack}
-              className="flex items-center gap-1 text-slate-500 hover:text-brand transition-colors"
+              className="mb-6 rounded-xl text-slate-500 hover:text-brand"
             >
-              <ChevronLeft className="size-4" />
-              Back
-            </button>
-            <span className="text-slate-300">/</span>
-            <button
-              onClick={() => navigateTo('blog')}
-              className="text-slate-500 hover:text-brand transition-colors"
-            >
-              Blog
-            </button>
-            <span className="text-slate-300">/</span>
-            <span className="text-brand font-medium truncate max-w-[200px]">{blog.title}</span>
-          </div>
-        </div>
-      </section>
+              <ArrowLeft className="size-4 mr-2" />
+              Back to Blog
+            </Button>
+          </FadeInSection>
 
-      {/* Article Header */}
-      <section className="py-8 md:py-12 bg-white">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            {/* Category Badge */}
-            <span className={`inline-block text-xs font-semibold px-3 py-1 rounded-full mb-4 ${getCategoryColor(blog.category)}`}>
-              {blog.category}
-            </span>
+          {/* Breadcrumb */}
+          <FadeInSection>
+            <Breadcrumb className="mb-6">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink onClick={() => useAppStore.getState().navigateTo('home')} className="cursor-pointer hover:text-brand">
+                    Home
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink onClick={() => useAppStore.getState().navigateTo('blog')} className="cursor-pointer hover:text-brand">
+                    Blog
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="text-brand font-medium line-clamp-1 max-w-[200px]">{blog.title}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </FadeInSection>
 
-            {/* Title */}
+          {/* Title & Meta */}
+          <FadeInSection delay={0.05}>
+            {blog.category && (
+              <Badge className="bg-blue-100 text-blue-700 border-blue-200 mb-4">
+                <Tag className="size-3 mr-1" />
+                {blog.category.name}
+              </Badge>
+            )}
+
             <h1 className="text-2xl md:text-4xl font-extrabold text-brand mb-4 leading-tight">
               {blog.title}
             </h1>
 
-            {/* Meta */}
             <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 mb-6">
-              <span className="flex items-center gap-1.5">
-                <User className="size-4" />
-                {blog.author || 'MeriPehli Gadi Team'}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Calendar className="size-4" />
+              <div className="flex items-center gap-2">
+                <div className="size-8 bg-brand rounded-full flex items-center justify-center">
+                  {blog.author?.avatar ? (
+                    <img src={blog.author.avatar} alt={blog.author.name} className="size-full rounded-full" />
+                  ) : (
+                    <User className="size-4 text-white" />
+                  )}
+                </div>
+                <div>
+                  <p className="font-medium text-slate-700">{blog.author?.name || 'MeriPehli Gadi'}</p>
+                </div>
+              </div>
+              <span className="flex items-center gap-1">
+                <Calendar className="size-3.5" />
                 {formatDate(blog.createdAt)}
               </span>
-              <span className="flex items-center gap-1.5">
-                <Eye className="size-4" />
-                {blog.viewsCount} views
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Clock className="size-4" />
-                5 min read
-              </span>
-            </div>
-
-            {/* Share Buttons */}
-            <div className="flex items-center gap-2 pb-6 border-b border-slate-100">
-              <span className="text-sm font-medium text-slate-500 mr-1">Share:</span>
-              {[
-                { icon: Facebook, platform: 'facebook', label: 'Facebook' },
-                { icon: Twitter, platform: 'twitter', label: 'Twitter' },
-                { icon: Linkedin, platform: 'linkedin', label: 'LinkedIn' },
-                { icon: Link2, platform: 'copy', label: 'Copy Link' },
-              ].map((share) => (
-                <motion.button
-                  key={share.platform}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleShare(share.platform)}
-                  className="size-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors"
-                  aria-label={share.label}
-                >
-                  <share.icon className="size-3.5" />
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Cover Image */}
-      <section className="bg-white pb-8">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6 }}>
-            <div className="relative aspect-[16/9] rounded-2xl overflow-hidden bg-slate-200">
-              {blog.coverImage ? (
-                <Image
-                  src={blog.coverImage}
-                  alt={blog.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 720px"
-                  unoptimized
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
-                  <BookOpen className="size-16 text-slate-400" />
-                </div>
-              )}
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Article Content */}
-      <section className="py-8 bg-white">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <FadeInSection>
-            <div className="prose prose-slate max-w-none prose-headings:text-brand prose-h2:text-xl prose-h3:text-lg prose-p:text-slate-600 prose-p:leading-relaxed prose-a:text-accent-blue prose-strong:text-brand prose-li:text-slate-600 prose-img:rounded-xl">
-              {blog.content ? (
-                <div dangerouslySetInnerHTML={{ __html: blog.content }} />
-              ) : (
-                <p className="text-slate-600 leading-relaxed">{blog.excerpt}</p>
+              {blog.viewsCount > 0 && (
+                <span className="flex items-center gap-1">
+                  <Eye className="size-3.5" />
+                  {blog.viewsCount} views
+                </span>
               )}
             </div>
           </FadeInSection>
+
+          {/* Cover Image */}
+          <FadeInSection delay={0.1}>
+            <div className="rounded-2xl overflow-hidden mb-8 bg-slate-100">
+              {blog.coverImage ? (
+                <img
+                  src={blog.coverImage}
+                  alt={blog.title}
+                  className="w-full h-auto max-h-[400px] object-cover"
+                />
+              ) : (
+                <div className="w-full h-64 md:h-80 bg-gradient-to-br from-brand/10 to-brand/5 flex items-center justify-center">
+                  <img
+                    src="/images/blog/blog-default.png"
+                    alt={blog.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none'
+                      ;(e.target as HTMLImageElement).parentElement!.innerHTML = `
+                        <div class="w-full h-full bg-gradient-to-br from-brand/10 to-brand/5 flex items-center justify-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-brand/20"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>
+                        </div>
+                      `
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          </FadeInSection>
+
+          {/* Content */}
+          <FadeInSection delay={0.15}>
+            <div className="prose prose-slate max-w-none mb-8">
+              {blog.content ? (
+                <div
+                  className="text-slate-600 leading-relaxed space-y-4"
+                  dangerouslySetInnerHTML={{ __html: blog.content }}
+                />
+              ) : (
+                <div className="text-slate-500 leading-relaxed">
+                  <p>This article is currently being written. Please check back soon for the full content.</p>
+                </div>
+              )}
+            </div>
+          </FadeInSection>
+
+          {/* Share Buttons */}
+          <FadeInSection delay={0.2}>
+            <div className="border-t border-slate-200 pt-6 mt-8">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <p className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                  <Share2 className="size-4" />
+                  Share this article
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleShareFacebook}
+                    className="rounded-xl gap-1.5"
+                  >
+                    <Facebook className="size-4 text-blue-600" />
+                    Facebook
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleShareTwitter}
+                    className="rounded-xl gap-1.5"
+                  >
+                    <Twitter className="size-4 text-sky-500" />
+                    Twitter
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopyLink}
+                    className="rounded-xl gap-1.5"
+                  >
+                    <Link2 className="size-4" />
+                    Copy Link
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </FadeInSection>
+
+          {/* Related Articles */}
+          {relatedBlogs.length > 0 && (
+            <FadeInSection delay={0.25}>
+              <div className="mt-12 pt-8 border-t border-slate-200">
+                <h2 className="text-xl font-bold text-brand mb-6">Related Articles</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {relatedBlogs.map((relatedBlog) => (
+                    <Card
+                      key={relatedBlog.id}
+                      className="rounded-xl overflow-hidden border-slate-200/60 hover:shadow-md transition-all duration-300 cursor-pointer group"
+                      onClick={() => useAppStore.getState().navigateTo('blog-detail', { id: relatedBlog.id })}
+                    >
+                      <div className="flex gap-4 p-4">
+                        <div className="size-20 rounded-lg overflow-hidden bg-slate-100 shrink-0">
+                          {relatedBlog.coverImage ? (
+                            <img src={relatedBlog.coverImage} alt={relatedBlog.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-brand/10 to-brand/5 flex items-center justify-center">
+                              <BookOpen className="size-5 text-brand/30" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold text-brand text-sm line-clamp-2 group-hover:text-accent-blue transition-colors mb-1">
+                            {relatedBlog.title}
+                          </h3>
+                          <p className="text-xs text-slate-400 flex items-center gap-1">
+                            <Calendar className="size-3" />
+                            {formatDate(relatedBlog.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </FadeInSection>
+          )}
         </div>
       </section>
+    </>
+  )
+}
 
-      {/* Share Again + Tags */}
-      <section className="py-8 bg-slate-50 border-t border-b border-slate-100">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Share2 className="size-4 text-slate-400" />
-              <span className="text-sm font-medium text-slate-600">Share this article</span>
-              {[
-                { icon: Facebook, platform: 'facebook' },
-                { icon: Twitter, platform: 'twitter' },
-                { icon: Linkedin, platform: 'linkedin' },
-                { icon: Link2, platform: 'copy' },
-              ].map((share) => (
-                <motion.button
-                  key={share.platform}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleShare(share.platform)}
-                  className="size-8 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-colors"
-                >
-                  <share.icon className="size-3.5" />
-                </motion.button>
-              ))}
-            </div>
-            <Badge variant="secondary" className="gap-1">
-              <Tag className="size-3" />
-              {blog.category}
-            </Badge>
+// ─── Main BlogPage Component ────────────────────────────────────────
+
+export function BlogPage() {
+  const { currentPage } = useAppStore()
+  const isBlogDetail = currentPage === 'blog-detail'
+
+  return (
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-brand via-brand-light to-purple-900 py-16 md:py-24 px-4">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnYyaDR2MmgtNHYyem0wLTE2aC0ydi00aDJ2Mmg0djJoLTR2MnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30" />
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="text-center max-w-2xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Badge className="bg-white/20 text-white border-white/30 mb-4 text-sm px-4 py-1">
+                <BookOpen className="size-3.5 mr-1.5" />
+                Blog & Articles
+              </Badge>
+              <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
+                {isBlogDetail ? 'Article' : 'Our <span className="text-purple-300">Blog</span>'}
+              </h1>
+              <p className="text-white/90 text-lg md:text-xl">
+                {isBlogDetail
+                  ? 'Read the latest articles and insights from MeriPehli Gadi'
+                  : 'Stay updated with car tips, industry news, and expert guides'
+                }
+              </p>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Related Posts */}
-      {relatedBlogs.length > 0 && (
-        <section className="py-12 md:py-16 bg-white">
-          <div className="container mx-auto px-4">
+      {/* Content */}
+      {isBlogDetail ? <BlogDetail /> : <BlogListing />}
+
+      {/* CTA Section - Only for listing */}
+      {!isBlogDetail && (
+        <section className="py-12 md:py-16 px-4 bg-slate-50/50">
+          <div className="max-w-4xl mx-auto">
             <FadeInSection>
-              <div className="max-w-3xl mx-auto">
-                <h2 className="text-xl md:text-2xl font-bold text-brand mb-6">Related Articles</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {relatedBlogs.slice(0, 3).map((relBlog) => (
-                    <motion.div
-                      key={relBlog.id}
-                      whileHover={{ y: -3 }}
-                      onClick={() => navigateTo('blog-detail', { id: relBlog.id })}
-                      className="cursor-pointer"
-                    >
-                      <Card className="rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow h-full">
-                        <div className="relative aspect-[16/9] bg-slate-200 overflow-hidden">
-                          {relBlog.coverImage ? (
-                            <Image
-                              src={relBlog.coverImage}
-                              alt={relBlog.title}
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 768px) 100vw, 240px"
-                              unoptimized
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
-                              <BookOpen className="size-6 text-slate-400" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="p-3">
-                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${getCategoryColor(relBlog.category)}`}>
-                            {relBlog.category}
-                          </span>
-                          <h3 className="font-semibold text-brand text-sm leading-tight mt-1.5 line-clamp-2">
-                            {relBlog.title}
-                          </h3>
-                          <p className="text-xs text-slate-400 mt-1.5">
-                            {formatDate(relBlog.createdAt)}
-                          </p>
-                        </div>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
+              <Card className="p-8 md:p-12 rounded-2xl bg-gradient-to-r from-brand to-brand-light text-white text-center">
+                <h2 className="text-2xl md:text-3xl font-bold mb-3">
+                  Ready to Find Your Dream Car?
+                </h2>
+                <p className="text-white/80 mb-6 max-w-lg mx-auto">
+                  Explore our wide collection of verified used and new cars across Northeast India.
+                </p>
+                <Button
+                  onClick={() => useAppStore.getState().navigateTo('used-cars')}
+                  className="bg-white text-brand hover:bg-slate-100 rounded-xl h-12 px-8 text-base font-semibold"
+                >
+                  Browse Cars
+                  <ArrowUpRight className="size-4 ml-2" />
+                </Button>
+              </Card>
             </FadeInSection>
           </div>
         </section>
       )}
     </div>
   )
-}
-
-// ─── Main Export ────────────────────────────────────────────────────
-
-export function BlogPage() {
-  const currentPage = useAppStore((s) => s.currentPage)
-
-  switch (currentPage) {
-    case 'blog-detail':
-      return <BlogDetailPage />
-    default:
-      return <BlogListingPage />
-  }
 }

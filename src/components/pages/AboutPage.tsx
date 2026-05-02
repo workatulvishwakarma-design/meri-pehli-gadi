@@ -2,16 +2,13 @@
 
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import Image from 'next/image'
 import {
-  Shield, Eye, MapPin, Handshake, ArrowRight, Phone, Mail,
-  Users, Car, Building2, HeartHandshake, Award, Star, Target,
-  CheckCircle2, MessageCircle
+  Heart, Shield, Eye, Users, Car, MapPin, Building2, Award,
+  Target, Lightbulb, ArrowUpRight, CheckCircle2, Star
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { useAppStore } from '@/lib/store'
 
 // ─── Animation Helpers ──────────────────────────────────────────────
@@ -34,719 +31,501 @@ function FadeInSection({ children, className = '', delay = 0 }: {
   )
 }
 
-// ─── About Page ─────────────────────────────────────────────────────
+// ─── Privacy Policy Content ─────────────────────────────────────────
 
-function AboutMainPage() {
-  const navigateTo = useAppStore((s) => s.navigateTo)
-
-  const values = [
-    {
-      icon: Shield,
-      title: 'Trust',
-      description: 'Every car undergoes rigorous quality checks. We verify documents, inspect engines, and ensure complete transparency before listing any vehicle on our platform.',
-      color: 'bg-emerald-50 text-emerald-600',
-      borderColor: 'border-emerald-200',
-    },
-    {
-      icon: Eye,
-      title: 'Transparency',
-      description: 'No hidden charges, no misleading information. We display true condition reports, real photos, and fair pricing on every listing.',
-      color: 'bg-blue-50 text-blue-600',
-      borderColor: 'border-blue-200',
-    },
-    {
-      icon: MapPin,
-      title: 'Local Support',
-      description: 'Based in Dibrugarh, Assam, we understand the Northeast India market deeply. Our local team provides hands-on support for every transaction.',
-      color: 'bg-orange-50 text-orange-600',
-      borderColor: 'border-orange-200',
-    },
-  ]
-
-  const team = [
-    {
-      name: 'Mukul Shah',
-      role: 'Founder & CEO',
-      description: 'Visionary entrepreneur passionate about making car ownership accessible to every Indian family.',
-      gradient: 'from-brand to-blue-700',
-    },
-    {
-      name: 'Finance Team',
-      role: 'Shani Finserve',
-      description: 'Dedicated financial experts providing hassle-free car loans and insurance solutions.',
-      gradient: 'from-orange-500 to-amber-500',
-    },
-    {
-      name: 'Sales Team',
-      role: 'Customer Support',
-      description: 'Friendly, knowledgeable team helping you find the perfect car at the best price.',
-      gradient: 'from-emerald-500 to-teal-500',
-    },
-  ]
-
-  const stats = [
-    { value: '500+', label: 'Cars Sold', icon: Car },
-    { value: '100+', label: 'Verified Dealers', icon: Building2 },
-    { value: '50+', label: 'Cities Covered', icon: MapPin },
-    { value: '10,000+', label: 'Happy Customers', icon: Users },
-  ]
-
+function PrivacyPolicyContent() {
   return (
-    <div>
-      {/* Hero Banner */}
-      <section className="relative bg-gradient-to-br from-[#0a1628] via-[#1a2a4a] to-[#0a1628] overflow-hidden py-16 md:py-24">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-[10%] size-40 rounded-full bg-orange-500 blur-3xl" />
-          <div className="absolute bottom-10 right-[10%] size-60 rounded-full bg-blue-500 blur-3xl" />
-        </div>
-        <div className="container mx-auto px-4 relative z-10 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Image src="/logo.png" alt="MeriPehli Gadi" width={120} height={40} className="h-10 w-auto mx-auto mb-6" unoptimized />
-          </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-3xl md:text-5xl font-extrabold mb-4"
-          >
-            <span className="bg-gradient-to-r from-white via-blue-200 to-orange-300 bg-clip-text text-transparent">
-              About MeriPehli Gadi
-            </span>
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-slate-400 text-sm md:text-base max-w-2xl mx-auto"
-          >
-            Your trusted partner in buying and selling quality pre-owned cars across Northeast India and beyond.
-          </motion.p>
-        </div>
+    <div className="prose prose-slate max-w-none">
+      <h2 className="text-2xl font-bold text-brand mb-4">Privacy Policy</h2>
+      <p className="text-sm text-slate-500 mb-6">Last updated: January 2025</p>
+
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">1. Information We Collect</h3>
+        <p className="text-sm text-slate-600 leading-relaxed mb-3">
+          At MeriPehli Gadi, we collect information you provide directly to us, including your name, email address, phone number, location, and other details when you create an account, list a car, inquire about a vehicle, or use our services.
+        </p>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          We also collect certain information automatically, including your IP address, browser type, device information, pages visited, and time spent on our platform.
+        </p>
       </section>
 
-      {/* Mission Section */}
-      <section className="py-12 md:py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <FadeInSection>
-            <div className="max-w-3xl mx-auto text-center">
-              <Badge className="bg-orange-50 text-orange-600 border-orange-200 mb-4">
-                <Target className="size-3 mr-1" />
-                Our Mission
-              </Badge>
-              <h2 className="text-2xl md:text-4xl font-bold text-brand mb-6 leading-tight">
-                Har family ki pehli car ka sapna, ab aur aasaan.
-              </h2>
-              <p className="text-slate-600 text-sm md:text-base leading-relaxed">
-                At MeriPehli Gadi, we believe every family deserves a reliable car at a fair price. 
-                We&apos;re building India&apos;s most trusted used car marketplace, starting from the heart of 
-                Assam and expanding across the nation. Our mission is to make the dream of car ownership 
-                a reality for millions of Indian families.
-              </p>
-            </div>
-          </FadeInSection>
-        </div>
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">2. How We Use Your Information</h3>
+        <ul className="text-sm text-slate-600 leading-relaxed space-y-2 list-disc pl-5">
+          <li>To provide and maintain our car listing and discovery services</li>
+          <li>To process your inquiries and connect you with buyers/sellers</li>
+          <li>To send you notifications about your listings and messages</li>
+          <li>To provide customer support and respond to your requests</li>
+          <li>To improve our platform and develop new features</li>
+          <li>To communicate with you about updates and promotions (with your consent)</li>
+        </ul>
       </section>
 
-      {/* Our Story */}
-      <section className="py-12 md:py-16 bg-slate-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <FadeInSection>
-              <div className="grid md:grid-cols-2 gap-8 items-center">
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-brand mb-4">Our Story</h2>
-                  <p className="text-slate-600 text-sm leading-relaxed mb-4">
-                    MeriPehli Gadi was founded in Dibrugarh, Assam, with a simple yet powerful vision: 
-                    to create a transparent and trustworthy platform where people can buy and sell 
-                    pre-owned cars with complete peace of mind.
-                  </p>
-                  <p className="text-slate-600 text-sm leading-relaxed mb-4">
-                    Growing up in Northeast India, our founder Mukul Shah witnessed firsthand the challenges 
-                    people face when buying a used car — hidden defects, unclear ownership history, and 
-                    unfair pricing. This inspired the creation of a platform built on three pillars: 
-                    trust, transparency, and local support.
-                  </p>
-                  <p className="text-slate-600 text-sm leading-relaxed">
-                    Today, MeriPehli Gadi has grown from a local initiative to a comprehensive car 
-                    marketplace serving customers across 50+ cities, with over 500 cars sold and 
-                    thousands of satisfied families who found their first car through us.
-                  </p>
-                </div>
-                <div className="relative">
-                  <div className="bg-gradient-to-br from-[#0a1628] to-[#1a2a4a] rounded-2xl p-8 text-center">
-                    <Car className="size-20 text-white/80 mx-auto mb-4" />
-                    <p className="text-white/60 text-sm">Since</p>
-                    <p className="text-white text-4xl font-bold">2023</p>
-                    <p className="text-white/60 text-sm mt-1">Dibrugarh, Assam</p>
-                  </div>
-                  <motion.div
-                    animate={{ y: [0, -6, 0] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute -top-3 -right-3 bg-accent-orange text-white rounded-xl px-3 py-1.5 shadow-lg"
-                  >
-                    <p className="text-xs font-bold">Growing Fast!</p>
-                  </motion.div>
-                </div>
-              </div>
-            </FadeInSection>
-          </div>
-        </div>
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">3. Information Sharing</h3>
+        <p className="text-sm text-slate-600 leading-relaxed mb-3">
+          We do not sell, trade, or rent your personal information to third parties. We may share your information with:
+        </p>
+        <ul className="text-sm text-slate-600 leading-relaxed space-y-2 list-disc pl-5">
+          <li>Other users when you respond to their inquiries or listings</li>
+          <li>Service providers who assist in operating our platform</li>
+          <li>Law enforcement when required by law</li>
+          <li>Business partners (like Shani Finserve) only with your explicit consent</li>
+        </ul>
       </section>
 
-      {/* Vision & Values */}
-      <section className="py-12 md:py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <FadeInSection>
-            <div className="text-center mb-10">
-              <h2 className="text-2xl md:text-3xl font-bold text-brand mb-2">Our Vision & Values</h2>
-              <p className="text-slate-500 text-sm max-w-xl mx-auto">
-                Everything we do is guided by these core principles
-              </p>
-            </div>
-          </FadeInSection>
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {values.map((item, i) => (
-              <FadeInSection key={item.title} delay={i * 0.1}>
-                <motion.div whileHover={{ y: -4 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
-                  <Card className={`p-6 rounded-2xl border ${item.borderColor} bg-white h-full shadow-sm hover:shadow-md transition-shadow`}>
-                    <div className={`size-12 rounded-xl ${item.color} flex items-center justify-center mb-4`}>
-                      <item.icon className="size-6" />
-                    </div>
-                    <h3 className="text-lg font-bold text-brand mb-2">{item.title}</h3>
-                    <p className="text-slate-500 text-sm leading-relaxed">{item.description}</p>
-                  </Card>
-                </motion.div>
-              </FadeInSection>
-            ))}
-          </div>
-        </div>
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">4. Data Security</h3>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          We implement industry-standard security measures to protect your personal information. However, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security of your data.
+        </p>
       </section>
 
-      {/* Shani Finserve Partnership */}
-      <section className="py-12 md:py-16 bg-gradient-to-br from-blue-50 via-white to-orange-50">
-        <div className="container mx-auto px-4">
-          <FadeInSection>
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-6 md:p-10">
-                <div className="flex flex-col md:flex-row items-center gap-8">
-                  <div className="flex-shrink-0">
-                    <div className="size-20 md:size-24 bg-gradient-to-br from-[#0a1628] to-[#1a2a4a] rounded-2xl flex items-center justify-center">
-                      <Handshake className="size-10 md:size-12 text-accent-orange" />
-                    </div>
-                  </div>
-                  <div className="text-center md:text-left flex-1">
-                    <Badge className="bg-orange-50 text-orange-600 border-orange-200 mb-3">
-                      <Star className="size-3 mr-1" />
-                      Official Partner
-                    </Badge>
-                    <h2 className="text-2xl md:text-3xl font-bold text-brand mb-3">
-                      Shani Finserve Partnership
-                    </h2>
-                    <p className="text-slate-600 text-sm leading-relaxed mb-4">
-                      We&apos;ve partnered with Shani Finserve to make car ownership even more accessible. 
-                      Through this partnership, MeriPehli Gadi customers get exclusive access to:
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                      {[
-                        'Competitive car loan interest rates',
-                        'Quick loan approval in 24 hours',
-                        'Comprehensive car insurance plans',
-                        'Minimal documentation process',
-                        'Flexible EMI options',
-                        'Zero down payment on select models',
-                      ].map((item) => (
-                        <div key={item} className="flex items-center gap-2">
-                          <CheckCircle2 className="size-4 text-emerald-500 flex-shrink-0" />
-                          <span className="text-sm text-slate-600">{item}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <p className="text-sm font-semibold text-brand">
-                      Finance and insurance support by Shani Finserve
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </FadeInSection>
-        </div>
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">5. Your Rights</h3>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          You have the right to access, correct, or delete your personal information at any time. You can manage your data through your account settings or contact us at privacy@meripehligadi.com.
+        </p>
       </section>
 
-      {/* Team Section */}
-      <section className="py-12 md:py-16 bg-slate-50">
-        <div className="container mx-auto px-4">
-          <FadeInSection>
-            <div className="text-center mb-10">
-              <h2 className="text-2xl md:text-3xl font-bold text-brand mb-2">Meet Our Team</h2>
-              <p className="text-slate-500 text-sm max-w-xl mx-auto">
-                The passionate people behind MeriPehli Gadi
-              </p>
-            </div>
-          </FadeInSection>
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {team.map((member, i) => (
-              <FadeInSection key={member.name} delay={i * 0.1}>
-                <motion.div whileHover={{ y: -4 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
-                  <Card className="p-6 rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-md transition-shadow text-center h-full">
-                    <div className={`w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br ${member.gradient} flex items-center justify-center`}>
-                      <Users className="size-10 text-white" />
-                    </div>
-                    <h3 className="text-lg font-bold text-brand">{member.name}</h3>
-                    <p className="text-accent-orange text-sm font-medium mb-2">{member.role}</p>
-                    <p className="text-slate-500 text-sm leading-relaxed">{member.description}</p>
-                  </Card>
-                </motion.div>
-              </FadeInSection>
-            ))}
-          </div>
-        </div>
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">6. Cookies</h3>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          We use cookies and similar tracking technologies to enhance your experience on our platform. You can control cookie preferences through your browser settings.
+        </p>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-12 md:py-16 bg-gradient-to-br from-[#0a1628] via-[#1a2a4a] to-[#0a1628]">
-        <div className="container mx-auto px-4">
-          <FadeInSection>
-            <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-10">
-              Our Impact in Numbers
-            </h2>
-          </FadeInSection>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
-            {stats.map((stat, i) => (
-              <FadeInSection key={stat.label} delay={i * 0.1}>
-                <div className="text-center">
-                  <div className="size-14 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
-                    <stat.icon className="size-7 text-accent-orange" />
-                  </div>
-                  <p className="text-2xl md:text-3xl font-bold text-white mb-1">{stat.value}</p>
-                  <p className="text-slate-400 text-sm">{stat.label}</p>
-                </div>
-              </FadeInSection>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Contact CTA */}
-      <section className="py-12 md:py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <FadeInSection>
-            <div className="max-w-2xl mx-auto text-center">
-              <HeartHandshake className="size-12 text-accent-orange mx-auto mb-4" />
-              <h2 className="text-2xl md:text-3xl font-bold text-brand mb-3">
-                Get in Touch with Us
-              </h2>
-              <p className="text-slate-500 text-sm mb-6">
-                Have questions? Want to know more about our services? We&apos;d love to hear from you.
-              </p>
-              <div className="flex flex-wrap gap-3 justify-center">
-                <Button
-                  size="lg"
-                  onClick={() => navigateTo('contact')}
-                  className="bg-brand hover:bg-brand-light text-white font-semibold rounded-xl px-8 h-11"
-                >
-                  <Mail className="size-4 mr-2" />
-                  Contact Us
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={() => navigateTo('faq')}
-                  className="rounded-xl px-8 h-11 border-slate-200 text-brand"
-                >
-                  <MessageCircle className="size-4 mr-2" />
-                  View FAQs
-                </Button>
-              </div>
-            </div>
-          </FadeInSection>
-        </div>
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">7. Contact Us</h3>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          If you have any questions about this Privacy Policy, please contact us at privacy@meripehligadi.com or call us at +91 98765 43210.
+        </p>
       </section>
     </div>
   )
 }
 
-// ─── Privacy Policy Page ────────────────────────────────────────────
+// ─── Terms Content ──────────────────────────────────────────────────
 
-function PrivacyPolicyPage() {
-  const navigateTo = useAppStore((s) => s.navigateTo)
-
-  const sections = [
-    {
-      title: 'Information We Collect',
-      content: [
-        'Personal Information: When you create an account, list a car, or contact us, we may collect your name, email address, phone number, and address.',
-        'Vehicle Information: Details about cars you list or inquire about, including make, model, year, registration number, and images.',
-        'Usage Data: We collect information about how you use our platform, including pages visited, search queries, and interaction patterns.',
-        'Device Information: Your IP address, browser type, operating system, and device identifiers for security and analytics purposes.',
-      ],
-    },
-    {
-      title: 'How We Use Your Information',
-      content: [
-        'To provide and maintain our car marketplace services.',
-        'To process your inquiries, car listings, and transactions.',
-        'To connect you with dealers, sellers, and buyers.',
-        'To send you notifications about your listings, messages, and account activity.',
-        'To improve our platform and develop new features.',
-        'To comply with legal obligations and protect against fraud.',
-      ],
-    },
-    {
-      title: 'Data Sharing',
-      content: [
-        'We share your information with car dealers and potential buyers/sellers as necessary to facilitate transactions on our platform.',
-        'We may share data with Shani Finserve for finance and insurance services if you opt-in.',
-        'We use third-party analytics services to improve user experience, but data is anonymized.',
-        'We may disclose information if required by law or to protect our rights and safety.',
-      ],
-    },
-    {
-      title: 'Your Rights',
-      content: [
-        'Access: You can request a copy of the personal data we hold about you.',
-        'Correction: You can update or correct your personal information at any time.',
-        'Deletion: You can request deletion of your account and associated data.',
-        'Opt-out: You can opt out of marketing communications at any time.',
-        'Data Portability: You can request your data in a portable format.',
-      ],
-    },
-    {
-      title: 'Data Security',
-      content: [
-        'We implement industry-standard security measures to protect your personal information.',
-        'All data transmissions are encrypted using SSL/TLS protocols.',
-        'We regularly review and update our security practices.',
-        'While we strive to protect your data, no method of transmission over the internet is 100% secure.',
-      ],
-    },
-  ]
-
+function TermsContent() {
   return (
-    <div>
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-[#0a1628] via-[#1a2a4a] to-[#0a1628] py-16 md:py-20">
-        <div className="container mx-auto px-4 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <Badge className="bg-white/10 text-white border-0 mb-4 text-xs">Legal</Badge>
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Privacy Policy</h1>
-            <p className="text-slate-400 text-sm">Last updated: January 2025</p>
-          </motion.div>
-        </div>
+    <div className="prose prose-slate max-w-none">
+      <h2 className="text-2xl font-bold text-brand mb-4">Terms of Service</h2>
+      <p className="text-sm text-slate-500 mb-6">Last updated: January 2025</p>
+
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">1. Acceptance of Terms</h3>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          By accessing or using MeriPehli Gadi, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our platform.
+        </p>
       </section>
 
-      {/* Content */}
-      <section className="py-12 md:py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <FadeInSection>
-              <p className="text-slate-600 text-sm leading-relaxed mb-8">
-                At MeriPehli Gadi, we take your privacy seriously. This Privacy Policy explains how we collect, 
-                use, disclose, and safeguard your information when you visit our platform or use our services. 
-                Please read this policy carefully to understand our practices regarding your personal data.
-              </p>
-            </FadeInSection>
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">2. User Accounts</h3>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          To access certain features, you may need to create an account. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.
+        </p>
+      </section>
 
-            {sections.map((section, i) => (
-              <FadeInSection key={section.title} delay={i * 0.05}>
-                <div className="mb-8">
-                  <h2 className="text-lg md:text-xl font-bold text-brand mb-4 flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center">
-                      <span className="text-sm font-bold text-brand">{i + 1}</span>
-                    </div>
-                    {section.title}
-                  </h2>
-                  <ul className="space-y-2 ml-10">
-                    {section.content.map((item, j) => (
-                      <li key={j} className="text-slate-600 text-sm leading-relaxed flex items-start gap-2">
-                        <span className="text-accent-orange mt-1.5 flex-shrink-0">•</span>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <Separator className="my-6 bg-slate-100" />
-              </FadeInSection>
-            ))}
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">3. Listings & Transactions</h3>
+        <ul className="text-sm text-slate-600 leading-relaxed space-y-2 list-disc pl-5">
+          <li>All car listings must be accurate and represent the actual vehicle condition</li>
+          <li>Users must not list stolen, illegal, or misrepresented vehicles</li>
+          <li>MeriPehli Gadi acts as a platform and is not a party to any transaction between buyers and sellers</li>
+          <li>Users are responsible for verifying vehicle details before completing a transaction</li>
+          <li>All financial transactions are the responsibility of the parties involved</li>
+        </ul>
+      </section>
 
-            <FadeInSection>
-              <div className="bg-slate-50 rounded-xl p-6 mt-6">
-                <h3 className="font-semibold text-brand mb-2">Contact Us About Privacy</h3>
-                <p className="text-slate-600 text-sm mb-4">
-                  If you have any questions about this Privacy Policy, please contact us at{' '}
-                  <a href="mailto:info@meripehligadi.com" className="text-accent-blue hover:underline">
-                    info@meripehligadi.com
-                  </a>
-                  {' '}or call us at{' '}
-                  <a href="tel:08721932757" className="text-accent-blue hover:underline">
-                    087219 32757
-                  </a>.
-                </p>
-                <Button
-                  variant="outline"
-                  onClick={() => navigateTo('contact')}
-                  className="rounded-lg text-sm"
-                >
-                  <MessageCircle className="size-4 mr-2" />
-                  Contact Support
-                </Button>
-              </div>
-            </FadeInSection>
-          </div>
-        </div>
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">4. Prohibited Activities</h3>
+        <ul className="text-sm text-slate-600 leading-relaxed space-y-2 list-disc pl-5">
+          <li>Posting false, misleading, or fraudulent listings</li>
+          <li>Using the platform for spam, harassment, or illegal activities</li>
+          <li>Attempting to gain unauthorized access to other users&apos; accounts</li>
+          <li>Copying or scraping content from the platform without permission</li>
+          <li>Circumventing any security measures or restrictions</li>
+        </ul>
+      </section>
+
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">5. Intellectual Property</h3>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          All content, design, logos, and software on MeriPehli Gadi are the property of MeriPehli Gadi and are protected by intellectual property laws. You may not reproduce, distribute, or create derivative works without our express permission.
+        </p>
+      </section>
+
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">6. Limitation of Liability</h3>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          MeriPehli Gadi provides the platform &quot;as is&quot; without any warranties. We are not liable for any damages arising from the use of our platform, including but not limited to any financial losses from transactions between users.
+        </p>
+      </section>
+
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">7. Modifications</h3>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          We reserve the right to modify these terms at any time. Continued use of the platform after modifications constitutes acceptance of the updated terms.
+        </p>
+      </section>
+
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">8. Contact</h3>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          For questions about these Terms, contact us at legal@meripehligadi.com.
+        </p>
       </section>
     </div>
   )
 }
 
-// ─── Terms & Conditions Page ────────────────────────────────────────
+// ─── Refund Policy Content ──────────────────────────────────────────
 
-function TermsPage() {
-  const navigateTo = useAppStore((s) => s.navigateTo)
-
-  const sections = [
-    {
-      title: 'Acceptance of Terms',
-      content: 'By accessing and using MeriPehli Gadi\'s platform (website and mobile interfaces), you agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, you must not use our services. These terms apply to all users, including visitors, buyers, sellers, and dealers.',
-    },
-    {
-      title: 'User Accounts',
-      content: 'To access certain features, you must create an account. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You must provide accurate and complete information during registration. You must be at least 18 years old to create an account.',
-    },
-    {
-      title: 'Car Listings',
-      content: 'All car listings on MeriPehli Gadi are provided by third-party sellers and dealers. While we strive to ensure accuracy, we do not guarantee the completeness or reliability of listing information. Users are encouraged to independently verify all vehicle details, including condition, ownership, and documentation, before making a purchase decision.',
-    },
-    {
-      title: 'Transactions',
-      content: 'MeriPehli Gadi serves as a marketplace connecting buyers and sellers. We facilitate the transaction process but are not a party to the sale agreement between buyers and sellers. Final purchase agreements are between the buyer and seller. We recommend using secure payment methods and proper documentation for all transactions.',
-    },
-    {
-      title: 'Finance and Insurance',
-      content: 'Car finance and insurance services are provided by our partner Shani Finserve. Approval of loans and insurance policies is subject to Shani Finserve\'s terms, conditions, and eligibility criteria. MeriPehli Gadi is not responsible for any decisions made by Shani Finserve regarding loan or insurance applications.',
-    },
-    {
-      title: 'Prohibited Activities',
-      content: 'Users are prohibited from posting fraudulent or misleading car listings, using the platform for illegal activities, attempting to manipulate pricing or reviews, creating multiple accounts for fraudulent purposes, and violating any applicable laws or regulations while using the platform.',
-    },
-    {
-      title: 'Limitation of Liability',
-      content: 'MeriPehli Gadi shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the platform. Our total liability shall not exceed the fees paid by you to us in the twelve months preceding the claim, if any.',
-    },
-    {
-      title: 'Modifications',
-      content: 'We reserve the right to modify these terms at any time. Changes will be effective immediately upon posting. Your continued use of the platform after changes constitutes acceptance of the modified terms. We will notify users of significant changes through email or platform notifications.',
-    },
-  ]
-
+function RefundPolicyContent() {
   return (
-    <div>
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-[#0a1628] via-[#1a2a4a] to-[#0a1628] py-16 md:py-20">
-        <div className="container mx-auto px-4 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <Badge className="bg-white/10 text-white border-0 mb-4 text-xs">Legal</Badge>
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Terms & Conditions</h1>
-            <p className="text-slate-400 text-sm">Last updated: January 2025</p>
-          </motion.div>
-        </div>
+    <div className="prose prose-slate max-w-none">
+      <h2 className="text-2xl font-bold text-brand mb-4">Refund Policy</h2>
+      <p className="text-sm text-slate-500 mb-6">Last updated: January 2025</p>
+
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">1. General Refund Policy</h3>
+        <p className="text-sm text-slate-600 leading-relaxed mb-3">
+          MeriPehli Gadi is a platform connecting car buyers and sellers. Since transactions happen directly between users, refund policies are determined by the individual sellers and the nature of the transaction.
+        </p>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          We recommend buyers thoroughly inspect vehicles and clarify all terms before making any payments.
+        </p>
       </section>
 
-      {/* Content */}
-      <section className="py-12 md:py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <FadeInSection>
-              <p className="text-slate-600 text-sm leading-relaxed mb-8">
-                These Terms and Conditions govern your use of MeriPehli Gadi&apos;s platform and services. 
-                Please read them carefully before using our website or mobile application.
-              </p>
-            </FadeInSection>
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">2. Featured Listing Refunds</h3>
+        <p className="text-sm text-slate-600 leading-relaxed mb-3">
+          If you have purchased a featured listing or promotional service from MeriPehli Gadi:
+        </p>
+        <ul className="text-sm text-slate-600 leading-relaxed space-y-2 list-disc pl-5">
+          <li>Refund requests must be made within 7 days of purchase</li>
+          <li>If the service has not been delivered, a full refund will be issued</li>
+          <li>If the service has been partially delivered, a proportional refund may be issued</li>
+          <li>Refunds will be processed within 10-15 business days</li>
+        </ul>
+      </section>
 
-            {sections.map((section, i) => (
-              <FadeInSection key={section.title} delay={i * 0.05}>
-                <div className="mb-6">
-                  <h2 className="text-lg md:text-xl font-bold text-brand mb-3 flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center">
-                      <span className="text-sm font-bold text-brand">{i + 1}</span>
-                    </div>
-                    {section.title}
-                  </h2>
-                  <p className="text-slate-600 text-sm leading-relaxed ml-10">{section.content}</p>
-                </div>
-                <Separator className="my-4 bg-slate-100" />
-              </FadeInSection>
-            ))}
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">3. Finance & Insurance Services</h3>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          Finance and insurance services are provided by our partner Shani Finserve. Any refund requests related to these services should be directed to Shani Finserve&apos;s customer support team.
+        </p>
+      </section>
 
-            <FadeInSection>
-              <div className="bg-slate-50 rounded-xl p-6 mt-6">
-                <h3 className="font-semibold text-brand mb-2">Questions About Our Terms?</h3>
-                <p className="text-slate-600 text-sm mb-4">
-                  For any questions regarding these terms, please reach out to our support team.
-                </p>
-                <Button
-                  variant="outline"
-                  onClick={() => navigateTo('contact')}
-                  className="rounded-lg text-sm"
-                >
-                  <Phone className="size-4 mr-2" />
-                  Contact Support
-                </Button>
-              </div>
-            </FadeInSection>
-          </div>
-        </div>
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">4. How to Request a Refund</h3>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          To request a refund, please contact us at support@meripehligadi.com with your order details and reason for the refund. Our team will review your request and respond within 48 hours.
+        </p>
+      </section>
+
+      <section className="mb-8">
+        <h3 className="text-lg font-bold text-brand mb-3">5. Dispute Resolution</h3>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          In case of disputes between buyers and sellers, we encourage both parties to communicate and resolve the issue amicably. MeriPehli Gadi can act as a mediator but is not legally bound to resolve third-party disputes.
+        </p>
       </section>
     </div>
   )
 }
 
-// ─── Refund Policy Page ─────────────────────────────────────────────
-
-function RefundPolicyPage() {
-  const navigateTo = useAppStore((s) => s.navigateTo)
-
-  const sections = [
-    {
-      title: 'Certified Car Return Policy',
-      content: 'Cars purchased through our Certified Pre-Owned program come with a 7-day return window. If you are not satisfied with your certified car purchase for any reason, you may initiate a return within 7 days of delivery for a full refund, subject to the conditions below.',
-      highlight: true,
-    },
-    {
-      title: 'Return Conditions',
-      content: [
-        'The car must be returned in the same condition as delivered, with no additional damage beyond normal test-driving wear.',
-        'All original documents, accessories, and keys must be returned with the vehicle.',
-        'The car must not have been driven more than 200 km since delivery.',
-        'No modifications or alterations should have been made to the vehicle.',
-        'The return request must be initiated within the 7-day window through our support team.',
-      ],
-    },
-    {
-      title: 'Refund Process',
-      content: [
-        'Once your return request is approved, our team will inspect the vehicle within 2 business days.',
-        'After a successful inspection, the refund will be processed within 7-10 business days.',
-        'Refunds will be issued to the original payment method used for the purchase.',
-        'Shipping or transportation costs for return are the buyer\'s responsibility unless the car had undisclosed defects.',
-        'If finance was used, the loan will be cancelled and any payments made will be refunded to the financing partner.',
-      ],
-    },
-    {
-      title: 'Non-Returnable Items',
-      content: 'Returns are not applicable for: Cars purchased from private sellers through the marketplace (non-certified listings), vehicles with custom modifications made after purchase, cars with damage caused by the buyer, and transactions completed more than 7 days ago.',
-    },
-    {
-      title: 'Disputed Transactions',
-      content: 'If you believe there has been a misrepresentation in a car listing (undisclosed defects, incorrect specifications, etc.), please contact our support team within 7 days of delivery with supporting evidence. We will investigate the matter and work towards a fair resolution, which may include a partial refund, full refund, or car exchange.',
-    },
-  ]
-
-  return (
-    <div>
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-[#0a1628] via-[#1a2a4a] to-[#0a1628] py-16 md:py-20">
-        <div className="container mx-auto px-4 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <Badge className="bg-white/10 text-white border-0 mb-4 text-xs">Legal</Badge>
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Refund Policy</h1>
-            <p className="text-slate-400 text-sm">Last updated: January 2025</p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Content */}
-      <section className="py-12 md:py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <FadeInSection>
-              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-8 flex items-start gap-3">
-                <Shield className="size-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-semibold text-emerald-800 mb-1">Certified Pre-Owned Guarantee</p>
-                  <p className="text-sm text-emerald-700">
-                    All certified cars come with a 7-day return policy and 6-month warranty for your peace of mind.
-                  </p>
-                </div>
-              </div>
-            </FadeInSection>
-
-            {sections.map((section, i) => (
-              <FadeInSection key={section.title} delay={i * 0.05}>
-                <div className="mb-8">
-                  <h2 className={`text-lg md:text-xl font-bold mb-3 flex items-center gap-2 ${section.highlight ? 'text-emerald-700' : 'text-brand'}`}>
-                    <div className={`w-8 h-8 rounded-lg ${section.highlight ? 'bg-emerald-100' : 'bg-brand/10'} flex items-center justify-center`}>
-                      <CheckCircle2 className={`size-4 ${section.highlight ? 'text-emerald-600' : 'text-brand'}`} />
-                    </div>
-                    {section.title}
-                  </h2>
-                  {Array.isArray(section.content) ? (
-                    <ul className="space-y-2 ml-10">
-                      {section.content.map((item, j) => (
-                        <li key={j} className="text-slate-600 text-sm leading-relaxed flex items-start gap-2">
-                          <span className="text-accent-orange mt-1.5 flex-shrink-0">•</span>
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-slate-600 text-sm leading-relaxed ml-10">{section.content}</p>
-                  )}
-                </div>
-                <Separator className="my-4 bg-slate-100" />
-              </FadeInSection>
-            ))}
-
-            <FadeInSection>
-              <div className="bg-slate-50 rounded-xl p-6 mt-6">
-                <h3 className="font-semibold text-brand mb-2">Need Help with a Return?</h3>
-                <p className="text-slate-600 text-sm mb-4">
-                  Our support team is here to help you with any return or refund queries.
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => navigateTo('contact')}
-                    className="rounded-lg text-sm"
-                  >
-                    <Phone className="size-4 mr-2" />
-                    Contact Support
-                  </Button>
-                  <a
-                    href="https://wa.me/918721932757"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-white px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50 transition-colors"
-                  >
-                    <MessageCircle className="size-4" />
-                    WhatsApp Us
-                  </a>
-                </div>
-              </div>
-            </FadeInSection>
-          </div>
-        </div>
-      </section>
-    </div>
-  )
-}
-
-// ─── Main Export ────────────────────────────────────────────────────
+// ─── Main AboutPage Component ───────────────────────────────────────
 
 export function AboutPage() {
-  const currentPage = useAppStore((s) => s.currentPage)
+  const { currentPage } = useAppStore()
 
-  switch (currentPage) {
-    case 'privacy-policy':
-      return <PrivacyPolicyPage />
-    case 'terms':
-      return <TermsPage />
-    case 'refund-policy':
-      return <RefundPolicyPage />
-    default:
-      return <AboutMainPage />
-  }
+  const isPolicy = ['privacy-policy', 'terms', 'refund-policy'].includes(currentPage)
+
+  return (
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      {!isPolicy ? (
+        <section className="relative bg-gradient-to-br from-brand via-brand-light to-blue-800 py-16 md:py-24 px-4">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnYyaDR2MmgtNHYyem0wLTE2aC0ydi00aDJ2Mmg0djJoLTR2MnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30" />
+          <div className="max-w-6xl mx-auto relative z-10">
+            <div className="text-center max-w-2xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Badge className="bg-white/20 text-white border-white/30 mb-4 text-sm px-4 py-1">
+                  <Heart className="size-3.5 mr-1.5" />
+                  Our Story
+                </Badge>
+                <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
+                  About <span className="text-sky-300">MeriPehli Gadi</span>
+                </h1>
+                <p className="text-white/90 text-lg md:text-xl">
+                  Northeast India&apos;s most trusted platform for buying and selling cars. Built with love in Assam.
+                </p>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="relative bg-gradient-to-br from-slate-700 via-slate-600 to-slate-500 py-12 md:py-16 px-4">
+          <div className="max-w-6xl mx-auto relative z-10">
+            <div className="text-center max-w-2xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <h1 className="text-2xl md:text-4xl font-extrabold text-white mb-3">
+                  {currentPage === 'privacy-policy' && 'Privacy Policy'}
+                  {currentPage === 'terms' && 'Terms of Service'}
+                  {currentPage === 'refund-policy' && 'Refund Policy'}
+                </h1>
+                <p className="text-white/70 text-sm">
+                  Please read these carefully before using our platform
+                </p>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Content */}
+      {!isPolicy ? (
+        <>
+          {/* Our Story Section */}
+          <section className="py-12 md:py-16 px-4">
+            <div className="max-w-4xl mx-auto">
+              <FadeInSection>
+                <div className="text-center mb-10">
+                  <h2 className="text-2xl md:text-3xl font-bold text-brand mb-3">Our Story</h2>
+                </div>
+              </FadeInSection>
+
+              <FadeInSection delay={0.1}>
+                <div className="space-y-4 text-slate-600 leading-relaxed">
+                  <p>
+                    MeriPehli Gadi was born from a simple idea: making it easy for people in Northeast India to buy and sell cars with trust and transparency. Founded in Dibrugarh, Assam, we noticed that the car buying and selling experience in the region was fragmented, unreliable, and often frustrating.
+                  </p>
+                  <p>
+                    We set out to change that. What started as a small local platform has grown into Northeast India&apos;s most trusted car marketplace, connecting thousands of buyers with genuine sellers across Assam and beyond.
+                  </p>
+                  <p>
+                    Our mission is simple — to make every car purchase a &quot;Meri Pehli Gadi&quot; moment. Whether it&apos;s your first car or your fifth, we want the experience to be memorable, transparent, and hassle-free.
+                  </p>
+                  <p>
+                    Today, we work with 100+ verified dealers, serve customers across 50+ cities, and have facilitated over 500+ successful car sales. And we&apos;re just getting started.
+                  </p>
+                </div>
+              </FadeInSection>
+            </div>
+          </section>
+
+          {/* Vision & Values Section */}
+          <section className="py-12 md:py-16 px-4 bg-slate-50/50">
+            <div className="max-w-6xl mx-auto">
+              <FadeInSection>
+                <div className="text-center mb-10">
+                  <h2 className="text-2xl md:text-3xl font-bold text-brand mb-3">Our Vision & Values</h2>
+                  <p className="text-slate-500 max-w-lg mx-auto">
+                    These core values guide everything we do at MeriPehli Gadi
+                  </p>
+                </div>
+              </FadeInSection>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                  {
+                    icon: Shield,
+                    title: 'Trust',
+                    desc: 'We verify every listing and dealer to ensure you get genuine, reliable information. Your trust is our most valuable asset.',
+                    color: 'bg-blue-100 text-blue-600',
+                  },
+                  {
+                    icon: Eye,
+                    title: 'Transparency',
+                    desc: 'No hidden charges, no misleading information. We believe in complete honesty in every transaction and interaction.',
+                    color: 'bg-emerald-100 text-emerald-600',
+                  },
+                  {
+                    icon: MapPin,
+                    title: 'Local Support',
+                    desc: 'We are from Northeast India, for Northeast India. Our team understands the local market, culture, and needs.',
+                    color: 'bg-orange-100 text-orange-600',
+                  },
+                ].map((item, i) => (
+                  <FadeInSection key={item.title} delay={i * 0.1}>
+                    <Card className="p-6 rounded-2xl border-slate-200/60 hover:shadow-lg transition-all duration-300 text-center group">
+                      <div className={`size-16 ${item.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
+                        <item.icon className="size-8" />
+                      </div>
+                      <h3 className="font-bold text-brand text-lg mb-3">{item.title}</h3>
+                      <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
+                    </Card>
+                  </FadeInSection>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Stats Section */}
+          <section className="py-12 md:py-16 px-4">
+            <div className="max-w-6xl mx-auto">
+              <FadeInSection>
+                <div className="bg-gradient-to-r from-brand to-brand-light rounded-2xl p-8 md:p-12">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    {[
+                      { value: '500+', label: 'Cars Sold', icon: Car },
+                      { value: '100+', label: 'Verified Dealers', icon: Building2 },
+                      { value: '50+', label: 'Cities Covered', icon: MapPin },
+                      { value: '10K+', label: 'Happy Customers', icon: Users },
+                    ].map((stat) => (
+                      <div key={stat.label} className="text-center">
+                        <stat.icon className="size-8 text-sky-300 mx-auto mb-2" />
+                        <p className="text-3xl md:text-4xl font-extrabold text-white mb-1">{stat.value}</p>
+                        <p className="text-white/70 text-sm">{stat.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </FadeInSection>
+            </div>
+          </section>
+
+          {/* Team Section */}
+          <section className="py-12 md:py-16 px-4 bg-slate-50/50">
+            <div className="max-w-6xl mx-auto">
+              <FadeInSection>
+                <div className="text-center mb-10">
+                  <h2 className="text-2xl md:text-3xl font-bold text-brand mb-3">Meet Our Team</h2>
+                  <p className="text-slate-500 max-w-lg mx-auto">
+                    The passionate people behind MeriPehli Gadi
+                  </p>
+                </div>
+              </FadeInSection>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  { name: 'Rahul Sharma', role: 'Founder & CEO', initials: 'RS' },
+                  { name: 'Priya Dutta', role: 'COO', initials: 'PD' },
+                  { name: 'Amit Baruah', role: 'CTO', initials: 'AB' },
+                  { name: 'Neha Gogoi', role: 'Head of Sales', initials: 'NG' },
+                ].map((member, i) => (
+                  <FadeInSection key={member.name} delay={i * 0.1}>
+                    <Card className="p-6 rounded-2xl border-slate-200/60 hover:shadow-lg transition-all duration-300 text-center group">
+                      <div className="size-20 bg-gradient-to-br from-brand to-brand-light rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <span className="text-xl font-bold text-white">{member.initials}</span>
+                      </div>
+                      <h3 className="font-bold text-brand">{member.name}</h3>
+                      <p className="text-sm text-slate-500">{member.role}</p>
+                    </Card>
+                  </FadeInSection>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Shani Finserve Partnership Section */}
+          <section className="py-12 md:py-16 px-4">
+            <div className="max-w-4xl mx-auto">
+              <FadeInSection>
+                <Card className="p-8 md:p-12 rounded-2xl border-slate-200/60">
+                  <div className="flex flex-col md:flex-row items-center gap-6">
+                    <div className="size-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center shrink-0">
+                      <Award className="size-10 text-white" />
+                    </div>
+                    <div>
+                      <Badge className="bg-amber-100 text-amber-700 border-amber-200 mb-3">
+                        Official Partnership
+                      </Badge>
+                      <h3 className="text-xl md:text-2xl font-bold text-brand mb-3">
+                        In Partnership with Shani Finserve
+                      </h3>
+                      <p className="text-slate-500 leading-relaxed mb-4">
+                        MeriPehli Gadi has partnered with Shani Finserve to offer hassle-free car finance and insurance solutions to our customers. Together, we provide end-to-end support from finding your dream car to financing and protecting it.
+                      </p>
+                      <div className="flex flex-wrap gap-3">
+                        <Button
+                          onClick={() => useAppStore.getState().navigateTo('finance')}
+                          className="bg-amber-500 hover:bg-amber-600 text-white rounded-xl"
+                        >
+                          Explore Finance <ArrowUpRight className="size-4 ml-1" />
+                        </Button>
+                        <Button
+                          onClick={() => useAppStore.getState().navigateTo('insurance')}
+                          variant="outline"
+                          className="rounded-xl"
+                        >
+                          Get Insurance <ArrowUpRight className="size-4 ml-1" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </FadeInSection>
+            </div>
+          </section>
+
+          {/* CTA Section */}
+          <section className="py-12 md:py-16 px-4 bg-slate-50/50">
+            <div className="max-w-4xl mx-auto">
+              <FadeInSection>
+                <Card className="p-8 md:p-12 rounded-2xl bg-gradient-to-r from-accent-orange to-orange-400 text-white text-center">
+                  <h2 className="text-2xl md:text-3xl font-bold mb-3">
+                    Join the MeriPehli Gadi Family
+                  </h2>
+                  <p className="text-white/80 mb-6 max-w-lg mx-auto">
+                    Whether you&apos;re buying your first car or selling one, we&apos;re here to make the experience amazing.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button
+                      onClick={() => useAppStore.getState().navigateTo('used-cars')}
+                      className="bg-white text-accent-orange hover:bg-slate-100 rounded-xl h-12 px-8 text-base font-semibold"
+                    >
+                      Browse Cars
+                      <ArrowUpRight className="size-4 ml-2" />
+                    </Button>
+                    <Button
+                      onClick={() => useAppStore.getState().navigateTo('contact')}
+                      variant="outline"
+                      className="border-white/30 text-white hover:bg-white/10 rounded-xl h-12 px-8 text-base font-semibold"
+                    >
+                      Contact Us
+                    </Button>
+                  </div>
+                </Card>
+              </FadeInSection>
+            </div>
+          </section>
+        </>
+      ) : (
+        /* Policy Content Section */
+        <section className="py-12 md:py-16 px-4">
+          <div className="max-w-4xl mx-auto">
+            <FadeInSection>
+              <Card className="p-6 md:p-10 rounded-2xl border-slate-200/60">
+                {currentPage === 'privacy-policy' && <PrivacyPolicyContent />}
+                {currentPage === 'terms' && <TermsContent />}
+                {currentPage === 'refund-policy' && <RefundPolicyContent />}
+              </Card>
+            </FadeInSection>
+
+            <FadeInSection delay={0.1}>
+              <div className="mt-6 text-center">
+                <Button
+                  onClick={() => useAppStore.getState().navigateTo('about')}
+                  variant="outline"
+                  className="rounded-xl"
+                >
+                  Back to About Us
+                </Button>
+              </div>
+            </FadeInSection>
+          </div>
+        </section>
+      )}
+    </div>
+  )
 }

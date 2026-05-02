@@ -9,7 +9,8 @@ import {
   Car, Camera, Upload, ChevronRight, ChevronLeft, Check, Star,
   Shield, BadgeCheck, Clock, FileText, Users, IndianRupee,
   Sparkles, ArrowUpRight, MapPin, Phone, Mail, User,
-  Gauge, Calendar, Palette, CircleDot, ImagePlus, X, PartyPopper
+  Gauge, Calendar, Palette, CircleDot, ImagePlus, X, PartyPopper,
+  Zap, Eye, DollarSign, TrendingUp
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -177,7 +178,7 @@ function SellCarForm() {
     defaultValues: { expectedPrice: '' },
   })
 
-  const stepDetailsForm2 = useForm<YourDetailsData>({
+  const stepContactForm = useForm<YourDetailsData>({
     resolver: zodResolver(yourDetailsSchema),
     defaultValues: { name: '', email: '', phone: '', city: '', address: '' },
   })
@@ -224,7 +225,7 @@ function SellCarForm() {
   }
 
   const handleSubmit = async () => {
-    const valid = await stepDetailsForm2.trigger()
+    const valid = await stepContactForm.trigger()
     if (!valid) return
 
     setLoading(true)
@@ -235,7 +236,7 @@ function SellCarForm() {
         ...stepDetailsForm.getValues(),
         ...stepInfoForm.getValues(),
         expectedPrice: Number(stepPhotosForm.getValues().expectedPrice.replace(/[^0-9]/g, '')) || undefined,
-        ...stepDetailsForm2.getValues(),
+        ...stepContactForm.getValues(),
       }
 
       const res = await fetch('/api/leads/sell-car', {
@@ -269,7 +270,7 @@ function SellCarForm() {
           <div className="size-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Check className="size-10 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-brand mb-3">Listing Submitted!</h2>
+          <h2 className="text-2xl font-bold text-brand mb-3">Your car listing has been submitted!</h2>
           <p className="text-slate-500 mb-6">
             Thank you for listing your car with MeriPehli Gadi. Our team will review your details and get back to you within 24 hours with the best offer.
           </p>
@@ -313,7 +314,7 @@ function SellCarForm() {
                 }`}>{s.label}</p>
               </div>
               {i < steps.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-2 mt-[-18px] rounded ${
+                <div className={`flex-1 h-0.5 mx-2 mt-[-18px] rounded transition-colors ${
                   step > s.num ? 'bg-green-500' : 'bg-slate-200'
                 }`} />
               )}
@@ -618,13 +619,6 @@ function SellCarForm() {
                               </button>
                             </div>
                           ))}
-                          <button
-                            type="button"
-                            onClick={() => setSelectedPhotos(prev => [...prev, 'new'])}
-                            className="size-20 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center hover:border-accent-orange/50 transition-colors"
-                          >
-                            <Plus className="size-5 text-slate-400" />
-                          </button>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -662,10 +656,10 @@ function SellCarForm() {
                 </div>
               </div>
 
-              <Form {...stepDetailsForm2}>
+              <Form {...stepContactForm}>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField control={stepDetailsForm2.control} name="name" render={({ field }) => (
+                    <FormField control={stepContactForm.control} name="name" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Full Name</FormLabel>
                         <FormControl>
@@ -675,7 +669,7 @@ function SellCarForm() {
                       </FormItem>
                     )} />
 
-                    <FormField control={stepDetailsForm2.control} name="email" render={({ field }) => (
+                    <FormField control={stepContactForm.control} name="email" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
@@ -687,7 +681,7 @@ function SellCarForm() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField control={stepDetailsForm2.control} name="phone" render={({ field }) => (
+                    <FormField control={stepContactForm.control} name="phone" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Phone Number</FormLabel>
                         <FormControl>
@@ -697,7 +691,7 @@ function SellCarForm() {
                       </FormItem>
                     )} />
 
-                    <FormField control={stepDetailsForm2.control} name="city" render={({ field }) => (
+                    <FormField control={stepContactForm.control} name="city" render={({ field }) => (
                       <FormItem>
                         <FormLabel>City</FormLabel>
                         <Select value={field.value} onValueChange={field.onChange}>
@@ -713,7 +707,7 @@ function SellCarForm() {
                     )} />
                   </div>
 
-                  <FormField control={stepDetailsForm2.control} name="address" render={({ field }) => (
+                  <FormField control={stepContactForm.control} name="address" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Address (Optional)</FormLabel>
                       <FormControl>
@@ -947,12 +941,12 @@ function CarValuationForm() {
                       )} />
                       <FormField control={leadForm.control} name="phone" render={({ field }) => (
                         <FormItem>
-                          <FormControl><Input type="tel" placeholder="10-digit phone" {...field} /></FormControl>
+                          <FormControl><Input type="tel" placeholder="Phone number" {...field} /></FormControl>
                           <FormMessage />
                         </FormItem>
                       )} />
-                      <Button onClick={handleLeadSubmit} disabled={loading} className="w-full bg-accent-orange hover:bg-orange-600 text-white rounded-xl">
-                        {loading ? 'Submitting...' : 'Get Detailed Report'}
+                      <Button type="button" onClick={handleLeadSubmit} disabled={loading} className="w-full bg-accent-orange hover:bg-orange-600 text-white rounded-xl">
+                        {loading ? 'Submitting...' : 'Get Report'}
                       </Button>
                     </div>
                   </Form>
@@ -971,19 +965,20 @@ function CarValuationForm() {
                   <Select value={field.value} onValueChange={(v) => { field.onChange(v); form.setValue('model', '') }}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select Brand" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {brands.map((b) => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
+                      {brands.map((b) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )} />
+
               <FormField control={form.control} name="model" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Model</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange} disabled={!selectedBrand}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select Model" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {models.map((m) => (<SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>))}
+                      {models.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -992,25 +987,19 @@ function CarValuationForm() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormField control={form.control} name="variant" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Variant</FormLabel>
-                  <FormControl><Input placeholder="e.g. VX, ZX" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
               <FormField control={form.control} name="year" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Year</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Year" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {years.map((y) => (<SelectItem key={y} value={y}>{y}</SelectItem>))}
+                      {years.map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )} />
+
               <FormField control={form.control} name="kmDriven" render={({ field }) => (
                 <FormItem>
                   <FormLabel>KM Driven</FormLabel>
@@ -1018,28 +1007,14 @@ function CarValuationForm() {
                   <FormMessage />
                 </FormItem>
               )} />
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField control={form.control} name="fuelType" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Fuel Type</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <FormControl><SelectTrigger><SelectValue placeholder="Fuel Type" /></SelectTrigger></FormControl>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Fuel" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {fuelTypes.map((f) => (<SelectItem key={f} value={f}>{f}</SelectItem>))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              <FormField control={form.control} name="transmission" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Transmission</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <FormControl><SelectTrigger><SelectValue placeholder="Transmission" /></SelectTrigger></FormControl>
-                    <SelectContent>
-                      {transmissions.map((t) => (<SelectItem key={t} value={t}>{t}</SelectItem>))}
+                      {fuelTypes.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -1047,161 +1022,155 @@ function CarValuationForm() {
               )} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField control={form.control} name="city" render={({ field }) => (
                 <FormItem>
                   <FormLabel>City</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <FormControl><SelectTrigger><SelectValue placeholder="City" /></SelectTrigger></FormControl>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Select City" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {cities.map((c) => (<SelectItem key={c.id} value={c.slug}>{c.name}</SelectItem>))}
+                      {cities.map((c) => <SelectItem key={c.id} value={c.slug}>{c.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )} />
-              <FormField control={form.control} name="ownerType" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Owner Type</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <FormControl><SelectTrigger><SelectValue placeholder="Owner" /></SelectTrigger></FormControl>
-                    <SelectContent>
-                      {ownerTypes.map((o) => (<SelectItem key={o} value={o}>{o}</SelectItem>))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )} />
+
               <FormField control={form.control} name="condition" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Condition</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Condition" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {conditions.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}
+                      {conditions.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )} />
             </div>
+
+            <Button
+              type="button"
+              onClick={handleValuation}
+              disabled={loading}
+              className="w-full bg-accent-orange hover:bg-orange-600 text-white rounded-xl h-12 text-base font-semibold btn-shine"
+            >
+              {loading ? (
+                <>
+                  <div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                  Calculating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="size-4 mr-2" />
+                  Get Instant Valuation
+                </>
+              )}
+            </Button>
           </div>
         </Form>
-
-        <Button
-          onClick={handleValuation}
-          disabled={loading}
-          className="w-full mt-6 bg-accent-orange hover:bg-orange-600 text-white rounded-xl h-12 text-base font-semibold gap-2"
-        >
-          {loading ? (
-            <>
-              <div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Calculating...
-            </>
-          ) : (
-            <>
-              <Sparkles className="size-4" />
-              Get Valuation
-            </>
-          )}
-        </Button>
       </Card>
     </div>
   )
 }
 
-// ─── Main SellCarPage Export ─────────────────────────────────────────
+// ─── Main SellCarPage Component ──────────────────────────────────────
 
 export function SellCarPage() {
-  const currentPage = useAppStore((s) => s.currentPage)
-  const navigateTo = useAppStore((s) => s.navigateTo)
+  const { currentPage } = useAppStore()
   const isValuation = currentPage === 'car-valuation'
 
-  const benefits = [
-    { icon: BadgeCheck, title: 'Best Price', desc: 'Get the most competitive price for your car', color: 'bg-orange-100 text-orange-600' },
-    { icon: Shield, title: 'Verified Buyers', desc: 'Connect with genuine, verified car buyers', color: 'bg-blue-100 text-blue-600' },
-    { icon: Sparkles, title: 'Free Valuation', desc: 'Get instant car valuation absolutely free', color: 'bg-emerald-100 text-emerald-600' },
-    { icon: Clock, title: 'Quick Payment', desc: 'Fast and secure payment processing', color: 'bg-purple-100 text-purple-600' },
-    { icon: FileText, title: 'Paperwork Support', desc: 'Complete assistance with documentation', color: 'bg-amber-100 text-amber-600' },
-  ]
-
   return (
-    <div>
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <section className={`relative overflow-hidden py-12 md:py-20 ${isValuation ? 'bg-gradient-to-br from-amber-500 via-orange-500 to-orange-600' : 'gradient-orange'}`}>
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 size-40 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-10 size-60 bg-white rounded-full blur-3xl" />
-        </div>
-        <div className="container mx-auto px-4 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center"
-          >
-            <Badge className="bg-white/20 text-white border-0 mb-4 text-xs">
-              <Sparkles className="size-3 mr-1" />
-              {isValuation ? 'Free Valuation Tool' : 'Sell in 4 Easy Steps'}
-            </Badge>
-            <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
-              {isValuation ? 'Car Valuation' : 'Sell Your Car'}
-            </h1>
-            <p className="text-white/90 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
-              {isValuation
-                ? 'Know the true market value of your car. Get instant estimated price based on year, km, condition and more.'
-                : 'Apni car bechna ab tension-free. Best price, verified buyers aur fast payment support.'
-              }
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      {isValuation ? (
+        <section className="relative bg-gradient-to-br from-amber-500 via-orange-500 to-yellow-400 py-16 md:py-24 px-4">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnYyaDR2MmgtNHYyem0wLTE2aC0ydi00aDJ2Mmg0djJoLTR2MnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30" />
+          <div className="max-w-6xl mx-auto relative z-10">
+            <div className="text-center max-w-2xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Badge className="bg-white/20 text-white border-white/30 mb-4 text-sm px-4 py-1">
+                  <Sparkles className="size-3.5 mr-1.5" />
+                  Free Car Valuation
+                </Badge>
+                <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
+                  Know Your Car&apos;s True <span className="text-yellow-100">Value</span>
+                </h1>
+                <p className="text-white/90 text-lg md:text-xl">
+                  Get an instant estimated market value for your car based on real-time market data and trends.
+                </p>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="relative bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400 py-16 md:py-24 px-4">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnYyaDR2MmgtNHYyem0wLTE2aC0ydi00aDJ2Mmg0djJoLTR2MnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30" />
+          <div className="max-w-6xl mx-auto relative z-10">
+            <div className="text-center max-w-2xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Badge className="bg-white/20 text-white border-white/30 mb-4 text-sm px-4 py-1">
+                  <Car className="size-3.5 mr-1.5" />
+                  Sell Your Car
+                </Badge>
+                <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
+                  Sell Your <span className="text-yellow-100">Car</span> Today
+                </h1>
+                <p className="text-white/90 text-lg md:text-xl">
+                  Apni car bechna ab tension-free. Get the best price from verified buyers near you.
+                </p>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+      )}
 
-      {/* Main Content */}
-      <section className="py-10 md:py-16 bg-slate-50">
-        <div className="container mx-auto px-4">
-          {!isValuation && (
-            <FadeInSection>
-              <div className="mb-10">
-                <div className="flex items-center gap-2 text-sm text-slate-400 mb-2">
-                  <button onClick={() => navigateTo('home')} className="hover:text-brand transition-colors">Home</button>
-                  <ChevronRight className="size-3" />
-                  <span className="text-brand font-medium">Sell Your Car</span>
-                </div>
-              </div>
-            </FadeInSection>
-          )}
+      {/* Form Section */}
+      <section className="py-12 md:py-16 px-4">
+        <div className="max-w-6xl mx-auto">
           {isValuation ? <CarValuationForm /> : <SellCarForm />}
         </div>
       </section>
 
       {/* Benefits Section */}
       {!isValuation && (
-        <section className="py-12 md:py-16 bg-white">
-          <div className="container mx-auto px-4">
+        <section className="py-12 md:py-16 px-4 bg-slate-50/50">
+          <div className="max-w-6xl mx-auto">
             <FadeInSection>
               <div className="text-center mb-10">
-                <h2 className="text-2xl md:text-3xl font-bold text-brand mb-2">
-                  Why Sell on MeriPehli Gadi?
+                <h2 className="text-2xl md:text-3xl font-bold text-brand mb-3">
+                  Why Sell with MeriPehli Gadi?
                 </h2>
-                <p className="text-slate-500 text-sm max-w-lg mx-auto">
-                  We make selling your car simple, safe, and profitable.
+                <p className="text-slate-500 max-w-lg mx-auto">
+                  We make selling your car simple, fast, and profitable
                 </p>
               </div>
             </FadeInSection>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
-              {benefits.map((b, i) => (
-                <FadeInSection key={b.title} delay={i * 0.08}>
-                  <motion.div
-                    whileHover={{ y: -4 }}
-                    className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-all text-center"
-                  >
-                    <div className={`size-12 rounded-xl flex items-center justify-center mx-auto mb-3 ${b.color}`}>
-                      <b.icon className="size-6" />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { icon: Zap, title: 'Quick Listing', desc: 'List your car in under 5 minutes with our easy form', color: 'bg-orange-100 text-accent-orange' },
+                { icon: Eye, title: 'Maximum Visibility', desc: 'Your listing reaches thousands of verified buyers', color: 'bg-blue-100 text-accent-blue' },
+                { icon: DollarSign, title: 'Best Price', desc: 'Get competitive offers from genuine buyers', color: 'bg-green-100 text-accent-green' },
+                { icon: Shield, title: 'Secure & Trusted', desc: 'Verified buyers and secure transaction process', color: 'bg-purple-100 text-purple-600' },
+              ].map((item, i) => (
+                <FadeInSection key={item.title} delay={i * 0.1}>
+                  <Card className="p-6 rounded-2xl border-slate-200/60 hover:shadow-lg transition-all duration-300 text-center group">
+                    <div className={`size-14 ${item.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
+                      <item.icon className="size-7" />
                     </div>
-                    <h3 className="font-semibold text-brand text-sm mb-1">{b.title}</h3>
-                    <p className="text-xs text-slate-400 leading-relaxed">{b.desc}</p>
-                  </motion.div>
+                    <h3 className="font-bold text-brand mb-2">{item.title}</h3>
+                    <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
+                  </Card>
                 </FadeInSection>
               ))}
             </div>
@@ -1209,35 +1178,69 @@ export function SellCarPage() {
         </section>
       )}
 
-      {/* Quick CTA for Valuation */}
-      {!isValuation && (
-        <section className="py-10 bg-gradient-to-r from-slate-50 to-orange-50/50">
-          <div className="container mx-auto px-4 text-center">
+      {/* Valuation Benefits */}
+      {isValuation && (
+        <section className="py-12 md:py-16 px-4 bg-slate-50/50">
+          <div className="max-w-6xl mx-auto">
             <FadeInSection>
-              <h3 className="text-lg font-bold text-brand mb-2">Not sure about the price?</h3>
-              <p className="text-sm text-slate-500 mb-4">Get a free instant car valuation before listing.</p>
-              <Button
-                onClick={() => navigateTo('car-valuation')}
-                variant="outline"
-                className="border-accent-orange text-accent-orange hover:bg-orange-50 rounded-xl gap-2"
-              >
-                <Sparkles className="size-4" />
-                Check Free Valuation
-              </Button>
+              <div className="text-center mb-10">
+                <h2 className="text-2xl md:text-3xl font-bold text-brand mb-3">
+                  How Our Valuation Works
+                </h2>
+                <p className="text-slate-500 max-w-lg mx-auto">
+                  Get an accurate estimate in three simple steps
+                </p>
+              </div>
             </FadeInSection>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { icon: FileText, title: 'Fill Details', desc: 'Enter your car\'s brand, model, year and other details' },
+                { icon: TrendingUp, title: 'Smart Analysis', desc: 'Our algorithm analyzes market data to calculate the best estimate' },
+                { icon: IndianRupee, title: 'Get Price', desc: 'Receive an instant estimated market value for your car' },
+              ].map((item, i) => (
+                <FadeInSection key={item.title} delay={i * 0.15}>
+                  <Card className="p-6 rounded-2xl border-slate-200/60 hover:shadow-lg transition-all duration-300 text-center group relative">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 size-7 bg-accent-orange text-white rounded-full flex items-center justify-center text-sm font-bold">
+                      {i + 1}
+                    </div>
+                    <div className="size-14 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4 mt-2 group-hover:scale-110 transition-transform">
+                      <item.icon className="size-7 text-accent-orange" />
+                    </div>
+                    <h3 className="font-bold text-brand mb-2">{item.title}</h3>
+                    <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
+                  </Card>
+                </FadeInSection>
+              ))}
+            </div>
           </div>
         </section>
       )}
+
+      {/* CTA Section */}
+      <section className="py-12 md:py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <FadeInSection>
+            <Card className="p-8 md:p-12 rounded-2xl bg-gradient-to-r from-brand to-brand-light text-white text-center">
+              <h2 className="text-2xl md:text-3xl font-bold mb-3">
+                {isValuation ? 'Want to sell your car too?' : 'Not sure about the price?'}
+              </h2>
+              <p className="text-white/80 mb-6 max-w-lg mx-auto">
+                {isValuation
+                  ? 'After getting your valuation, list your car with us to find the best buyer quickly.'
+                  : 'Get a free car valuation before listing to set the right price for your car.'}
+              </p>
+              <Button
+                onClick={() => useAppStore.getState().navigateTo(isValuation ? 'sell-car' : 'car-valuation')}
+                className="bg-accent-orange hover:bg-orange-600 text-white rounded-xl h-12 px-8 text-base font-semibold"
+              >
+                {isValuation ? 'List Your Car' : 'Get Free Valuation'}
+                <ArrowUpRight className="size-4 ml-2" />
+              </Button>
+            </Card>
+          </FadeInSection>
+        </div>
+      </section>
     </div>
-  )
-}
-
-// ─── Placeholder Plus Icon ───────────────────────────────────────────
-
-function Plus({ className }: { className?: string }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M5 12h14"/><path d="M12 5v14"/>
-    </svg>
   )
 }

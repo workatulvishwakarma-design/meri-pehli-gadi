@@ -15,30 +15,35 @@ import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
 import { cn } from '@/lib/utils'
 
+/* ─── City Data ──────────────────────────────────────────── */
+
 interface City {
   name: string
   state: string
+  slug: string
   isPopular?: boolean
 }
 
 const cities: City[] = [
-  { name: 'Dibrugarh', state: 'Assam', isPopular: true },
-  { name: 'Guwahati', state: 'Assam', isPopular: true },
-  { name: 'Jorhat', state: 'Assam', isPopular: true },
-  { name: 'Tinsukia', state: 'Assam' },
-  { name: 'Tezpur', state: 'Assam' },
-  { name: 'Silchar', state: 'Assam', isPopular: true },
-  { name: 'Shillong', state: 'Meghalaya' },
-  { name: 'Imphal', state: 'Manipur' },
-  { name: 'Agartala', state: 'Tripura' },
-  { name: 'Mumbai', state: 'Maharashtra', isPopular: true },
-  { name: 'Delhi NCR', state: 'Delhi', isPopular: true },
-  { name: 'Bangalore', state: 'Karnataka', isPopular: true },
-  { name: 'Pune', state: 'Maharashtra' },
-  { name: 'Hyderabad', state: 'Telangana' },
-  { name: 'Kolkata', state: 'West Bengal', isPopular: true },
-  { name: 'Chennai', state: 'Tamil Nadu' },
+  { name: 'Dibrugarh', state: 'Assam', slug: 'dibrugarh', isPopular: true },
+  { name: 'Guwahati', state: 'Assam', slug: 'guwahati', isPopular: true },
+  { name: 'Jorhat', state: 'Assam', slug: 'jorhat', isPopular: true },
+  { name: 'Tinsukia', state: 'Assam', slug: 'tinsukia' },
+  { name: 'Tezpur', state: 'Assam', slug: 'tezpur' },
+  { name: 'Silchar', state: 'Assam', slug: 'silchar', isPopular: true },
+  { name: 'Shillong', state: 'Meghalaya', slug: 'shillong' },
+  { name: 'Imphal', state: 'Manipur', slug: 'imphal' },
+  { name: 'Agartala', state: 'Tripura', slug: 'agartala' },
+  { name: 'Mumbai', state: 'Maharashtra', slug: 'mumbai', isPopular: true },
+  { name: 'Delhi NCR', state: 'Delhi', slug: 'delhi-ncr', isPopular: true },
+  { name: 'Bangalore', state: 'Karnataka', slug: 'bangalore', isPopular: true },
+  { name: 'Pune', state: 'Maharashtra', slug: 'pune' },
+  { name: 'Hyderabad', state: 'Telangana', slug: 'hyderabad' },
+  { name: 'Kolkata', state: 'West Bengal', slug: 'kolkata', isPopular: true },
+  { name: 'Chennai', state: 'Tamil Nadu', slug: 'chennai' },
 ]
+
+/* ─── Component ──────────────────────────────────────────── */
 
 export function CityModal() {
   const [search, setSearch] = useState('')
@@ -46,37 +51,34 @@ export function CityModal() {
   const setShowCityModal = useAppStore((s) => s.setShowCityModal)
   const setSelectedCity = useAppStore((s) => s.setSelectedCity)
   const selectedCity = useAppStore((s) => s.selectedCity)
-  const navigateTo = useAppStore((s) => s.navigateTo)
 
   const filteredCities = useMemo(() => {
     if (!search.trim()) return cities
     const q = search.toLowerCase()
     return cities.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.state.toLowerCase().includes(q)
+      (c) => c.name.toLowerCase().includes(q) || c.state.toLowerCase().includes(q),
     )
   }, [search])
 
   const popularCities = useMemo(
     () => filteredCities.filter((c) => c.isPopular),
-    [filteredCities]
+    [filteredCities],
   )
 
   const otherCities = useMemo(
     () => filteredCities.filter((c) => !c.isPopular),
-    [filteredCities]
+    [filteredCities],
   )
 
-  const handleSelectCity = (cityName: string) => {
-    setSelectedCity(cityName)
-    navigateTo('used-cars', { city: cityName.toLowerCase() })
+  const handleSelectCity = (city: City) => {
+    setSelectedCity(city.slug)
   }
 
   const handleDetectLocation = () => {
-    // Decorative - simulates detection
-    setSelectedCity('Dibrugarh')
+    setSelectedCity('dibrugarh')
   }
+
+  const isSelected = (city: City) => selectedCity === city.slug
 
   return (
     <Dialog open={showCityModal} onOpenChange={setShowCityModal}>
@@ -86,10 +88,10 @@ export function CityModal() {
           <DialogHeader>
             <DialogTitle className="text-white text-lg font-bold flex items-center gap-2">
               <MapPin className="size-5 text-accent-orange" />
-              What is your location?
+              Select Your City
             </DialogTitle>
             <DialogDescription className="text-white/70 text-sm mt-1">
-              Select your city to see cars available near you
+              Choose your city to see cars available near you
             </DialogDescription>
           </DialogHeader>
 
@@ -145,37 +147,30 @@ export function CityModal() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
                       transition={{ duration: 0.15 }}
-                      onClick={() => handleSelectCity(city.name)}
+                      onClick={() => handleSelectCity(city)}
                       className={cn(
                         'flex flex-col items-center gap-1 p-3 rounded-xl border transition-all duration-200',
-                        'hover:border-accent-blue/50 hover:bg-accent-blue/5 hover:shadow-sm',
-                        'cursor-pointer',
-                        selectedCity.toLowerCase() === city.name.toLowerCase()
+                        'hover:border-accent-blue/50 hover:bg-accent-blue/5 hover:shadow-sm cursor-pointer',
+                        isSelected(city)
                           ? 'border-accent-blue bg-accent-blue/10 shadow-sm'
-                          : 'border-border/60 bg-background'
+                          : 'border-border/60 bg-background',
                       )}
                     >
                       <MapPin
                         className={cn(
                           'size-4',
-                          selectedCity.toLowerCase() === city.name.toLowerCase()
-                            ? 'text-accent-blue'
-                            : 'text-muted-foreground'
+                          isSelected(city) ? 'text-accent-blue' : 'text-muted-foreground',
                         )}
                       />
                       <span
                         className={cn(
                           'text-xs font-semibold leading-tight text-center',
-                          selectedCity.toLowerCase() === city.name.toLowerCase()
-                            ? 'text-accent-blue'
-                            : 'text-foreground'
+                          isSelected(city) ? 'text-accent-blue' : 'text-foreground',
                         )}
                       >
                         {city.name}
                       </span>
-                      <span className="text-[10px] text-muted-foreground">
-                        {city.state}
-                      </span>
+                      <span className="text-[10px] text-muted-foreground">{city.state}</span>
                     </motion.button>
                   ))}
                 </AnimatePresence>
@@ -193,43 +188,37 @@ export function CityModal() {
                 {otherCities.map((city) => (
                   <button
                     key={city.name}
-                    onClick={() => handleSelectCity(city.name)}
+                    onClick={() => handleSelectCity(city)}
                     className={cn(
                       'flex flex-col items-center gap-1 p-3 rounded-xl border transition-all duration-200',
-                      'hover:border-accent-blue/50 hover:bg-accent-blue/5 hover:shadow-sm',
-                      'cursor-pointer',
-                      selectedCity.toLowerCase() === city.name.toLowerCase()
+                      'hover:border-accent-blue/50 hover:bg-accent-blue/5 hover:shadow-sm cursor-pointer',
+                      isSelected(city)
                         ? 'border-accent-blue bg-accent-blue/10 shadow-sm'
-                        : 'border-border/60 bg-background'
+                        : 'border-border/60 bg-background',
                     )}
                   >
                     <MapPin
                       className={cn(
                         'size-4',
-                        selectedCity.toLowerCase() === city.name.toLowerCase()
-                          ? 'text-accent-blue'
-                          : 'text-muted-foreground'
+                        isSelected(city) ? 'text-accent-blue' : 'text-muted-foreground',
                       )}
                     />
                     <span
                       className={cn(
                         'text-xs font-semibold leading-tight text-center',
-                        selectedCity.toLowerCase() === city.name.toLowerCase()
-                          ? 'text-accent-blue'
-                          : 'text-foreground'
+                        isSelected(city) ? 'text-accent-blue' : 'text-foreground',
                       )}
                     >
                       {city.name}
                     </span>
-                    <span className="text-[10px] text-muted-foreground">
-                      {city.state}
-                    </span>
+                    <span className="text-[10px] text-muted-foreground">{city.state}</span>
                   </button>
                 ))}
               </div>
             </div>
           )}
 
+          {/* No results */}
           {filteredCities.length === 0 && (
             <div className="text-center py-8">
               <MapPin className="size-10 text-muted-foreground/40 mx-auto mb-3" />
@@ -246,9 +235,7 @@ export function CityModal() {
         {/* Current Selection Footer */}
         <div className="px-6 py-4 border-t border-border/50 bg-muted/30 rounded-b-lg">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">
-              Current selection:
-            </span>
+            <span className="text-xs text-muted-foreground">Current selection:</span>
             <span className="text-sm font-semibold text-foreground capitalize flex items-center gap-1.5">
               <MapPin className="size-3.5 text-accent-orange" />
               {selectedCity}
