@@ -1,0 +1,498 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS (as String constants for SQLite) ──────────────────────────
+
+// Roles
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  DEALER
+  SELLER
+  BUYER
+  FINANCE_EXECUTIVE
+  INSURANCE_EXECUTIVE
+  CONTENT_MANAGER
+}
+
+// Car Status
+enum CarStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  SOLD
+  FEATURED
+}
+
+// Fuel Type
+enum FuelType {
+  PETROL
+  DIESEL
+  CNG
+  ELECTRIC
+  HYBRID
+  LPG
+}
+
+// Transmission
+enum Transmission {
+  MANUAL
+  AUTOMATIC
+  CVT
+  DCT
+  AMT
+}
+
+// Owner Type
+enum OwnerType {
+  FIRST
+  SECOND
+  THIRD
+  FOURTH_PLUS
+}
+
+// Body Type
+enum BodyType {
+  SUV
+  SEDAN
+  HATCHBACK
+  COUPE
+  CONVERTIBLE
+  VAN
+  TRUCK
+  MPV
+  PICKUP
+  WAGON
+}
+
+// Lead Type
+enum LeadType {
+  CONTACT
+  TEST_DRIVE
+  FINANCE
+  INSURANCE
+  SELL_CAR
+  VALUATION
+  MAKE_OFFER
+  DEALER_INQUIRY
+}
+
+// Lead Status
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  LOST
+}
+
+// Blog Status
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// ─── MODELS ──────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String?
+  name          String?
+  phone         String?
+  avatar        String?
+  role          Role      @default(BUYER)
+  cityId        String?
+  isActive      Boolean   @default(true)
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  city          City?     @relation(fields: [cityId], references: [id])
+  cars          Car[]
+  leads         Lead[]
+  wishlists     Wishlist[]
+  testDrives    TestDrive[]
+  blogPosts     BlogPost[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model City {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  state       String?
+  isPopular   Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+  cars        Car[]
+  dealers     Dealer[]
+}
+
+model Brand {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  logo        String?
+  country     String?
+  isPopular   Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  models      Model[]
+  cars        Car[]
+}
+
+model Model {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String
+  brandId     String
+  bodyType    BodyType?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  brand       Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  variants    Variant[]
+  cars        Car[]
+
+  @@unique([brandId, slug])
+  @@index([brandId])
+}
+
+model Variant {
+  id          String   @id @default(cuid())
+  name        String
+  modelId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  model       Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  cars        Car[]
+
+  @@index([modelId])
+}
+
+model Car {
+  id              String      @id @default(cuid())
+  title           String
+  slug            String      @unique
+  description     String?
+  brandId         String
+  modelId         String
+  variantId       String?
+  year            Int
+  price           Float
+  emiPrice        Float?
+  kmDriven        Int
+  fuelType        FuelType    @default(PETROL)
+  transmission    Transmission @default(MANUAL)
+  ownerType       OwnerType   @default(FIRST)
+  bodyType        BodyType    @default(HATCHBACK)
+  color           String?
+  rto             String?
+  regYear         Int?
+  insuranceValidTill DateTime?
+  cityId          String?
+  status          CarStatus   @default(DRAFT)
+  badge           String?
+  isCertified     Boolean     @default(false)
+  isFeatured      Boolean     @default(false)
+  isFinanceAvailable Boolean   @default(false)
+  isInsuranceAvailable Boolean  @default(false)
+  conditionScore  Int?
+  trustScore      Int?
+  sellerId        String
+  dealerId        String?
+  seoTitle        String?
+  seoDescription  String?
+  viewsCount      Int         @default(0)
+  inquiriesCount  Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  brand           Brand       @relation(fields: [brandId], references: [id])
+  model           Model       @relation(fields: [modelId], references: [id])
+  variant         Variant?    @relation(fields: [variantId], references: [id])
+  seller          User        @relation(fields: [sellerId], references: [id])
+  dealer          Dealer?     @relation(fields: [dealerId], references: [id])
+  city            City?       @relation(fields: [cityId], references: [id])
+  images          CarImage[]
+  features        CarFeature[]
+  leads           Lead[]
+  testDrives      TestDrive[]
+  wishlists       Wishlist[]
+
+  @@index([brandId])
+  @@index([modelId])
+  @@index([cityId])
+  @@index([status])
+  @@index([price])
+  @@index([year])
+  @@index([fuelType])
+  @@index([bodyType])
+  @@index([sellerId])
+}
+
+model CarImage {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String?
+  sortOrder Int      @default(0)
+  carId     String
+  createdAt DateTime @default(now())
+
+  car       Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@index([carId])
+}
+
+model CarFeature {
+  id        String   @id @default(cuid())
+  name      String
+  carId     String
+  createdAt DateTime @default(now())
+
+  car       Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@index([carId])
+}
+
+model Dealer {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  email       String?
+  phone       String
+  address     String?
+  cityId      String
+  description String?
+  logo        String?
+  rating      Float    @default(0)
+  totalCars   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  city        City     @relation(fields: [cityId], references: [id])
+  cars        Car[]
+
+  @@index([cityId])
+}
+
+model Lead {
+  id          String     @id @default(cuid())
+  type        LeadType
+  status      LeadStatus @default(NEW)
+  name        String
+  email       String?
+  phone       String
+  message     String?
+  carId       String?
+  cityId      String?
+  userId      String?    // if logged in
+  dealerId    String?
+  metaData    String?    // JSON string for extra data
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user        User?      @relation(fields: [userId], references: [id])
+  car         Car?       @relation(fields: [carId], references: [id])
+
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model TestDrive {
+  id          String   @id @default(cuid())
+  name        String
+  email       String?
+  phone       String
+  carId       String
+  preferredDate String?
+  preferredTime String?
+  message     String?
+  status      LeadStatus @default(NEW)
+  userId      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  car         Car      @relation(fields: [carId], references: [id])
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@index([carId])
+  @@index([status])
+}
+
+model ValuationRequest {
+  id          String   @id @default(cuid())
+  brand       String
+  model       String
+  variant     String?
+  year        Int
+  kmDriven    Int
+  fuelType    String?
+  transmission String?
+  city        String?
+  ownerType   String?
+  condition   String?
+  expectedPrice Float?
+  name        String
+  email       String?
+  phone       String
+  status      LeadStatus @default(NEW)
+  estimatedPrice Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model BlogPost {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  excerpt     String?
+  content     String?
+  coverImage  String?
+  authorId    String
+  categoryId  String?
+  tags        String?
+  status      BlogStatus @default(DRAFT)
+  viewsCount  Int        @default(0)
+  seoTitle    String?
+  seoDescription String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  author      User       @relation(fields: [authorId], references: [id])
+  category    BlogCategory? @relation(fields: [categoryId], references: [id])
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model BlogCategory {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  posts       BlogPost[]
+}
+
+model FAQ {
+  id          String   @id @default(cuid())
+  question    String
+  answer      String
+  category    String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+}
+
+model Testimonial {
+  id          String   @id @default(cuid())
+  name        String
+  designation String?
+  city        String?
+  content     String
+  rating      Int      @default(5)
+  avatar      String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Banner {
+  id          String   @id @default(cuid())
+  title       String
+  subtitle    String?
+  image       String?
+  link        String?
+  position    String   @default("homepage")
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([position])
+}
+
+model Wishlist {
+  id          String   @id @default(cuid())
+  userId      String
+  carId       String
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  car         Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, carId])
+  @@index([userId])
+}
+
+model Compare {
+  id          String   @id @default(cuid())
+  userId      String?
+  carIds      String   // JSON array
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ContactMessage {
+  id          String   @id @default(cuid())
+  name        String
+  email       String?
+  phone       String?
+  subject     String?
+  message     String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model WebsiteSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String?
+  type        String   @default("text") // text, json, html
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String?
+  title       String
+  message     String
+  type        String   @default("info") // info, success, warning, error
+  isRead      Boolean  @default(false)
+  link        String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+}
