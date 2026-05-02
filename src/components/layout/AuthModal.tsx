@@ -104,6 +104,10 @@ export function AuthModal() {
         setError(json.error || 'Login failed. Please try again.')
         return
       }
+      const token = json.token
+      if (token) {
+        localStorage.setItem('meripehli-token', token)
+      }
       setAuth(json.user)
       setShowAuthModal(false)
       // Reset fields
@@ -140,6 +144,10 @@ export function AuthModal() {
       if (!res.ok) {
         setError(json.error || 'Registration failed. Please try again.')
         return
+      }
+      const token = json.token
+      if (token) {
+        localStorage.setItem('meripehli-token', token)
       }
       setAuth(json.user)
       setShowAuthModal(false)

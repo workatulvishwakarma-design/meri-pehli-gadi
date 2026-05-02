@@ -26,6 +26,25 @@ import {
 import { useAppStore } from '@/lib/store'
 import CarCard from '@/components/shared/CarCard'
 
+// ─── API Data Mapping Helper ─────────────────────────────────────
+// The /api/cars endpoint returns nested objects (brand: {name, ...}, city: {name, ...}, images: [{url, ...}])
+// but CarCard expects flat strings and string arrays. This helper normalizes the data.
+function mapApiCarToCardProps(car: Record<string, unknown>): Parameters<typeof CarCard>[0]['car'] {
+  const raw = car as Record<string, any>
+  return {
+    ...raw,
+    brand: raw.brand?.name || raw.brand || '',
+    brandSlug: raw.brand?.slug || '',
+    model: raw.model?.name || raw.model || '',
+    modelSlug: raw.model?.slug || '',
+    city: raw.city?.name || raw.city || '',
+    citySlug: raw.city?.slug || '',
+    images: Array.isArray(raw.images)
+      ? raw.images.map((img: any) => (typeof img === 'string' ? img : img.url || ''))
+      : [],
+  } as any
+}
+
 // ─── Animation Helpers ──────────────────────────────────────────────
 
 function FadeInSection({ children, className = '', delay = 0 }: {
@@ -437,13 +456,17 @@ function PopularBrandsSection() {
 // ─── Section 5: Most Searched Cars ──────────────────────────────────
 
 function MostSearchedCarsSection() {
-  const [cars, setCars] = useState<Record<string, unknown>[]>([])
+  const [cars, setCars] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetch('/api/cars?sort=popular&limit=8')
       .then(r => r.json())
-      .then(d => { setCars(d.cars || []); setLoading(false) })
+      .then(d => {
+        const mapped = (d.cars || []).map((c: Record<string, unknown>) => mapApiCarToCardProps(c))
+        setCars(mapped as any)
+        setLoading(false)
+      })
       .catch(() => setLoading(false))
   }, [])
 
@@ -472,9 +495,9 @@ function MostSearchedCarsSection() {
             </div>
           ) : (
             <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
-              {cars.map((car: Record<string, unknown>) => (
-                <div key={car.id as string} className="min-w-[260px] md:min-w-[280px] max-w-[300px] flex-shrink-0">
-                  <CarCard car={car as Parameters<typeof CarCard>[0]['car']} variant="default" />
+              {cars.map((car) => (
+                <div key={car.id} className="min-w-[260px] md:min-w-[280px] max-w-[300px] flex-shrink-0">
+                  <CarCard car={car} variant="default" />
                 </div>
               ))}
             </div>
@@ -489,13 +512,17 @@ function MostSearchedCarsSection() {
 
 function RecentlyAddedCarsSection() {
   const navigateTo = useAppStore((s) => s.navigateTo)
-  const [cars, setCars] = useState<Record<string, unknown>[]>([])
+  const [cars, setCars] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetch('/api/cars?sort=newest&limit=8')
       .then(r => r.json())
-      .then(d => { setCars(d.cars || []); setLoading(false) })
+      .then(d => {
+        const mapped = (d.cars || []).map((c: Record<string, unknown>) => mapApiCarToCardProps(c))
+        setCars(mapped as any)
+        setLoading(false)
+      })
       .catch(() => setLoading(false))
   }, [])
 
@@ -538,9 +565,9 @@ function RecentlyAddedCarsSection() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {cars.map((car: Record<string, unknown>, i) => (
-              <FadeInSection key={car.id as string} delay={i * 0.05}>
-                <CarCard car={car as Parameters<typeof CarCard>[0]['car']} />
+            {cars.map((car, i) => (
+              <FadeInSection key={car.id} delay={i * 0.05}>
+                <CarCard car={car} />
               </FadeInSection>
             ))}
           </div>
@@ -554,13 +581,17 @@ function RecentlyAddedCarsSection() {
 
 function CertifiedCarsSection() {
   const navigateTo = useAppStore((s) => s.navigateTo)
-  const [cars, setCars] = useState<Record<string, unknown>[]>([])
+  const [cars, setCars] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetch('/api/cars?certified=true&limit=4')
       .then(r => r.json())
-      .then(d => { setCars(d.cars || []); setLoading(false) })
+      .then(d => {
+        const mapped = (d.cars || []).map((c: Record<string, unknown>) => mapApiCarToCardProps(c))
+        setCars(mapped as any)
+        setLoading(false)
+      })
       .catch(() => setLoading(false))
   }, [])
 
@@ -607,9 +638,9 @@ function CertifiedCarsSection() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {cars.map((car: Record<string, unknown>, i) => (
-              <FadeInSection key={car.id as string} delay={i * 0.05}>
-                <CarCard car={car as Parameters<typeof CarCard>[0]['car']} />
+            {cars.map((car, i) => (
+              <FadeInSection key={car.id} delay={i * 0.05}>
+                <CarCard car={car} />
               </FadeInSection>
             ))}
           </div>

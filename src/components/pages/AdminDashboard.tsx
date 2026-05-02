@@ -246,9 +246,10 @@ export function AdminDashboard() {
       }
       try {
         const res = await apiFetch('/api/auth/me')
-        if (res.data) {
-          setAuth(res.data)
-          if (!['SUPER_ADMIN', 'ADMIN', 'DEALER', 'CONTENT_MANAGER', 'FINANCE_EXECUTIVE', 'INSURANCE_EXECUTIVE'].includes(res.data.role)) {
+        const userData = res.user || res.data
+        if (userData) {
+          setAuth(userData)
+          if (!['SUPER_ADMIN', 'ADMIN', 'DEALER', 'CONTENT_MANAGER', 'FINANCE_EXECUTIVE', 'INSURANCE_EXECUTIVE'].includes(userData.role)) {
             setAccessDenied(true)
           }
         }
