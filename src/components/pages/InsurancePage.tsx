@@ -27,6 +27,8 @@ import {
   Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from '@/components/ui/form'
 import { useAppStore } from '@/lib/store'
+import { DynamicMeta, QuickAnswerBox, FAQSchemaBlock, FinanceCTA, SellCarCTA, PopularCityLinks, AIReadableSummary, RelatedSearchesBlock } from '@/components/seo/SEOComponents'
+import { INSURANCE_FAQS, ASSAM_CITIES } from '@/lib/seo-data'
 
 // ─── Animation Helpers ──────────────────────────────────────────────
 
@@ -250,6 +252,12 @@ export function InsurancePage() {
 
   return (
     <div className="min-h-screen">
+      <DynamicMeta 
+        title="Used Car Insurance in Assam | Compare & Renew - MeriPehli Gadi"
+        description="Buy or renew used car insurance in Assam with comprehensive, third-party and zero depreciation options. Powered by Shani Finserve."
+        keywords={['car insurance Assam', 'used car insurance', 'insurance renewal Assam', 'third party insurance', 'comprehensive insurance', 'Shani Finserve']}
+      />
+
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-emerald-600 via-green-500 to-teal-400 py-16 md:py-24 px-4">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnYyaDR2MmgtNHYyem0wLTE2aC0ydi00aDJ2Mmg0djJoLTR2MnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30" />
@@ -265,10 +273,10 @@ export function InsurancePage() {
                 Powered by Shani Finserve
               </Badge>
               <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
-                Car <span className="text-emerald-100">Insurance</span> by Shani Finserve
+                Used Car <span className="text-emerald-100">Insurance</span> in Assam
               </h1>
               <p className="text-white/90 text-lg md:text-xl">
-                Protect your car with the best insurance plans. Compare, choose, and get instant quotes.
+                Protect your car with simple insurance renewal, third-party and comprehensive policy support powered by Shani Finserve.
               </p>
             </motion.div>
           </div>
@@ -610,6 +618,53 @@ export function InsurancePage() {
           </FadeInSection>
         </div>
       </section>
+
+      {/* SEO: Quick Answer Box */}
+      <section className="py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          <QuickAnswerBox answer="Yes, you can get used car insurance in Assam through MeriPehli Gadi powered by Shani Finserve. We offer comprehensive, third-party, zero depreciation and own damage insurance plans. Compare policies, get instant quotes and renew your existing policy with simple documentation and quick processing." />
+        </div>
+      </section>
+
+      {/* SEO: Finance CTA */}
+      <section className="py-6 px-4">
+        <div className="max-w-4xl mx-auto">
+          <FinanceCTA />
+        </div>
+      </section>
+
+      {/* SEO: Sell Car CTA */}
+      <section className="py-6 px-4">
+        <div className="max-w-4xl mx-auto">
+          <SellCarCTA />
+        </div>
+      </section>
+
+      {/* SEO: FAQ Section with Schema */}
+      <section className="py-12 md:py-16 px-4 bg-slate-50/50">
+        <div className="max-w-3xl mx-auto">
+          <FAQSchemaBlock faqs={INSURANCE_FAQS} />
+        </div>
+      </section>
+
+      {/* SEO: Related Searches */}
+      <section className="py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          <RelatedSearchesBlock
+            searches={['car insurance renewal', 'third party insurance', 'comprehensive car insurance', 'zero depreciation insurance', 'insurance claim process']}
+          />
+        </div>
+      </section>
+
+      {/* SEO: Popular City Links */}
+      <section className="py-10 px-4">
+        <div className="max-w-6xl mx-auto">
+          <PopularCityLinks />
+        </div>
+      </section>
+
+      {/* SEO: AI Readable Summary */}
+      <AIReadableSummary text="MeriPehli Gadi provides used car insurance services in Assam powered by Shani Finserve. Customers can buy or renew car insurance including comprehensive, third-party, zero depreciation and own damage plans. The insurance page features a quote request form, coverage comparison table, and claim process guide. Available across all major Assam cities including Guwahati, Dibrugarh, Jorhat, Tinsukia, Silchar, Tezpur and more. Shani Finserve is the verified insurance partner for MeriPehli Gadi, offering competitive premiums and quick claim settlement support." />
     </div>
   )
 }

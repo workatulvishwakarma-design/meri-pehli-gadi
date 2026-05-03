@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   ChevronDown,
+  ChevronRight,
   Car,
   DollarSign,
   Shield,
@@ -20,80 +21,429 @@ import {
   Zap,
   TrendingUp,
   CalendarClock,
-  ArrowLeftRight,
+  ArrowRight,
   HandCoins,
   ShieldCheck,
   Crown,
   Banknote,
   Sparkles,
   Tag,
+  FileText,
+  Calculator,
+  ClipboardCheck,
+  Percent,
+  HelpCircle,
+  Award,
+  Upload,
+  Eye,
+  FileCheck,
+  CircleDollarSign,
+  RefreshCw,
+  AlertTriangle,
+  Umbrella,
+  LifeBuoy,
+  BadgeCheck,
+  Building2,
+  Fuel,
+  Gauge,
+  Layers,
+  Star,
+  ArrowLeftRight,
+  CheckCircle2,
+  Bike,
+  Wrench,
+  type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Sheet, SheetContent } from '@/components/ui/sheet'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
 import { Separator } from '@/components/ui/separator'
+import { Badge } from '@/components/ui/badge'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import { useAppStore, type PageName } from '@/lib/store'
 import { cn } from '@/lib/utils'
 
-/* ─── Dropdown Data ──────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   Types
+   ═══════════════════════════════════════════════════════════════ */
 
-interface DropItem {
+interface MegaHeading {
   label: string
   page: PageName
-  icon: React.ReactNode
-  desc?: string
+  params?: Record<string, string>
+  icon: LucideIcon
 }
 
-const usedCarsDropdown: DropItem[] = [
-  { label: 'Buy Used Cars', page: 'used-cars', icon: <Car className="size-4 text-accent-blue" />, desc: 'Explore all listings' },
-  { label: 'Used Cars in City', page: 'used-cars-city', icon: <MapPin className="size-4 text-accent-green" />, desc: 'Cars near you' },
-  { label: 'Sell My Car', page: 'sell-car', icon: <HandCoins className="size-4 text-accent-orange" />, desc: 'Get best price' },
-  { label: 'Car Valuation', page: 'car-valuation', icon: <Tag className="size-4 text-accent-blue" />, desc: 'Free value check' },
-  { label: 'Certified Cars', page: 'certified-cars', icon: <ShieldCheck className="size-4 text-accent-green" />, desc: 'Inspected & verified' },
-  { label: 'Budget Cars', page: 'used-cars-budget', icon: <Banknote className="size-4 text-accent-orange" />, desc: 'Under 5 lakh' },
-  { label: 'Luxury Cars', page: 'luxury-cars', icon: <Crown className="size-4 text-accent-orange" />, desc: 'Premium collection' },
-]
-
-const newCarsDropdown: DropItem[] = [
-  { label: 'Electric Cars', page: 'electric-cars', icon: <Zap className="size-4 text-accent-green" />, desc: 'Go green with EVs' },
-  { label: 'Popular Cars', page: 'new-cars', icon: <TrendingUp className="size-4 text-accent-blue" />, desc: 'Top selling models' },
-  { label: 'Upcoming Cars', page: 'new-cars', icon: <CalendarClock className="size-4 text-accent-orange" />, desc: 'Launching soon' },
-  { label: 'Compare Cars', page: 'compare-cars', icon: <ArrowLeftRight className="size-4 text-accent-blue" />, desc: 'Side by side specs' },
-  { label: 'Find Dealers', page: 'contact', icon: <MapPin className="size-4 text-accent-green" />, desc: 'Nearby showrooms' },
-]
-
-/* ─── Nav Items ──────────────────────────────────────────── */
-
-interface NavItem {
+interface MegaQuickLink {
   label: string
   page: PageName
-  hasDropdown?: boolean
-  dropdown?: DropItem[]
+  params?: Record<string, string>
+  icon: LucideIcon
+  isCta?: boolean
+  ctaLabel?: string
 }
 
-const navItems: NavItem[] = [
-  { label: 'Used Cars', page: 'used-cars', hasDropdown: true, dropdown: usedCarsDropdown },
-  { label: 'New Cars', page: 'new-cars', hasDropdown: true, dropdown: newCarsDropdown },
-  { label: 'Sell Car', page: 'sell-car' },
-  { label: 'Finance', page: 'finance' },
-  { label: 'Insurance', page: 'insurance' },
-  { label: 'Blog', page: 'blog' },
-  { label: 'Contact', page: 'contact' },
+interface MegaMenuData {
+  headings: MegaHeading[]
+  quickLinks: MegaQuickLink[]
+  poweredBy?: boolean
+}
+
+interface SimpleDropdownItem {
+  label: string
+  page: PageName
+  params?: Record<string, string>
+  icon: LucideIcon
+}
+
+interface NavItemConfig {
+  label: string
+  page: PageName
+  type: 'mega' | 'dropdown' | 'link'
+  megaMenu?: MegaMenuData
+  dropdownItems?: SimpleDropdownItem[]
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Mega Menu Data — Buy Used Car
+   ═══════════════════════════════════════════════════════════════ */
+
+const buyUsedCarMega: MegaMenuData = {
+  headings: [
+    { label: 'Buy Used Cars in Assam', page: 'used-cars', params: { city: 'assam' }, icon: MapPin },
+    { label: 'Used Cars in Your City', page: 'used-cars', icon: Building2 },
+    { label: 'Browse by Brand', page: 'used-cars', icon: Layers },
+    { label: 'Browse by Budget', page: 'used-cars', icon: Banknote },
+    { label: 'Browse by Body Type', page: 'used-cars', icon: Car },
+    { label: 'Browse by Fuel Type', page: 'used-cars', icon: Fuel },
+    { label: 'Certified Cars', page: 'certified-cars', icon: ShieldCheck },
+    { label: 'Low Mileage Cars', page: 'used-cars', icon: Gauge },
+    { label: 'Luxury Cars', page: 'luxury-cars', icon: Crown },
+  ],
+  quickLinks: [
+    { label: 'Used Cars in Guwahati', page: 'used-cars-city', params: { city: 'guwahati' }, icon: MapPin },
+    { label: 'Used Cars in Dibrugarh', page: 'used-cars-city', params: { city: 'dibrugarh' }, icon: MapPin },
+    { label: 'Used Cars in Tinsukia', page: 'used-cars-city', params: { city: 'tinsukia' }, icon: MapPin },
+    { label: 'Used Maruti Cars', page: 'used-cars-brand', params: { brand: 'maruti-suzuki' }, icon: Car },
+    { label: 'Used Hyundai Cars', page: 'used-cars-brand', params: { brand: 'hyundai' }, icon: Car },
+    { label: 'Used Tata Cars', page: 'used-cars-brand', params: { brand: 'tata' }, icon: Car },
+    { label: 'Used Cars Under \u20B95 Lakh', page: 'used-cars-budget', params: { budget: '5' }, icon: Banknote },
+    { label: 'Used Automatic Cars in Assam', page: 'used-cars', params: { city: 'assam', transmission: 'automatic' }, icon: ArrowLeftRight },
+  ],
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Mega Menu Data — Car Finance
+   ═══════════════════════════════════════════════════════════════ */
+
+const carFinanceMega: MegaMenuData = {
+  poweredBy: true,
+  headings: [
+    { label: 'Used Car Loan', page: 'finance', params: { section: 'used-car-loan' }, icon: CircleDollarSign },
+    { label: 'Loan Against Car', page: 'finance', params: { section: 'loan-against-car' }, icon: Car },
+    { label: 'EMI Calculator', page: 'finance', params: { section: 'emi-calculator' }, icon: Calculator },
+    { label: 'Documents & Eligibility', page: 'finance', params: { section: 'documents' }, icon: FileText },
+    { label: 'Interest Rates', page: 'finance', params: { section: 'interest-rates' }, icon: Percent },
+    { label: 'Application Process', page: 'finance', params: { section: 'application-process' }, icon: ClipboardCheck },
+    { label: 'Why Shani Finserve?', page: 'about', icon: Award },
+    { label: 'Check Loan Eligibility', page: 'finance', params: { section: 'check-eligibility' }, icon: CheckCircle2 },
+  ],
+  quickLinks: [
+    { label: 'Used Car Loan in Assam', page: 'finance', params: { city: 'assam' }, icon: MapPin },
+    { label: 'Used Car Loan in Guwahati', page: 'finance', params: { city: 'guwahati' }, icon: MapPin },
+    { label: 'Used Car Loan in Dibrugarh', page: 'finance', params: { city: 'dibrugarh' }, icon: MapPin },
+    { label: 'Low EMI Used Car Loan', page: 'finance', params: { section: 'low-emi' }, icon: Banknote },
+    { label: 'Car Loan for First-Time Buyers', page: 'finance', params: { section: 'first-time' }, icon: User },
+    {
+      label: 'Apply Now',
+      page: 'finance',
+      params: { section: 'apply' },
+      icon: ArrowRight,
+      isCta: true,
+      ctaLabel: 'Quick Apply',
+    },
+  ],
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Mega Menu Data — Sell Car
+   ═══════════════════════════════════════════════════════════════ */
+
+const sellCarMega: MegaMenuData = {
+  headings: [
+    { label: 'Sell My Car', page: 'sell-car', icon: HandCoins },
+    { label: 'Used Car Valuation', page: 'car-valuation', icon: Tag },
+    { label: 'Upload Car Details', page: 'sell-car', params: { step: 'upload' }, icon: Upload },
+    { label: 'Schedule Inspection', page: 'sell-car', params: { step: 'inspection' }, icon: Eye },
+    { label: 'Get Best Price', page: 'sell-car', params: { step: 'pricing' }, icon: Sparkles },
+    { label: 'Documents Required', page: 'sell-car', params: { step: 'documents' }, icon: FileCheck },
+  ],
+  quickLinks: [
+    { label: 'Sell Car in Guwahati', page: 'sell-car', params: { city: 'guwahati' }, icon: MapPin },
+    { label: 'Sell Car in Dibrugarh', page: 'sell-car', params: { city: 'dibrugarh' }, icon: MapPin },
+    {
+      label: 'List Your Car Free',
+      page: 'sell-car',
+      icon: ArrowRight,
+      isCta: true,
+      ctaLabel: 'Start Selling',
+    },
+  ],
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Mega Menu Data — Insurance
+   ═══════════════════════════════════════════════════════════════ */
+
+const insuranceMega: MegaMenuData = {
+  headings: [
+    { label: 'Used Car Insurance', page: 'insurance', params: { section: 'used-car' }, icon: Shield },
+    { label: 'Insurance Renewal', page: 'insurance', params: { section: 'renewal' }, icon: RefreshCw },
+    { label: 'Third Party Insurance', page: 'insurance', params: { section: 'third-party' }, icon: AlertTriangle },
+    { label: 'Comprehensive Insurance', page: 'insurance', params: { section: 'comprehensive' }, icon: Umbrella },
+    { label: 'Claim Assistance', page: 'insurance', params: { section: 'claim' }, icon: LifeBuoy },
+    { label: 'Check Insurance Price', page: 'insurance', params: { section: 'price' }, icon: Calculator },
+    { label: 'Insurance by Shani Finserve', page: 'insurance', params: { section: 'shani-finserve' }, icon: BadgeCheck },
+  ],
+  quickLinks: [
+    {
+      label: 'Get Insurance Quote',
+      page: 'insurance',
+      icon: ArrowRight,
+      isCta: true,
+      ctaLabel: 'Get Quote',
+    },
+  ],
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Simple Dropdown — Blog
+   ═══════════════════════════════════════════════════════════════ */
+
+const blogDropdownItems: SimpleDropdownItem[] = [
+  { label: 'All Articles', page: 'blog', icon: BookOpen },
+  { label: 'Car Buying Tips', page: 'blog', params: { category: 'buying-tips' }, icon: Star },
+  { label: 'Car Maintenance', page: 'blog', params: { category: 'maintenance' }, icon: Wrench },
+  { label: 'Finance & Insurance', page: 'blog', params: { category: 'finance-insurance' }, icon: DollarSign },
+  { label: 'Industry News', page: 'blog', params: { category: 'news' }, icon: TrendingUp },
+  { label: 'Car Reviews', page: 'blog', params: { category: 'reviews' }, icon: Gauge },
 ]
 
-/* ─── Dropdown Sub-component ─────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   Navigation Items
+   ═══════════════════════════════════════════════════════════════ */
 
-function NavDropdown({ items }: { items: DropItem[] }) {
+const navItems: NavItemConfig[] = [
+  { label: 'Buy Used Car', page: 'used-cars', type: 'mega', megaMenu: buyUsedCarMega },
+  { label: 'Car Finance', page: 'finance', type: 'mega', megaMenu: carFinanceMega },
+  { label: 'Sell Car', page: 'sell-car', type: 'mega', megaMenu: sellCarMega },
+  { label: 'Insurance', page: 'insurance', type: 'mega', megaMenu: insuranceMega },
+  { label: 'Blog', page: 'blog', type: 'dropdown', dropdownItems: blogDropdownItems },
+]
+
+/* ═══════════════════════════════════════════════════════════════
+   Framer Motion Variants
+   ═══════════════════════════════════════════════════════════════ */
+
+const megaMenuVariants = {
+  hidden: { opacity: 0, y: 10, scale: 0.96 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
+  },
+  exit: {
+    opacity: 0,
+    y: 8,
+    scale: 0.97,
+    transition: { duration: 0.15, ease: 'easeIn' },
+  },
+}
+
+const dropdownVariants = {
+  hidden: { opacity: 0, y: 6, scale: 0.96 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] },
+  },
+  exit: {
+    opacity: 0,
+    y: 6,
+    scale: 0.97,
+    transition: { duration: 0.12, ease: 'easeIn' },
+  },
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Mega Menu Component (Desktop)
+   ═══════════════════════════════════════════════════════════════ */
+
+function MegaMenuPanel({
+  data,
+  onClose,
+}: {
+  data: MegaMenuData
+  onClose: () => void
+}) {
+  const navigateTo = useAppStore((s) => s.navigateTo)
+
+  return (
+    <div className="w-[700px] flex rounded-2xl border border-border/60 overflow-hidden shadow-2xl shadow-black/10">
+      {/* ── Left column: Dark navy headings ── */}
+      <div className="w-[300px] bg-slate-900 text-white p-1 flex flex-col">
+        {data.headings.map((heading) => {
+          const Icon = heading.icon
+          return (
+            <button
+              key={heading.label}
+              onClick={() => {
+                onClose()
+                navigateTo(heading.page, heading.params)
+              }}
+              className="flex items-center gap-3 px-4 py-2.5 text-left text-[13px] font-medium text-slate-200 hover:bg-white/10 hover:text-white rounded-lg mx-1 my-0.5 transition-all duration-150 group cursor-pointer"
+            >
+              <Icon className="size-4 text-slate-400 group-hover:text-accent-orange shrink-0 transition-colors" />
+              <span className="truncate">{heading.label}</span>
+              <ChevronRight className="size-3 text-slate-500 group-hover:text-slate-300 ml-auto opacity-0 group-hover:opacity-100 transition-all shrink-0" />
+            </button>
+          )
+        })}
+
+        {/* Powered by badge */}
+        {data.poweredBy && (
+          <div className="mt-auto px-4 py-3 mx-1 mb-1">
+            <div className="flex items-center gap-2 bg-accent-orange/15 border border-accent-orange/20 rounded-lg px-3 py-2">
+              <Award className="size-4 text-accent-orange" />
+              <div>
+                <div className="text-[11px] font-semibold text-accent-orange leading-tight">
+                  Powered by Shani Finserve
+                </div>
+                <div className="text-[10px] text-slate-400 leading-tight mt-0.5">
+                  Trusted NBFC in Assam
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Right column: Quick link cards ── */}
+      <div className="flex-1 bg-background p-4 flex flex-col">
+        <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">
+          Popular Searches
+        </div>
+        <div className="flex-1 grid grid-cols-1 gap-1.5">
+          {data.quickLinks.map((link) => {
+            const Icon = link.icon
+            if (link.isCta) {
+              return (
+                <button
+                  key={link.label}
+                  onClick={() => {
+                    onClose()
+                    navigateTo(link.page, link.params)
+                  }}
+                  className="mt-2 flex items-center gap-2.5 bg-gradient-to-r from-accent-orange to-orange-600 text-white rounded-xl px-4 py-3 text-sm font-semibold shadow-lg shadow-accent-orange/20 hover:shadow-accent-orange/35 transition-all duration-200 hover:scale-[1.01] cursor-pointer group"
+                >
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-white/20 shrink-0">
+                    <Icon className="size-4" />
+                  </div>
+                  <span className="flex-1">{link.label}</span>
+                  {link.ctaLabel && (
+                    <Badge className="bg-white/20 text-white border-0 text-[10px] px-2 py-0.5">
+                      {link.ctaLabel}
+                    </Badge>
+                  )}
+                  <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              )
+            }
+            return (
+              <button
+                key={link.label}
+                onClick={() => {
+                  onClose()
+                  navigateTo(link.page, link.params)
+                }}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-[13px] font-medium text-foreground hover:bg-accent/60 hover:text-foreground transition-all duration-150 group cursor-pointer"
+              >
+                <div className="flex size-7 items-center justify-center rounded-md bg-accent/80 group-hover:bg-accent-orange/10 transition-colors shrink-0">
+                  <Icon className="size-3.5 text-muted-foreground group-hover:text-accent-orange transition-colors" />
+                </div>
+                <span>{link.label}</span>
+                <ChevronRight className="size-3 text-muted-foreground/50 ml-auto group-hover:text-muted-foreground opacity-0 group-hover:opacity-100 transition-all shrink-0" />
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Simple Dropdown Component (Desktop) — Blog etc.
+   ═══════════════════════════════════════════════════════════════ */
+
+function SimpleDropdownPanel({
+  items,
+  onClose,
+}: {
+  items: SimpleDropdownItem[]
+  onClose: () => void
+}) {
+  const navigateTo = useAppStore((s) => s.navigateTo)
+
+  return (
+    <div className="w-[220px] rounded-xl border border-border/60 bg-background shadow-xl shadow-black/8 p-2">
+      {items.map((item) => {
+        const Icon = item.icon
+        return (
+          <button
+            key={item.label}
+            onClick={() => {
+              onClose()
+              navigateTo(item.page, item.params)
+            }}
+            className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-left text-[13px] font-medium text-foreground hover:bg-accent/60 transition-colors group cursor-pointer"
+          >
+            <Icon className="size-4 text-muted-foreground group-hover:text-accent-orange transition-colors shrink-0" />
+            <span>{item.label}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Nav Item Wrapper (Desktop) — handles hover state
+   ═══════════════════════════════════════════════════════════════ */
+
+function DesktopNavItem({ item }: { item: NavItemConfig }) {
   const [open, setOpen] = useState(false)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const navigateTo = useAppStore((s) => s.navigateTo)
 
-  const handleEnter = () => {
+  const enter = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
     setOpen(true)
   }
-  const handleLeave = () => {
-    timeoutRef.current = setTimeout(() => setOpen(false), 150)
+  const leave = () => {
+    timeoutRef.current = setTimeout(() => setOpen(false), 200)
   }
 
   useEffect(() => {
@@ -102,51 +452,182 @@ function NavDropdown({ items }: { items: DropItem[] }) {
     }
   }, [])
 
+  const handleClose = () => setOpen(false)
+
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          initial={{ opacity: 0, y: 8, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 8, scale: 0.97 }}
-          transition={{ duration: 0.18, ease: 'easeOut' }}
-          onMouseEnter={handleEnter}
-          onMouseLeave={handleLeave}
-          className="absolute top-full left-1/2 -translate-x-1/2 z-50 mt-1 w-[520px] rounded-xl border bg-background shadow-xl p-3"
-        >
-          <div className="grid grid-cols-2 gap-1">
-            {items.map((item) => (
-              <button
-                key={item.label}
-                onClick={() => {
-                  setOpen(false)
-                  navigateTo(item.page)
-                }}
-                className="flex items-start gap-3 p-3 rounded-lg text-left transition-colors hover:bg-accent/60 group cursor-pointer"
-              >
-                <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent/80 group-hover:bg-accent-blue/10 transition-colors">
-                  {item.icon}
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold text-foreground group-hover:text-accent-blue transition-colors">
-                    {item.label}
-                  </div>
-                  {item.desc && (
-                    <div className="text-xs text-muted-foreground mt-0.5 truncate">
-                      {item.desc}
-                    </div>
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div className="relative" onMouseEnter={enter} onMouseLeave={leave}>
+      <button
+        onClick={() => {
+          if (item.type === 'link') {
+            navigateTo(item.page)
+          }
+        }}
+        className={cn(
+          'flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer',
+          'text-slate-700 hover:text-foreground hover:bg-accent/50',
+          open && 'text-foreground bg-accent/60',
+        )}
+      >
+        {item.label}
+        {(item.type === 'mega' || item.type === 'dropdown') && (
+          <ChevronDown
+            className={cn(
+              'size-3.5 text-muted-foreground transition-transform duration-200',
+              open && 'rotate-180',
+            )}
+          />
+        )}
+      </button>
+
+      <AnimatePresence>
+        {open && item.type === 'mega' && item.megaMenu && (
+          <motion.div
+            variants={megaMenuVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onMouseEnter={enter}
+            onMouseLeave={leave}
+            className="absolute top-full left-1/2 -translate-x-1/2 z-50 pt-3"
+          >
+            <MegaMenuPanel data={item.megaMenu} onClose={handleClose} />
+          </motion.div>
+        )}
+        {open && item.type === 'dropdown' && item.dropdownItems && (
+          <motion.div
+            variants={dropdownVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onMouseEnter={enter}
+            onMouseLeave={leave}
+            className="absolute top-full left-1/2 -translate-x-1/2 z-50 pt-3"
+          >
+            <SimpleDropdownPanel items={item.dropdownItems} onClose={handleClose} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }
 
-/* ─── Main Header Component ──────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   Mobile Menu — Accordion Sections
+   ═══════════════════════════════════════════════════════════════ */
+
+function MobileMegaSection({
+  item,
+}: {
+  item: NavItemConfig
+}) {
+  const navigateTo = useAppStore((s) => s.navigateTo)
+  const setShowMobileMenu = useAppStore((s) => s.setShowMobileMenu)
+
+  const handleNavigate = (page: PageName, params?: Record<string, string>) => {
+    setShowMobileMenu(false)
+    navigateTo(page, params)
+  }
+
+  return (
+    <AccordionItem value={item.label} className="border-b border-border/40 px-0">
+      <AccordionTrigger className="px-5 py-3.5 text-sm font-semibold text-slate-800 hover:no-underline">
+        {item.label}
+      </AccordionTrigger>
+      <AccordionContent className="pb-0">
+        {/* Headings */}
+        {item.type === 'mega' && item.megaMenu && (
+          <div className="px-5 pb-3 space-y-0.5">
+            {item.megaMenu.headings.map((heading) => {
+              const Icon = heading.icon
+              return (
+                <button
+                  key={heading.label}
+                  onClick={() => handleNavigate(heading.page, heading.params)}
+                  className="flex items-center gap-2.5 w-full py-2 text-left text-[13px] text-slate-600 hover:text-foreground transition-colors cursor-pointer"
+                >
+                  <Icon className="size-3.5 text-muted-foreground" />
+                  <span>{heading.label}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Quick links / dropdown items */}
+        {item.type === 'mega' && item.megaMenu && item.megaMenu.quickLinks.length > 0 && (
+          <div className="px-5 pb-3">
+            <div className="h-px bg-border/60 mb-2" />
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+              Popular
+            </div>
+            <div className="space-y-0.5">
+              {item.megaMenu.quickLinks.map((link) => {
+                const Icon = link.icon
+                return (
+                  <button
+                    key={link.label}
+                    onClick={() => handleNavigate(link.page, link.params)}
+                    className={cn(
+                      'flex items-center gap-2.5 w-full py-2 text-left text-[13px] transition-colors cursor-pointer',
+                      link.isCta
+                        ? 'font-semibold text-accent-orange'
+                        : 'text-slate-600 hover:text-foreground',
+                    )}
+                  >
+                    <Icon className="size-3.5 text-muted-foreground" />
+                    <span>{link.label}</span>
+                    {link.ctaLabel && (
+                      <Badge variant="secondary" className="ml-auto text-[9px] px-1.5 py-0">
+                        {link.ctaLabel}
+                      </Badge>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Powered by badge */}
+        {item.type === 'mega' && item.megaMenu?.poweredBy && (
+          <div className="px-5 pb-3">
+            <div className="flex items-center gap-2 bg-accent-orange/10 border border-accent-orange/15 rounded-lg px-3 py-2">
+              <Award className="size-3.5 text-accent-orange" />
+              <div>
+                <div className="text-[10px] font-semibold text-accent-orange leading-tight">
+                  Powered by Shani Finserve
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Simple dropdown items */}
+        {item.type === 'dropdown' && item.dropdownItems && (
+          <div className="px-5 pb-3 space-y-0.5">
+            {item.dropdownItems.map((d) => {
+              const Icon = d.icon
+              return (
+                <button
+                  key={d.label}
+                  onClick={() => handleNavigate(d.page, d.params)}
+                  className="flex items-center gap-2.5 w-full py-2 text-left text-[13px] text-slate-600 hover:text-foreground transition-colors cursor-pointer"
+                >
+                  <Icon className="size-3.5 text-muted-foreground" />
+                  <span>{d.label}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </AccordionContent>
+    </AccordionItem>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Main Header Component
+   ═══════════════════════════════════════════════════════════════ */
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false)
@@ -181,10 +662,6 @@ export function Header() {
     },
     [navigateTo, setSearchQueryStore],
   )
-
-  const handleNavClick = (page: PageName) => {
-    navigateTo(page)
-  }
 
   return (
     <header
@@ -224,32 +701,9 @@ export function Header() {
 
           {/* ── Desktop Navigation ── */}
           <nav className="hidden lg:flex items-center gap-0.5 ml-3">
-            {navItems.map((item) =>
-              item.hasDropdown && item.dropdown ? (
-                <div
-                  key={item.label}
-                  className="relative"
-                  onMouseEnter={(e) => {
-                    /* Trigger open via hover state managed in dropdown */
-                    const btn = e.currentTarget.querySelector('button')
-                    if (btn) {
-                      const evt = new MouseEvent('mouseenter', { bubbles: true })
-                      btn.dispatchEvent(evt)
-                    }
-                  }}
-                >
-                  <DropdownNavItem item={item} />
-                </div>
-              ) : (
-                <button
-                  key={item.label}
-                  onClick={() => handleNavClick(item.page)}
-                  className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-slate-700 hover:text-brand hover:bg-accent/50 rounded-md transition-colors"
-                >
-                  {item.label}
-                </button>
-              ),
-            )}
+            {navItems.map((item) => (
+              <DesktopNavItem key={item.label} item={item} />
+            ))}
           </nav>
 
           {/* ── Desktop Search Bar ── */}
@@ -323,7 +777,7 @@ export function Header() {
               </Button>
             )}
 
-            {/* List Your Car */}
+            {/* List Your Car CTA */}
             <Button
               size="sm"
               onClick={() => navigateTo('sell-car')}
@@ -404,21 +858,23 @@ export function Header() {
       <Sheet open={showMobileMenu} onOpenChange={setShowMobileMenu}>
         <SheetContent side="left" className="w-[300px] sm:w-[340px] p-0 overflow-y-auto">
           {/* Header */}
-          <div className="flex items-center gap-3 px-4 py-5 border-b border-border/50">
-            <Image
-              src="/logo.png"
-              alt="MeriPehli Gadi"
-              width={40}
-              height={40}
-              className="size-10 object-contain"
-            />
-            <div>
-              <div className="text-base font-bold text-foreground">
-                MeriPehli<span className="text-accent-orange">Gadi</span>
+          <SheetHeader className="px-4 py-5 border-b border-border/50 text-left">
+            <SheetTitle className="flex items-center gap-3">
+              <Image
+                src="/logo.png"
+                alt="MeriPehli Gadi"
+                width={40}
+                height={40}
+                className="size-10 object-contain"
+              />
+              <div>
+                <div className="text-base font-bold text-foreground">
+                  MeriPehli<span className="text-accent-orange">Gadi</span>
+                </div>
+                <div className="text-[10px] text-muted-foreground">Shani Finserve</div>
               </div>
-              <div className="text-[10px] text-muted-foreground">Shani Finserve</div>
-            </div>
-          </div>
+            </SheetTitle>
+          </SheetHeader>
 
           {/* City selector */}
           <button
@@ -435,22 +891,12 @@ export function Header() {
 
           <Separator />
 
-          {/* Nav Links */}
-          <nav className="flex flex-col py-2">
+          {/* Accordion Nav */}
+          <Accordion type="multiple" className="py-1">
             {navItems.map((item) => (
-              <button
-                key={item.label}
-                onClick={() => {
-                  handleNavClick(item.page)
-                  setShowMobileMenu(false)
-                }}
-                className="flex items-center gap-3 px-5 py-3 text-sm font-medium text-slate-700 hover:text-brand hover:bg-accent/40 transition-colors"
-              >
-                <span>{item.label}</span>
-                {item.hasDropdown && <ChevronDown className="size-3.5 ml-auto text-muted-foreground" />}
-              </button>
+              <MobileMegaSection key={item.label} item={item} />
             ))}
-          </nav>
+          </Accordion>
 
           <Separator />
 
@@ -473,8 +919,8 @@ export function Header() {
                 variant="outline"
                 className="w-full flex items-center gap-2"
                 onClick={() => {
-                  handleNavClick('user-dashboard')
                   setShowMobileMenu(false)
+                  navigateTo('user-dashboard')
                 }}
               >
                 <div className="flex size-6 items-center justify-center rounded-full bg-accent-blue text-white text-xs font-bold">
@@ -486,8 +932,8 @@ export function Header() {
             <Button
               className="w-full bg-accent-orange hover:bg-accent-orange/90 text-white rounded-full"
               onClick={() => {
-                handleNavClick('sell-car')
                 setShowMobileMenu(false)
+                navigateTo('sell-car')
               }}
             >
               <span className="font-semibold">List Your Car Free</span>
@@ -504,85 +950,5 @@ export function Header() {
         </SheetContent>
       </Sheet>
     </header>
-  )
-}
-
-/* ─── DropdownNavItem ────────────────────────────────────── */
-
-function DropdownNavItem({ item }: { item: NavItem }) {
-  const [open, setOpen] = useState(false)
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const navigateTo = useAppStore((s) => s.navigateTo)
-
-  const enter = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    setOpen(true)
-  }
-  const leave = () => {
-    timeoutRef.current = setTimeout(() => setOpen(false), 150)
-  }
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    }
-  }, [])
-
-  return (
-    <div className="relative" onMouseEnter={enter} onMouseLeave={leave}>
-      <button
-        className={cn(
-          'flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md transition-colors',
-          'text-slate-700 hover:text-brand hover:bg-accent/50',
-          open && 'text-brand bg-accent/50',
-        )}
-      >
-        {item.label}
-        <ChevronDown
-          className={cn('size-3.5 transition-transform duration-200', open && 'rotate-180')}
-        />
-      </button>
-
-      <AnimatePresence>
-        {open && item.dropdown && (
-          <motion.div
-            initial={{ opacity: 0, y: 8, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.97 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="absolute top-full left-1/2 -translate-x-1/2 z-50 mt-1 w-[520px] rounded-xl border bg-background shadow-xl p-3"
-            onMouseEnter={enter}
-            onMouseLeave={leave}
-          >
-            <div className="grid grid-cols-2 gap-1">
-              {item.dropdown.map((d) => (
-                <button
-                  key={d.label}
-                  onClick={() => {
-                    setOpen(false)
-                    navigateTo(d.page)
-                  }}
-                  className="flex items-start gap-3 p-3 rounded-lg text-left transition-colors hover:bg-accent/60 group cursor-pointer"
-                >
-                  <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent/80 group-hover:bg-accent-blue/10 transition-colors">
-                    {d.icon}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold text-foreground group-hover:text-accent-blue transition-colors">
-                      {d.label}
-                    </div>
-                    {d.desc && (
-                      <div className="text-xs text-muted-foreground mt-0.5 truncate">
-                        {d.desc}
-                      </div>
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
   )
 }

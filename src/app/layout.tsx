@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { getGlobalSchemas } from "@/lib/schema-markup";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,24 +16,63 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MeriPehli Gadi - Buy, Sell, Finance & Insure Used Cars | Trusted Car Marketplace",
+  title: "MeriPehli Gadi - Buy, Sell, Finance & Insure Used Cars in Assam | Trusted Marketplace",
   description:
-    "MeriPehli Gadi helps customers buy, sell, finance and insure used cars with trust, transparency and local support. Har family ki pehli car ka sapna, ab aur aasaan.",
+    "MeriPehli Gadi helps customers in Assam buy, sell, finance and insure used cars with trust, transparency and local support. Pehli car ka sapna, ab aur aasaan. Powered by Shani Finserve.",
   keywords: [
-    "used cars", "buy used car", "sell car", "car finance", "car insurance",
-    "MeriPehli Gadi", "Shani Finserve", "used cars Dibrugarh", "used cars Assam",
-    "certified used cars", "car loan", "used car marketplace",
+    "used cars Assam", "buy used car Guwahati", "sell car Dibrugarh",
+    "used car loan Assam", "car insurance Assam", "MeriPehli Gadi",
+    "Shani Finserve", "used cars Dibrugarh", "certified used cars Assam",
+    "second hand cars Guwahati", "car finance Northeast India",
+    "used car marketplace Assam", "used Maruti cars Assam",
+    "used Hyundai cars Assam", "used Tata cars Assam",
+    "used SUV Assam", "budget cars Assam", "first car Assam",
   ],
-  authors: [{ name: "MeriPehli Gadi" }],
+  authors: [{ name: "MeriPehli Gadi", url: "https://meripehligadi.com" }],
+  creator: "MeriPehli Gadi",
+  publisher: "MeriPehli Gadi",
   icons: {
     icon: "/logo.png",
+    apple: "/logo.png",
   },
   openGraph: {
-    title: "MeriPehli Gadi - Trusted Used Car Marketplace",
-    description: "Buy, sell, finance and insure used cars with trust and transparency.",
+    title: "MeriPehli Gadi - Assam's Trusted Used Car Marketplace",
+    description: "Buy, sell, finance and insure used cars in Assam with trust and transparency. Powered by Shani Finserve.",
     siteName: "MeriPehli Gadi",
     type: "website",
     locale: "en_IN",
+    url: "https://meripehligadi.com",
+    images: [
+      {
+        url: "/logo.png",
+        width: 200,
+        height: 60,
+        alt: "MeriPehli Gadi",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MeriPehli Gadi - Assam's Trusted Used Car Marketplace",
+    description: "Buy, sell, finance and insure used cars in Assam with trust, transparency and local support.",
+    images: ["/logo.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: "https://meripehligadi.com",
+  },
+  verification: {
+    google: "your-google-verification-code",
   },
 };
 
@@ -41,8 +81,33 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Generate global JSON-LD schemas
+  const globalSchemas = getGlobalSchemas();
+  const schemaArray = Object.values(globalSchemas);
+
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Global JSON-LD Structured Data */}
+        {schemaArray.map((schema, index) => (
+          <script
+            key={`schema-${index}`}
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          />
+        ))}
+
+        {/* Preconnect for performance */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+
+        {/* Favicon */}
+        <link rel="icon" href="/logo.png" sizes="any" />
+        <link rel="apple-touch-icon" href="/logo.png" />
+
+        {/* llms.txt for AI crawlers */}
+        <link rel="ai" href="/llms.txt" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >

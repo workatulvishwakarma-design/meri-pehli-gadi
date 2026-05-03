@@ -22,6 +22,28 @@ import {
 } from '@/components/ui/select'
 import { useAppStore, type PageName } from '@/lib/store'
 import CarCard from '@/components/shared/CarCard'
+import {
+  QuickAnswerBox,
+  FAQSchemaBlock,
+  LocalTrustBlock,
+  RelatedSearchesBlock,
+  PopularCityLinks,
+  PopularBrandLinks,
+  BudgetLinks,
+  FinanceCTA,
+  InsuranceCTA,
+  SellCarCTA,
+  DynamicMeta,
+  AIReadableSummary,
+} from '@/components/seo/SEOComponents'
+import {
+  ASSAM_CITIES,
+  GENERAL_FAQS,
+  CAR_BRANDS,
+  BUDGET_RANGES,
+  getCityBySlug,
+  getQuickAnswer,
+} from '@/lib/seo-data'
 
 // ─── Constants ───────────────────────────────────────────────────────
 const FUEL_OPTIONS = ['PETROL', 'DIESEL', 'CNG', 'ELECTRIC', 'HYBRID'] as const
@@ -202,13 +224,13 @@ export function UsedCarsPage() {
 
     switch (currentPage) {
       case 'used-cars':
-        return 'Used Cars in India'
+        return 'Used Cars in Assam'
       case 'used-cars-city':
-        return `Used Cars in ${cityName}`
+        return `Used Cars in ${cityName}, Assam`
       case 'used-cars-brand':
-        return `Used ${brandName} Cars`
+        return `Used ${brandName} Cars in Assam`
       case 'used-cars-budget':
-        return `Used Cars Under ₹${budget} Lakh`
+        return `Used Cars Under ₹${budget} Lakh in Assam`
       case 'certified-cars':
         return 'Certified Pre-Owned Cars'
       case 'electric-cars':
@@ -220,7 +242,7 @@ export function UsedCarsPage() {
       case 'compare-cars':
         return 'Compare Cars'
       default:
-        return 'Used Cars in India'
+        return 'Used Cars in Assam'
     }
   }, [currentPage, pageParams])
 
@@ -357,6 +379,55 @@ export function UsedCarsPage() {
   }
 
   const activeFilterCount = getActiveFilterCount(filters)
+
+  // ─── SEO Data ───────────────────────────────────────────────────────
+  const citySlug = pageParams.city || ''
+  const cityNameFormatted = citySlug
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+  const brandSlug = pageParams.brand || ''
+  const brandNameFormatted = brandSlug
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+  const budget = pageParams.budget || ''
+
+  const cityData = useMemo(() => getCityBySlug(citySlug), [citySlug])
+
+  const seoQuickAnswer = useMemo(() => {
+    const pageType = currentPage === 'used-cars-city' ? 'used-cars' : 'used-cars'
+    return getQuickAnswer(pageType, citySlug) || `Find ${totalCars} verified used cars ${cityNameFormatted ? `in ${cityNameFormatted}` : 'across Assam'} with finance, insurance and local support on MeriPehli Gadi.`
+  }, [currentPage, citySlug, cityNameFormatted, totalCars])
+
+  const seoMetaDescription = useMemo(() => {
+    if (cityData) return cityData.metaDescription
+    if (currentPage === 'used-cars') return 'Buy verified used cars in Assam with easy finance, insurance, test drive and local guidance. MeriPehli Gadi — Assam\'s trusted car marketplace powered by Shani Finserve.'
+    if (currentPage === 'used-cars-brand') return `Explore verified used ${brandNameFormatted} cars in Assam with finance and insurance support on MeriPehli Gadi.`
+    if (currentPage === 'used-cars-budget') return `Find used cars under ₹${budget} lakh in Assam with easy EMI and insurance on MeriPehli Gadi.`
+    return 'Buy verified used cars in Assam — finance, insurance, test drive and local support. MeriPehli Gadi.'
+  }, [cityData, currentPage, brandNameFormatted, budget])
+
+  const seoRelatedSearches = useMemo(() => {
+    const base: string[] = []
+    if (cityNameFormatted) {
+      base.push(`used cars in ${cityNameFormatted}`)
+      base.push(`second hand cars ${cityNameFormatted}`)
+      base.push(`cheap cars ${cityNameFormatted}`)
+    }
+    if (brandNameFormatted) base.push(`used ${brandNameFormatted} cars Assam`)
+    if (budget) base.push(`used cars under ${budget} lakh Assam`)
+    base.push('used car loan Assam', 'car insurance Assam', 'sell car Assam')
+    if (cityNameFormatted) base.push(`car finance ${cityNameFormatted}`)
+    return [...new Set(base)]
+  }, [cityNameFormatted, brandNameFormatted, budget])
+
+  const seoLocalContent = useMemo(() => {
+    if (cityData) return cityData.localContent
+    return 'Assam is one of the fastest-growing used car markets in Northeast India. From the bustling streets of Guwahati to the tea gardens of Dibrugarh and the cultural hub of Jorhat, the demand for reliable personal vehicles continues to grow across the state. MeriPehli Gadi serves as Assam\'s trusted local car marketplace, connecting buyers with verified used car listings from all major cities including Guwahati, Dibrugarh, Tinsukia, Jorhat, Tezpur, Silchar, Sivasagar, Nagaon and more. Whether you are a first-time buyer looking for an affordable hatchback, a family in need of a spacious SUV, or a business owner seeking a reliable sedan, our platform offers transparent pricing, easy finance through Shani Finserve, insurance support and local guidance throughout the buying process. Every listing is verified to ensure quality and trust, making MeriPehli Gadi the preferred choice for used car buyers across Assam.'
+  }, [cityData])
+
+  const seoAIReadableSummary = useMemo(() => {
+    return `MeriPehli Gadi is Assam's trusted used car marketplace. ${pageTitle}. ${!loading ? `${totalCars} verified cars available` : ''}. Features: finance by Shani Finserve, insurance support, verified listings, local Assam support in ${ASSAM_CITIES.length}+ cities. Popular brands: ${CAR_BRANDS.map(b => b.name).join(', ')}. Budget ranges: ${BUDGET_RANGES.map(b => b.label).join(', ')}.`
+  }, [pageTitle, totalCars, loading])
 
   // ─── Breadcrumb Data ────────────────────────────────────────────────
   const breadcrumbItems = useMemo(() => {
@@ -591,6 +662,23 @@ export function UsedCarsPage() {
   // ─── Render ─────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* Dynamic Meta for SEO */}
+      <DynamicMeta
+        title={`${pageTitle} | MeriPehli Gadi`}
+        description={seoMetaDescription}
+        keywords={[
+          pageTitle.toLowerCase(),
+          'used cars assam',
+          'second hand cars assam',
+          cityNameFormatted ? `${cityNameFormatted.toLowerCase()} used cars` : '',
+          brandNameFormatted ? `used ${brandNameFormatted.toLowerCase()} cars` : '',
+          'car finance assam',
+          'car insurance assam',
+          'meri pehli gadi',
+          'verified used cars',
+        ].filter(Boolean)}
+      />
+
       {/* Top Bar: Breadcrumb + Title */}
       <div className="bg-white border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 py-3">
@@ -605,24 +693,27 @@ export function UsedCarsPage() {
                   <Home className="size-3" />
                 </BreadcrumbLink>
               </BreadcrumbItem>
+              <BreadcrumbSeparator />
               {breadcrumbItems.map((item, idx) => (
-                <BreadcrumbItem key={idx}>
-                  {idx > 0 && <BreadcrumbSeparator />}
-                  {item.isCurrent ? (
-                    <BreadcrumbPage className="font-medium text-slate-800">
-                      {item.label}
-                    </BreadcrumbPage>
-                  ) : (
-                    <BreadcrumbLink
-                      className="cursor-pointer text-slate-500 hover:text-brand"
-                      onClick={() =>
-                        item.page && navigateTo(item.page, item.params)
-                      }
-                    >
-                      {item.label}
-                    </BreadcrumbLink>
-                  )}
-                </BreadcrumbItem>
+                <span key={idx} className="contents">
+                  <BreadcrumbItem>
+                    {item.isCurrent ? (
+                      <BreadcrumbPage className="font-medium text-slate-800">
+                        {item.label}
+                      </BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink
+                        className="cursor-pointer text-slate-500 hover:text-brand"
+                        onClick={() =>
+                          item.page && navigateTo(item.page, item.params)
+                        }
+                      >
+                        {item.label}
+                      </BreadcrumbLink>
+                    )}
+                  </BreadcrumbItem>
+                  {idx < breadcrumbItems.length - 1 && <BreadcrumbSeparator />}
+                </span>
               ))}
             </BreadcrumbList>
           </Breadcrumb>
@@ -1068,6 +1159,88 @@ export function UsedCarsPage() {
               </>
             )}
           </div>
+
+          {/* ─── SEO Content Sections (visible when not loading) ──── */}
+          {!loading && (
+            <div className="mt-8 space-y-8">
+              {/* Quick Answer Box — AIO optimized */}
+              <QuickAnswerBox answer={seoQuickAnswer} />
+
+              {/* Local Trust Block */}
+              <LocalTrustBlock />
+
+              {/* Popular Brands */}
+              <PopularBrandLinks />
+
+              {/* Budget Ranges */}
+              <BudgetLinks />
+
+              {/* Finance CTA */}
+              <FinanceCTA />
+
+              {/* Insurance CTA */}
+              <InsuranceCTA />
+
+              {/* Sell Car CTA */}
+              <SellCarCTA />
+
+              {/* Long-form Local SEO Content — desktop only collapsible */}
+              <section className="hidden lg:block">
+                <div className="rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+                  <h2 className="text-xl font-bold text-foreground p-5 pb-0">
+                    {cityNameFormatted
+                      ? `About Used Cars in ${cityNameFormatted}, Assam`
+                      : 'About the Used Car Market in Assam'}
+                  </h2>
+                  <div className="p-5 pt-3">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {seoLocalContent}
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              {/* Nearby Cities Navigation — shown when on a city page */}
+              {cityData && cityData.nearbyCities.length > 0 && (
+                <section className="hidden lg:block">
+                  <div className="rounded-xl border border-slate-100 bg-white shadow-sm p-5">
+                    <h2 className="text-lg font-bold text-foreground mb-3">
+                      Also Explore Used Cars Near {cityNameFormatted}
+                    </h2>
+                    <div className="flex flex-wrap gap-2">
+                      {cityData.nearbyCities.map((nc) => {
+                        const ncData = ASSAM_CITIES.find(c => c.name === nc)
+                        return (
+                          <button
+                            key={nc}
+                            type="button"
+                            onClick={() =>
+                              ncData && navigateTo('used-cars-city', { city: ncData.slug })
+                            }
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 hover:border-accent-blue hover:text-accent-blue hover:bg-accent-blue/5 transition-colors cursor-pointer"
+                          >
+                            {nc}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {/* FAQ Section */}
+              <FAQSchemaBlock faqs={GENERAL_FAQS} />
+
+              {/* Related Searches */}
+              <RelatedSearchesBlock searches={seoRelatedSearches} />
+
+              {/* Popular Cities */}
+              <PopularCityLinks />
+
+              {/* AI-readable hidden summary */}
+              <AIReadableSummary text={seoAIReadableSummary} />
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -25,6 +25,8 @@ import {
   Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from '@/components/ui/form'
 import { useAppStore } from '@/lib/store'
+import { DynamicMeta, QuickAnswerBox, FAQSchemaBlock, InsuranceCTA, SellCarCTA, PopularCityLinks, AIReadableSummary, RelatedSearchesBlock } from '@/components/seo/SEOComponents'
+import { FINANCE_FAQS, ASSAM_CITIES, FINANCE_PAGES } from '@/lib/seo-data'
 
 // ─── Animation Helpers ──────────────────────────────────────────────
 
@@ -163,6 +165,12 @@ export function FinancePage() {
 
   return (
     <div className="min-h-screen">
+      <DynamicMeta 
+        title="Used Car Loan in Assam | Low EMI Finance by Shani Finserve - MeriPehli Gadi"
+        description="Apply for used car loan in Assam with low EMI, quick approval and simple documentation. Powered by Shani Finserve. MeriPehli Gadi."
+        keywords={['used car loan Assam', 'car finance Assam', 'Shani Finserve', 'EMI calculator', 'used car finance Guwahati', 'car loan Dibrugarh']}
+      />
+
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-blue-700 via-blue-600 to-sky-500 py-16 md:py-24 px-4">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnYyaDR2MmgtNHYyem0wLTE2aC0ydi00aDJ2Mmg0djJoLTR2MnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30" />
@@ -178,10 +186,10 @@ export function FinancePage() {
                 Powered by Shani Finserve
               </Badge>
               <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
-                Easy Car <span className="text-sky-200">Finance</span> by Shani Finserve
+                Easy Used Car <span className="text-sky-200">Finance</span> in Assam
               </h1>
               <p className="text-white/90 text-lg md:text-xl">
-                Get the best car loan deals with lowest interest rates. Quick approval, minimal documentation.
+                Low EMI, quick approval and simple documentation for your dream used car. Apply for used car loan support through MeriPehli Gadi powered by Shani Finserve.
               </p>
             </motion.div>
           </div>
@@ -653,6 +661,53 @@ export function FinancePage() {
           </FadeInSection>
         </div>
       </section>
+
+      {/* SEO: Quick Answer Box */}
+      <section className="py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          <QuickAnswerBox answer="Yes, you can easily get a used car loan in Assam through MeriPehli Gadi powered by Shani Finserve. We offer low EMI starting from competitive rates, quick approval within 24-48 hours, and simple documentation including just Aadhaar card, PAN card, bank statement and salary slip. Apply online and get instant personalized quotes for your dream used car." />
+        </div>
+      </section>
+
+      {/* SEO: Insurance CTA */}
+      <section className="py-6 px-4">
+        <div className="max-w-4xl mx-auto">
+          <InsuranceCTA />
+        </div>
+      </section>
+
+      {/* SEO: Sell Car CTA */}
+      <section className="py-6 px-4">
+        <div className="max-w-4xl mx-auto">
+          <SellCarCTA />
+        </div>
+      </section>
+
+      {/* SEO: FAQ Section with Schema */}
+      <section className="py-12 md:py-16 px-4 bg-slate-50/50">
+        <div className="max-w-3xl mx-auto">
+          <FAQSchemaBlock faqs={FINANCE_FAQS} />
+        </div>
+      </section>
+
+      {/* SEO: Related Searches */}
+      <section className="py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          <RelatedSearchesBlock
+            searches={['used car loan eligibility', 'EMI calculator', 'car loan documents', 'low EMI car loan', 'used car finance interest rate']}
+          />
+        </div>
+      </section>
+
+      {/* SEO: Popular City Links */}
+      <section className="py-10 px-4">
+        <div className="max-w-6xl mx-auto">
+          <PopularCityLinks />
+        </div>
+      </section>
+
+      {/* SEO: AI Readable Summary */}
+      <AIReadableSummary text="MeriPehli Gadi provides used car finance services in Assam powered by Shani Finserve. Customers can apply for car loans with low EMI, quick approval within 24-48 hours, and simple documentation. The finance page features an EMI calculator, loan application form, and detailed FAQ section. Available across all major Assam cities including Guwahati, Dibrugarh, Jorhat, Tinsukia, Silchar, Tezpur and more. Loan amounts range from ₹1 Lakh to ₹50 Lakh with interest rates starting from competitive rates. Shani Finserve is the verified finance partner for MeriPehli Gadi." />
     </div>
   )
 }

@@ -8,6 +8,7 @@ import { Footer } from '@/components/layout/Footer'
 import { CityModal } from '@/components/layout/CityModal'
 import { AuthModal } from '@/components/layout/AuthModal'
 import { WhatsAppButton } from '@/components/layout/WhatsAppButton'
+import StickyMobileBar from '@/components/layout/StickyMobileBar'
 
 // Lazy load all page components to reduce initial compilation memory
 const HomePage = dynamic(() => import('@/components/pages/HomePage'))
@@ -96,6 +97,7 @@ export default function AppRouter() {
       <CityModal />
       <AuthModal />
       {!isAdminPage && <WhatsAppButton />}
+      {!isAdminPage && <StickyMobileBar />}
     </div>
   )
 }
