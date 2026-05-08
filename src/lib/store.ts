@@ -69,6 +69,38 @@ export const useAppStore = create<AppState>((set, get) => ({
   pageParams: {},
   previousPage: null,
   navigateTo: (page, params = {}) => {
+    // ─── Intercept SEO pages to use native browser routing ───
+    if (typeof window !== 'undefined') {
+      if (page === 'used-cars-city' && params.city) {
+        window.location.href = `/used-cars/in/${params.city}`
+        return
+      }
+      if (page === 'used-cars-brand' && params.brand) {
+        window.location.href = `/used-cars/brand/${params.brand}/assam`
+        return
+      }
+      if (page === 'used-cars-budget' && params.budget || params.range) {
+        const budgetVal = params.budget || params.range
+        window.location.href = `/used-cars/budget/${budgetVal}/assam`
+        return
+      }
+      if (page === 'used-cars' || (page === 'used-cars-city' && !params.city)) {
+        let url = '/used-cars/in/assam'
+        const queryParams = new URLSearchParams()
+        
+        if (params.search) queryParams.set('search', params.search)
+        if (params.bodyType) queryParams.set('bodyType', params.bodyType)
+        if (params.transmission) queryParams.set('transmission', params.transmission)
+        if (params.fuel) queryParams.set('fuel', params.fuel)
+        
+        if (Array.from(queryParams.keys()).length > 0) {
+          url += `?${queryParams.toString()}`
+        }
+        window.location.href = url
+        return
+      }
+    }
+
     const state = get()
     set({
       previousPage: state.currentPage,

@@ -10,4 +10,7 @@ export const db =
     log: ['error'],
   })
 
+// Alias for convenience
+export const prisma = db
+
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db

@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import { getCarImages } from '../src/lib/images/car-image-map'
 
 const db = new PrismaClient()
 
@@ -14,19 +15,25 @@ async function main() {
     { name: 'Dibrugarh', slug: 'dibrugarh', state: 'Assam', isPopular: true, sortOrder: 1 },
     { name: 'Guwahati', slug: 'guwahati', state: 'Assam', isPopular: true, sortOrder: 2 },
     { name: 'Jorhat', slug: 'jorhat', state: 'Assam', isPopular: true, sortOrder: 3 },
-    { name: 'Tinsukia', slug: 'tinsukia', state: 'Assam', isPopular: false, sortOrder: 4 },
-    { name: 'Tezpur', slug: 'tezpur', state: 'Assam', isPopular: false, sortOrder: 5 },
+    { name: 'Tinsukia', slug: 'tinsukia', state: 'Assam', isPopular: true, sortOrder: 4 },
+    { name: 'Tezpur', slug: 'tezpur', state: 'Assam', isPopular: true, sortOrder: 5 },
     { name: 'Silchar', slug: 'silchar', state: 'Assam', isPopular: true, sortOrder: 6 },
-    { name: 'Shillong', slug: 'shillong', state: 'Meghalaya', isPopular: true, sortOrder: 7 },
-    { name: 'Imphal', slug: 'imphal', state: 'Manipur', isPopular: false, sortOrder: 8 },
-    { name: 'Agartala', slug: 'agartala', state: 'Tripura', isPopular: false, sortOrder: 9 },
-    { name: 'Mumbai', slug: 'mumbai', state: 'Maharashtra', isPopular: true, sortOrder: 10 },
-    { name: 'Delhi NCR', slug: 'delhi-ncr', state: 'Delhi', isPopular: true, sortOrder: 11 },
-    { name: 'Bangalore', slug: 'bangalore', state: 'Karnataka', isPopular: true, sortOrder: 12 },
-    { name: 'Pune', slug: 'pune', state: 'Maharashtra', isPopular: true, sortOrder: 13 },
-    { name: 'Hyderabad', slug: 'hyderabad', state: 'Telangana', isPopular: true, sortOrder: 14 },
-    { name: 'Kolkata', slug: 'kolkata', state: 'West Bengal', isPopular: true, sortOrder: 15 },
-    { name: 'Chennai', slug: 'chennai', state: 'Tamil Nadu', isPopular: true, sortOrder: 16 },
+    { name: 'Nagaon', slug: 'nagaon', state: 'Assam', isPopular: true, sortOrder: 7 },
+    { name: 'Bongaigaon', slug: 'bongaigaon', state: 'Assam', isPopular: false, sortOrder: 8 },
+    { name: 'Nalbari', slug: 'nalbari', state: 'Assam', isPopular: false, sortOrder: 9 },
+    { name: 'Dhemaji', slug: 'dhemaji', state: 'Assam', isPopular: false, sortOrder: 10 },
+    { name: 'Goalpara', slug: 'goalpara', state: 'Assam', isPopular: false, sortOrder: 11 },
+    { name: 'Lakhimpur', slug: 'lakhimpur', state: 'Assam', isPopular: false, sortOrder: 12 },
+    { name: 'Sivasagar', slug: 'sivasagar', state: 'Assam', isPopular: true, sortOrder: 13 },
+    { name: 'Golaghat', slug: 'golaghat', state: 'Assam', isPopular: false, sortOrder: 14 },
+    { name: 'Barpeta', slug: 'barpeta', state: 'Assam', isPopular: false, sortOrder: 15 },
+    { name: 'Karimganj', slug: 'karimganj', state: 'Assam', isPopular: false, sortOrder: 16 },
+    { name: 'Kokrajhar', slug: 'kokrajhar', state: 'Assam', isPopular: false, sortOrder: 17 },
+    { name: 'Dhubri', slug: 'dhubri', state: 'Assam', isPopular: false, sortOrder: 18 },
+    { name: 'Diphu', slug: 'diphu', state: 'Assam', isPopular: false, sortOrder: 19 },
+    { name: 'Morigaon', slug: 'morigaon', state: 'Assam', isPopular: false, sortOrder: 20 },
+    { name: 'Haflong', slug: 'haflong', state: 'Assam', isPopular: false, sortOrder: 21 },
+    { name: 'Hailakandi', slug: 'hailakandi', state: 'Assam', isPopular: false, sortOrder: 22 },
   ]
 
   for (const city of cities) {
@@ -320,6 +327,14 @@ async function main() {
 
   for (const car of sampleCars) {
     const slug = car.title.toLowerCase().replace(/ /g, '-').replace(/[^a-z0-9-]/g, '')
+    
+    // Reverse lookup brand and model names for the image mapper
+    const brandName = allBrands.find(b => b.id === car.brandId)?.name || ''
+    // Extract model name from title (e.g. "2023 Hyundai Venue SX" -> "Venue")
+    const modelName = car.title.split(' ')[2] || ''
+
+    const mappedImages = getCarImages(brandName, modelName)
+
     await db.car.upsert({
       where: { slug },
       update: {},
@@ -328,13 +343,21 @@ async function main() {
         slug,
         sellerId: sellerUser?.id || dealerUser?.id!,
         dealerId: dealer?.id,
-        description: `Well-maintained ${car.title} available for sale. Single owner, regular service history. All documents up to date. Insurance valid. Ready for immediate transfer.`,
+        description: `Well-maintained ${car.title} available for sale in ${dibrugarhCity?.name}. Single owner, regular service history. Perfect for Assam roads. All documents up to date. Insurance valid. Ready for immediate transfer.`,
         seoTitle: `${car.title} - Buy at ₹${(car.price / 100000).toFixed(2)} Lakh | MeriPehli Gadi`,
-        seoDescription: `Buy ${car.title} at best price ₹${(car.price / 100000).toFixed(2)} Lakh. ${car.kmDriven.toLocaleString()} kms driven. ${car.color} color. Available in Dibrugarh, Assam.`,
+        seoDescription: `Buy ${car.title} at best price ₹${(car.price / 100000).toFixed(2)} Lakh. ${car.kmDriven.toLocaleString()} kms driven. ${car.color} color. Fully verified.`,
+        viewsCount: Math.floor(Math.random() * 2000) + 500,
+        images: {
+          create: mappedImages.map((url, idx) => ({
+            url,
+            sortOrder: idx,
+            alt: `${car.title} Image ${idx + 1}`
+          }))
+        }
       },
     })
   }
-  console.log(`✅ ${sampleCars.length} sample cars seeded`)
+  console.log(`✅ ${sampleCars.length} sample cars seeded with mapped images`)
 
   // ─── FAQs ─────────────────────────────────────────────
   const faqs = [

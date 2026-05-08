@@ -21,7 +21,8 @@ const AboutPage = dynamic(() => import('@/components/pages/AboutPage').then(m =>
 const ContactPage = dynamic(() => import('@/components/pages/ContactPage').then(m => ({ default: m.ContactPage })))
 const FAQPage = dynamic(() => import('@/components/pages/FAQPage').then(m => ({ default: m.FAQPage })))
 const BlogPage = dynamic(() => import('@/components/pages/BlogPage').then(m => ({ default: m.BlogPage })))
-const AdminDashboard = dynamic(() => import('@/components/pages/AdminDashboard').then(m => ({ default: m.AdminDashboard })))
+const AdminLayout = dynamic(() => import('@/components/admin/AdminLayout'))
+const FloatingCarChatButton = dynamic(() => import('@/components/chatbot/FloatingCarChatButton'))
 const UserDashboard = dynamic(() => import('@/components/pages/UserDashboard').then(m => ({ default: m.UserDashboard })))
 
 const pageComponents: Record<PageName, React.ComponentType> = {
@@ -51,8 +52,8 @@ const pageComponents: Record<PageName, React.ComponentType> = {
   'refund-policy': AboutPage,
   'user-dashboard': UserDashboard,
   'seller-dashboard': UserDashboard,
-  'dealer-dashboard': AdminDashboard,
-  'admin-dashboard': AdminDashboard,
+  'dealer-dashboard': AdminLayout,
+  'admin-dashboard': AdminLayout,
 }
 
 function LoadingSpinner() {
@@ -84,20 +85,12 @@ export default function AppRouter() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {!isAdminPage && <Header />}
-      <main className="flex-1">
-        <div key={currentPage} className="page-enter">
-          <React.Suspense fallback={<LoadingSpinner />}>
-            <PageComponent />
-          </React.Suspense>
-        </div>
-      </main>
-      {!isAdminPage && <Footer />}
-      <CityModal />
-      <AuthModal />
-      {!isAdminPage && <WhatsAppButton />}
-      {!isAdminPage && <StickyMobileBar />}
-    </div>
+    <main className="flex-1">
+      <div key={currentPage} className="page-enter">
+        <React.Suspense fallback={<LoadingSpinner />}>
+          <PageComponent />
+        </React.Suspense>
+      </div>
+    </main>
   )
 }

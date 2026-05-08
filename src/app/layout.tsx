@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -76,6 +77,13 @@ export const metadata: Metadata = {
   },
 };
 
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
+import { CityModal } from "@/components/layout/CityModal";
+import { AuthModal } from "@/components/layout/AuthModal";
+import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
+import StickyMobileBar from "@/components/layout/StickyMobileBar";
+import FloatingCarChatButton from "@/components/chatbot/FloatingCarChatButton";
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -88,15 +96,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Global JSON-LD Structured Data */}
-        {schemaArray.map((schema, index) => (
-          <script
-            key={`schema-${index}`}
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-          />
-        ))}
-
         {/* Preconnect for performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -109,12 +108,31 @@ export default function RootLayout({
         <link rel="ai" href="/llms.txt" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground flex flex-col min-h-screen`}
       >
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-          {children}
+          <Header />
+          <div className="flex-1">
+            {children}
+          </div>
+          <Footer />
+          <CityModal />
+          <AuthModal />
+          <WhatsAppButton />
+          <StickyMobileBar />
+          <FloatingCarChatButton />
           <Toaster />
         </ThemeProvider>
+        {/* Global JSON-LD Structured Data — rendered outside ThemeProvider to avoid script warnings */}
+        {schemaArray.map((schema, index) => (
+          <Script
+            key={`schema-${index}`}
+            id={`json-ld-${index}`}
+            type="application/ld+json"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          />
+        ))}
       </body>
     </html>
   );

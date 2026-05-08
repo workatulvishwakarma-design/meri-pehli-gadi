@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   Search,
@@ -79,14 +80,16 @@ import { cn } from '@/lib/utils'
 
 interface MegaHeading {
   label: string
-  page: PageName
+  href?: string
+  page?: PageName
   params?: Record<string, string>
   icon: LucideIcon
 }
 
 interface MegaQuickLink {
   label: string
-  page: PageName
+  href?: string
+  page?: PageName
   params?: Record<string, string>
   icon: LucideIcon
   isCta?: boolean
@@ -101,14 +104,16 @@ interface MegaMenuData {
 
 interface SimpleDropdownItem {
   label: string
-  page: PageName
+  href?: string
+  page?: PageName
   params?: Record<string, string>
   icon: LucideIcon
 }
 
 interface NavItemConfig {
   label: string
-  page: PageName
+  href?: string
+  page?: PageName
   type: 'mega' | 'dropdown' | 'link'
   megaMenu?: MegaMenuData
   dropdownItems?: SimpleDropdownItem[]
@@ -306,18 +311,33 @@ function MegaMenuPanel({
       <div className="w-[300px] bg-slate-900 text-white p-1 flex flex-col">
         {data.headings.map((heading) => {
           const Icon = heading.icon
+          const content = (
+            <>
+              <Icon className="size-4 text-slate-400 group-hover:text-accent-orange shrink-0 transition-colors" />
+              <span className="truncate">{heading.label}</span>
+              <ChevronRight className="size-3 text-slate-500 group-hover:text-slate-300 ml-auto opacity-0 group-hover:opacity-100 transition-all shrink-0" />
+            </>
+          )
+          const className = "flex items-center gap-3 px-4 py-2.5 text-left text-[13px] font-medium text-slate-200 hover:bg-white/10 hover:text-white rounded-lg mx-1 my-0.5 transition-all duration-150 group cursor-pointer w-full"
+          
+          if (heading.href) {
+            return (
+              <Link key={heading.label} href={heading.href} onClick={onClose} className={className}>
+                {content}
+              </Link>
+            )
+          }
+
           return (
             <button
               key={heading.label}
               onClick={() => {
                 onClose()
-                navigateTo(heading.page, heading.params)
+                if (heading.page) navigateTo(heading.page, heading.params)
               }}
-              className="flex items-center gap-3 px-4 py-2.5 text-left text-[13px] font-medium text-slate-200 hover:bg-white/10 hover:text-white rounded-lg mx-1 my-0.5 transition-all duration-150 group cursor-pointer"
+              className={className}
             >
-              <Icon className="size-4 text-slate-400 group-hover:text-accent-orange shrink-0 transition-colors" />
-              <span className="truncate">{heading.label}</span>
-              <ChevronRight className="size-3 text-slate-500 group-hover:text-slate-300 ml-auto opacity-0 group-hover:opacity-100 transition-all shrink-0" />
+              {content}
             </button>
           )
         })}
@@ -348,27 +368,61 @@ function MegaMenuPanel({
         <div className="flex-1 grid grid-cols-1 gap-1.5">
           {data.quickLinks.map((link) => {
             const Icon = link.icon
+
+            const ctaContent = (
+              <>
+                <div className="flex size-8 items-center justify-center rounded-lg bg-white/20 shrink-0">
+                  <Icon className="size-4" />
+                </div>
+                <span className="flex-1 text-left">{link.label}</span>
+                {link.ctaLabel && (
+                  <Badge className="bg-white/20 text-white border-0 text-[10px] px-2 py-0.5">
+                    {link.ctaLabel}
+                  </Badge>
+                )}
+                <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
+              </>
+            )
+
+            const normalContent = (
+              <>
+                <div className="flex size-7 items-center justify-center rounded-md bg-accent/80 group-hover:bg-accent-orange/10 transition-colors shrink-0">
+                  <Icon className="size-3.5 text-muted-foreground group-hover:text-accent-orange transition-colors" />
+                </div>
+                <span className="text-left">{link.label}</span>
+                <ChevronRight className="size-3 text-muted-foreground/50 ml-auto group-hover:text-muted-foreground opacity-0 group-hover:opacity-100 transition-all shrink-0" />
+              </>
+            )
+
             if (link.isCta) {
+              const className = "mt-2 flex items-center gap-2.5 bg-gradient-to-r from-accent-orange to-orange-600 text-white rounded-xl px-4 py-3 text-sm font-semibold shadow-lg shadow-accent-orange/20 hover:shadow-accent-orange/35 transition-all duration-200 hover:scale-[1.01] cursor-pointer group w-full"
+              if (link.href) {
+                return (
+                  <Link key={link.label} href={link.href} onClick={onClose} className={className}>
+                    {ctaContent}
+                  </Link>
+                )
+              }
               return (
                 <button
                   key={link.label}
                   onClick={() => {
                     onClose()
-                    navigateTo(link.page, link.params)
+                    if (link.page) navigateTo(link.page, link.params)
                   }}
-                  className="mt-2 flex items-center gap-2.5 bg-gradient-to-r from-accent-orange to-orange-600 text-white rounded-xl px-4 py-3 text-sm font-semibold shadow-lg shadow-accent-orange/20 hover:shadow-accent-orange/35 transition-all duration-200 hover:scale-[1.01] cursor-pointer group"
+                  className={className}
                 >
-                  <div className="flex size-8 items-center justify-center rounded-lg bg-white/20 shrink-0">
-                    <Icon className="size-4" />
-                  </div>
-                  <span className="flex-1">{link.label}</span>
-                  {link.ctaLabel && (
-                    <Badge className="bg-white/20 text-white border-0 text-[10px] px-2 py-0.5">
-                      {link.ctaLabel}
-                    </Badge>
-                  )}
-                  <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
+                  {ctaContent}
                 </button>
+              )
+            }
+
+            const normalClass = "flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-[13px] font-medium text-foreground hover:bg-accent/60 hover:text-foreground transition-all duration-150 group cursor-pointer w-full"
+            if (link.href) {
+              return (
+                <Link key={link.label} href={link.href} onClick={onClose} className={normalClass}>
+                  {normalContent}
+                </Link>
               )
             }
             return (
@@ -376,15 +430,11 @@ function MegaMenuPanel({
                 key={link.label}
                 onClick={() => {
                   onClose()
-                  navigateTo(link.page, link.params)
+                  if (link.page) navigateTo(link.page, link.params)
                 }}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-[13px] font-medium text-foreground hover:bg-accent/60 hover:text-foreground transition-all duration-150 group cursor-pointer"
+                className={normalClass}
               >
-                <div className="flex size-7 items-center justify-center rounded-md bg-accent/80 group-hover:bg-accent-orange/10 transition-colors shrink-0">
-                  <Icon className="size-3.5 text-muted-foreground group-hover:text-accent-orange transition-colors" />
-                </div>
-                <span>{link.label}</span>
-                <ChevronRight className="size-3 text-muted-foreground/50 ml-auto group-hover:text-muted-foreground opacity-0 group-hover:opacity-100 transition-all shrink-0" />
+                {normalContent}
               </button>
             )
           })}
@@ -411,17 +461,32 @@ function SimpleDropdownPanel({
     <div className="w-[220px] rounded-xl border border-border/60 bg-background shadow-xl shadow-black/8 p-2">
       {items.map((item) => {
         const Icon = item.icon
+        const className = "flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-left text-[13px] font-medium text-foreground hover:bg-accent/60 transition-colors group cursor-pointer"
+        const content = (
+          <>
+            <Icon className="size-4 text-muted-foreground group-hover:text-accent-orange transition-colors shrink-0" />
+            <span>{item.label}</span>
+          </>
+        )
+
+        if (item.href) {
+          return (
+            <Link key={item.label} href={item.href} onClick={onClose} className={className}>
+              {content}
+            </Link>
+          )
+        }
+
         return (
           <button
             key={item.label}
             onClick={() => {
               onClose()
-              navigateTo(item.page, item.params)
+              if (item.page) navigateTo(item.page, item.params)
             }}
-            className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-left text-[13px] font-medium text-foreground hover:bg-accent/60 transition-colors group cursor-pointer"
+            className={className}
           >
-            <Icon className="size-4 text-muted-foreground group-hover:text-accent-orange transition-colors shrink-0" />
-            <span>{item.label}</span>
+            {content}
           </button>
         )
       })}
@@ -539,14 +604,31 @@ function MobileMegaSection({
           <div className="px-5 pb-3 space-y-0.5">
             {item.megaMenu.headings.map((heading) => {
               const Icon = heading.icon
+              const className = "flex items-center gap-2.5 w-full py-2 text-left text-[13px] text-slate-600 hover:text-foreground transition-colors cursor-pointer"
+              const content = (
+                <>
+                  <Icon className="size-3.5 text-muted-foreground" />
+                  <span>{heading.label}</span>
+                </>
+              )
+
+              if (heading.href) {
+                return (
+                  <Link key={heading.label} href={heading.href} onClick={() => setShowMobileMenu(false)} className={className}>
+                    {content}
+                  </Link>
+                )
+              }
+
               return (
                 <button
                   key={heading.label}
-                  onClick={() => handleNavigate(heading.page, heading.params)}
-                  className="flex items-center gap-2.5 w-full py-2 text-left text-[13px] text-slate-600 hover:text-foreground transition-colors cursor-pointer"
+                  onClick={() => {
+                    if (heading.page) handleNavigate(heading.page, heading.params)
+                  }}
+                  className={className}
                 >
-                  <Icon className="size-3.5 text-muted-foreground" />
-                  <span>{heading.label}</span>
+                  {content}
                 </button>
               )
             })}
@@ -563,17 +645,12 @@ function MobileMegaSection({
             <div className="space-y-0.5">
               {item.megaMenu.quickLinks.map((link) => {
                 const Icon = link.icon
-                return (
-                  <button
-                    key={link.label}
-                    onClick={() => handleNavigate(link.page, link.params)}
-                    className={cn(
-                      'flex items-center gap-2.5 w-full py-2 text-left text-[13px] transition-colors cursor-pointer',
-                      link.isCta
-                        ? 'font-semibold text-accent-orange'
-                        : 'text-slate-600 hover:text-foreground',
-                    )}
-                  >
+                const className = cn(
+                  'flex items-center gap-2.5 w-full py-2 text-left text-[13px] transition-colors cursor-pointer',
+                  link.isCta ? 'font-semibold text-accent-orange' : 'text-slate-600 hover:text-foreground'
+                )
+                const content = (
+                  <>
                     <Icon className="size-3.5 text-muted-foreground" />
                     <span>{link.label}</span>
                     {link.ctaLabel && (
@@ -581,6 +658,26 @@ function MobileMegaSection({
                         {link.ctaLabel}
                       </Badge>
                     )}
+                  </>
+                )
+
+                if (link.href) {
+                  return (
+                    <Link key={link.label} href={link.href} onClick={() => setShowMobileMenu(false)} className={className}>
+                      {content}
+                    </Link>
+                  )
+                }
+
+                return (
+                  <button
+                    key={link.label}
+                    onClick={() => {
+                      if (link.page) handleNavigate(link.page, link.params)
+                    }}
+                    className={className}
+                  >
+                    {content}
                   </button>
                 )
               })}
@@ -607,14 +704,31 @@ function MobileMegaSection({
           <div className="px-5 pb-3 space-y-0.5">
             {item.dropdownItems.map((d) => {
               const Icon = d.icon
+              const className = "flex items-center gap-2.5 w-full py-2 text-left text-[13px] text-slate-600 hover:text-foreground transition-colors cursor-pointer"
+              const content = (
+                <>
+                  <Icon className="size-3.5 text-muted-foreground" />
+                  <span>{d.label}</span>
+                </>
+              )
+
+              if (d.href) {
+                return (
+                  <Link key={d.label} href={d.href} onClick={() => setShowMobileMenu(false)} className={className}>
+                    {content}
+                  </Link>
+                )
+              }
+
               return (
                 <button
                   key={d.label}
-                  onClick={() => handleNavigate(d.page, d.params)}
-                  className="flex items-center gap-2.5 w-full py-2 text-left text-[13px] text-slate-600 hover:text-foreground transition-colors cursor-pointer"
+                  onClick={() => {
+                    if (d.page) handleNavigate(d.page, d.params)
+                  }}
+                  className={className}
                 >
-                  <Icon className="size-3.5 text-muted-foreground" />
-                  <span>{d.label}</span>
+                  {content}
                 </button>
               )
             })}
@@ -687,16 +801,19 @@ export function Header() {
           {/* ── Logo ── */}
           <button
             onClick={() => navigateTo('home')}
-            className="flex items-center gap-2 shrink-0"
+            className="flex flex-col items-start shrink-0 group"
           >
             <Image
               src="/logo.png"
               alt="MeriPehli Gadi"
               width={140}
               height={40}
-              className="h-8 w-auto object-contain md:h-10"
+              className="h-8 w-auto object-contain md:h-10 group-hover:opacity-90 transition-opacity"
               priority
             />
+            <span className="text-[9px] md:text-[10px] font-bold tracking-wider text-accent-orange uppercase mt-0.5 ml-1 leading-none drop-shadow-sm">
+              Powered by Shani Finserve
+            </span>
           </button>
 
           {/* ── Desktop Navigation ── */}

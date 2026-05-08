@@ -55,8 +55,17 @@ const config: Config = {
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
-  		}
+  			sm: 'calc(var(--radius) - 4px)',
+        '12': '12px',
+        '16': '16px',
+        '20': '20px'
+  		},
+      boxShadow: {
+        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+        'medium': '0 10px 30px -5px rgba(0, 0, 0, 0.08)',
+        'premium': '0 20px 40px -10px rgba(0, 0, 0, 0.12)',
+        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+      }
   	}
   },
   plugins: [tailwindcssAnimate],

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import {
   MapPin,
   Phone,
@@ -123,9 +124,46 @@ const socialLinks = [
 
 /* ─── Reusable: Link Column ────────────────────────────── */
 
-function LinkColumn({ title, links }: { title: string; links: FooterNavLink[] }) {
-  const navigateTo = useAppStore((s) => s.navigateTo)
+function getHref(page: string, params?: Record<string, string>): string {
+  switch (page) {
+    case 'home':
+      return '/'
+    case 'used-cars':
+      return '/used-cars'
+    case 'used-cars-city':
+      return `/used-cars/in/${params?.city || 'assam'}`
+    case 'used-cars-brand':
+      return `/used-cars/brand/${params?.brand || 'all'}/assam`
+    case 'used-cars-budget':
+      return `/used-cars/budget/${params?.budget || 'all'}-lakh/assam`
+    case 'car-details':
+      return `/car/${params?.id}`
+    case 'sell-car':
+      return '/sell-car'
+    case 'finance':
+      return '/finance'
+    case 'insurance':
+      return '/insurance'
+    case 'certified-cars':
+      return '/certified-cars'
+    case 'electric-cars':
+      return '/electric-cars'
+    case 'about':
+      return '/about'
+    case 'contact':
+      return '/contact'
+    case 'privacy-policy':
+      return '/privacy-policy'
+    case 'terms':
+      return '/terms'
+    case 'refund-policy':
+      return '/refund-policy'
+    default:
+      return '/'
+  }
+}
 
+function LinkColumn({ title, links }: { title: string; links: FooterNavLink[] }) {
   return (
     <div>
       <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4">
@@ -134,13 +172,14 @@ function LinkColumn({ title, links }: { title: string; links: FooterNavLink[] })
       <ul className="space-y-2">
         {links.map((link) => (
           <li key={link.label}>
-            <button
-              onClick={() => navigateTo(link.page, link.params)}
+            <Link
+              href={getHref(link.page, link.params)}
               className="group flex items-center gap-1.5 text-sm text-white/60 hover:text-accent-orange transition-colors duration-200 text-left"
+              prefetch={false}
             >
               <ChevronRight className="size-3 shrink-0 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-accent-orange" />
               {link.label}
-            </button>
+            </Link>
           </li>
         ))}
       </ul>
@@ -170,14 +209,19 @@ export function Footer() {
           ══════════════════════════════════════════════════ */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-14 pb-8">
         {/* Logo + Tagline */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-8">
-          <Image
-            src="/logo.png"
-            alt="MeriPehli Gadi"
-            width={140}
-            height={36}
-            className="h-8 w-auto object-contain brightness-0 invert"
-          />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-4 mb-8">
+          <div className="flex flex-col items-start">
+            <Image
+              src="/logo.png"
+              alt="MeriPehli Gadi"
+              width={140}
+              height={36}
+              className="h-8 w-auto object-contain brightness-0 invert"
+            />
+            <span className="text-[10px] font-bold tracking-wider text-accent-orange uppercase mt-1 ml-1 leading-none">
+              Powered by Shani Finserve
+            </span>
+          </div>
           <p className="text-sm text-white/50 italic">
             &ldquo;Har family ki pehli car ka sapna, ab aur aasaan.&rdquo;
           </p>

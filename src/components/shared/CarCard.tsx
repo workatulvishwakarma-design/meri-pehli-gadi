@@ -2,12 +2,13 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Heart, MapPin, Gauge, Fuel, Settings2, Shield } from 'lucide-react'
+import { Heart, MapPin, Gauge, Fuel, Settings2, Shield, User } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
 import Image from 'next/image'
+import Link from 'next/link'
 
 // ─── Types ──────────────────────────────────────────────────────────────
 
@@ -33,9 +34,11 @@ interface CarCardProps {
     color?: string | null
     bodyType?: string | null
     isFinanceAvailable?: boolean
+    viewsCount?: number
     dealerName?: string | null
   }
   variant?: 'default' | 'compact'
+  priority?: boolean
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────
@@ -48,6 +51,20 @@ function formatPrice(price: number): string {
     return `₹${(price / 100000).toFixed(2)} Lakh`
   }
   return `₹${price.toLocaleString('en-IN')}`
+}
+
+function capitalize(s: string): string {
+  if (!s) return ''
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
+}
+
+function formatOwner(owner: string): string {
+  if (!owner) return ''
+  const lower = owner.toLowerCase()
+  if (lower === 'first') return '1st Owner'
+  if (lower === 'second') return '2nd Owner'
+  if (lower === 'third') return '3rd Owner'
+  return '4th+ Owner'
 }
 
 function formatKm(km: number): string {
@@ -78,7 +95,7 @@ function getBadgeStyles(badge: string | null | undefined): string {
 
 // ─── Component ─────────────────────────────────────────────────────────
 
-export default function CarCard({ car, variant = 'default' }: CarCardProps) {
+export default function CarCard({ car, variant = 'default', priority = false }: CarCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false)
   const navigateTo = useAppStore((s) => s.navigateTo)
 
@@ -88,9 +105,13 @@ export default function CarCard({ car, variant = 'default' }: CarCardProps) {
   return (
     <motion.div
       whileHover={{ y: -4, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
-      className="h-full group"
+      className="h-full group relative"
     >
-      <Card className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm hover:shadow-xl transition-shadow duration-300 h-full flex flex-col p-0 gap-0">
+      <Link href={`/car/${car.id}`} className="absolute inset-0 z-0 rounded-16" prefetch={false}>
+        <span className="sr-only">View {car.title}</span>
+      </Link>
+      
+      <Card className="overflow-hidden rounded-16 border border-slate-200/80 bg-white/80 backdrop-blur-md shadow-soft hover:shadow-premium hover:bg-white transition-all duration-300 h-full flex flex-col p-0 gap-0">
         {/* ─── Image Section ─── */}
         <div className="relative overflow-hidden">
           {/* 16:10 Aspect Ratio Container */}
@@ -102,6 +123,8 @@ export default function CarCard({ car, variant = 'default' }: CarCardProps) {
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                priority={priority}
+                loading={priority ? undefined : 'lazy'}
                 unoptimized
               />
             ) : (
@@ -172,19 +195,30 @@ export default function CarCard({ car, variant = 'default' }: CarCardProps) {
             <span className="mx-1.5 text-slate-300">•</span>
             <span className="flex items-center gap-1">
               <Fuel className="size-3 text-slate-400" />
-              {car.fuelType.charAt(0).toUpperCase() + car.fuelType.slice(1)}
+              {capitalize(car.fuelType)}
             </span>
             <span className="mx-1.5 text-slate-300">•</span>
             <span className="flex items-center gap-1">
               <Settings2 className="size-3 text-slate-400" />
-              {car.transmission.charAt(0).toUpperCase() + car.transmission.slice(1)}
+              {capitalize(car.transmission)}
             </span>
           </div>
 
-          {/* Location */}
-          <div className="flex items-center gap-1 text-xs text-slate-400">
-            <MapPin className="size-3" />
-            <span>{car.city}</span>
+          {/* Location + Owner */}
+          <div className="flex items-center gap-0 text-xs text-slate-400 flex-wrap">
+            <span className="flex items-center gap-1">
+              <MapPin className="size-3" />
+              {car.city}
+            </span>
+            {car.ownerType && (
+              <>
+                <span className="mx-1.5 text-slate-200">•</span>
+                <span className="flex items-center gap-1">
+                  <User className="size-3" />
+                  {formatOwner(car.ownerType)}
+                </span>
+              </>
+            )}
           </div>
 
           {/* Spacer */}
@@ -204,11 +238,11 @@ export default function CarCard({ car, variant = 'default' }: CarCardProps) {
 
           {/* Action Buttons */}
           {!isCompact && (
-            <div className="flex gap-2 pt-1">
+            <div className="flex gap-2 pt-1 relative z-10">
               <Button
                 size="sm"
-                className="flex-1 bg-brand hover:bg-brand-light text-white text-xs h-8 rounded-lg"
-                onClick={() => navigateTo('car-details', { id: car.id })}
+                className="flex-1 bg-brand hover:bg-brand-light text-white text-xs h-8 rounded-lg pointer-events-none"
+                tabIndex={-1}
               >
                 View Details
               </Button>
@@ -218,7 +252,7 @@ export default function CarCard({ car, variant = 'default' }: CarCardProps) {
                   variant="outline"
                   className="text-xs h-8 rounded-lg border-purple-200 text-purple-600 hover:bg-purple-50"
                   onClick={(e) => {
-                    e.stopPropagation()
+                    e.preventDefault()
                     navigateTo('finance', { carId: car.id })
                   }}
                 >

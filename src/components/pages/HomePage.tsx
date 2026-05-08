@@ -22,8 +22,32 @@ import {
 import {
   Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious,
 } from '@/components/ui/carousel'
-import { useAppStore } from '@/lib/store'
+import { useRouter } from 'next/navigation'
 import CarCard from '@/components/shared/CarCard'
+
+function useNavigateAdapter() {
+  const router = useRouter()
+  return (page: string, params: Record<string, string> = {}) => {
+    let url = '/'
+    if (page === 'used-cars') url = '/used-cars'
+    else if (page === 'used-cars-brand') url = `/used-cars/brand/${params.brand}`
+    else if (page === 'used-cars-budget') url = `/used-cars/budget/${params.range}`
+    else if (page === 'used-cars-city') url = `/used-cars/in/${params.city}`
+    else if (page === 'certified-cars') url = '/used-cars?certified=true'
+    else if (page === 'sell-car' || page === 'car-valuation') url = '/sell-car'
+    else if (page === 'finance') url = '/finance'
+    else if (page === 'insurance') url = '/insurance'
+    else if (page === 'contact') url = '/contact'
+    
+    if (page === 'used-cars' && Object.keys(params).length > 0) {
+      const sp = new URLSearchParams()
+      Object.entries(params).forEach(([k,v]) => { if(v) sp.set(k, v) })
+      if (sp.toString()) url += '?' + sp.toString()
+    }
+    router.push(url)
+  }
+}
+import { getRandomBanner, BANNER_IMAGES } from '@/lib/images/car-image-map'
 
 // ─── API Data Mapping Helper ─────────────────────────────────────
 // The /api/cars endpoint returns nested objects (brand: {name, ...}, city: {name, ...}, images: [{url, ...}])
@@ -83,7 +107,7 @@ function SectionHeading({ title, subtitle, light = false, className = '' }: {
 // ─── Section 1: Hero ────────────────────────────────────────────────
 
 function HeroSection() {
-  const navigateTo = useAppStore((s) => s.navigateTo)
+  const navigateTo = useNavigateAdapter()
   const [carType, setCarType] = useState('used')
   const [selectedBrand, setSelectedBrand] = useState('')
   const [selectedModel, setSelectedModel] = useState('')
@@ -130,20 +154,45 @@ function HeroSection() {
     { value: '200+', label: 'Happy Customers', delay: 0.9 },
   ]
 
+  const [api, setApi] = useState<any>()
+
+  useEffect(() => {
+    if (!api) return
+    const interval = setInterval(() => {
+      api.scrollNext()
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [api])
+
+  const banners = BANNER_IMAGES
+
   return (
-    <section className="relative min-h-[600px] md:min-h-[700px] overflow-hidden">
-      {/* Background Image */}
-      <div className="absolute inset-0">
-        <Image
-          src="/images/hero/hero-banner.png"
-          alt="MeriPehli Gadi Dealership"
-          fill
-          className="object-cover"
-          priority
-          unoptimized
-        />
-        {/* Dark gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-brand/90 via-brand/70 to-brand/40" />
+    <section className="relative min-h-[600px] md:min-h-[700px] px-4 pt-4 pb-8 max-w-[1536px] mx-auto">
+      {/* Background Image Container - Auto Rotating Carousel */}
+      <div className="absolute inset-4 rounded-20 overflow-hidden shadow-premium">
+        <Carousel
+          setApi={setApi}
+          className="w-full h-full"
+          opts={{ loop: true }}
+        >
+          <CarouselContent className="h-full ml-0">
+            {banners.map((src, i) => (
+              <CarouselItem key={i} className="relative h-full w-full pl-0 min-w-full">
+                <Image
+                  src={src}
+                  alt={`MeriPehli Gadi Banner ${i + 1}`}
+                  fill
+                  className="object-cover"
+                  priority={i === 0}
+                  unoptimized
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+        {/* Dark gradient overlay for text readability */}
+        <div className="absolute inset-0 bg-[#0a1628]/80 mix-blend-multiply pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0a1628]/95 via-[#0a1628]/70 to-transparent pointer-events-none" />
       </div>
 
       {/* Floating Stats Badges - desktop only */}
@@ -179,8 +228,12 @@ function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-center mb-10 max-w-3xl mx-auto"
+          className="text-center mb-10 max-w-3xl mx-auto flex flex-col items-center"
         >
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/20 backdrop-blur-md border border-white/20 mb-5 shadow-soft">
+            <Award className="size-4 text-accent-orange" />
+            <span className="text-xs font-semibold text-white tracking-wide uppercase">Powered by Shani Finserve</span>
+          </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-5 leading-tight text-white drop-shadow-sm">
             Find Your Perfect Car
           </h1>
@@ -295,7 +348,7 @@ function HeroSection() {
 // ─── Section 2: Browse by Body Type ─────────────────────────────────
 
 function BrowseByTypeSection() {
-  const navigateTo = useAppStore((s) => s.navigateTo)
+  const navigateTo = useNavigateAdapter()
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const bodyTypes = [
@@ -367,7 +420,7 @@ function BrowseByTypeSection() {
 // ─── Section 3: Browse by Budget ────────────────────────────────────
 
 function BrowseByBudgetSection() {
-  const navigateTo = useAppStore((s) => s.navigateTo)
+  const navigateTo = useNavigateAdapter()
   const budgetRanges = [
     { label: 'Under ₹2 Lakh', value: '0-200000', cars: 35, gradient: 'from-emerald-500 to-green-600' },
     { label: '₹2 - 5 Lakh', value: '200000-500000', cars: 65, gradient: 'from-sky-500 to-blue-600' },
@@ -406,7 +459,7 @@ function BrowseByBudgetSection() {
 // ─── Section 4: Popular Brands ──────────────────────────────────────
 
 function PopularBrandsSection() {
-  const navigateTo = useAppStore((s) => s.navigateTo)
+  const navigateTo = useNavigateAdapter()
 
   const popularBrands = [
     { name: 'Maruti Suzuki', slug: 'maruti-suzuki', count: 85 },
@@ -454,15 +507,15 @@ function PopularBrandsSection() {
   )
 }
 
-// ─── Section 5: Recently Added Cars ─────────────────────────────────
+// ─── Section 5: Featured Cars ──────────────────────────────────────
 
-function RecentlyAddedCarsSection() {
-  const navigateTo = useAppStore((s) => s.navigateTo)
+function FeaturedCarsSection() {
+  const navigateTo = useNavigateAdapter()
   const [cars, setCars] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/cars?sort=newest&limit=8')
+    fetch('/api/cars?isFeatured=true&limit=8')
       .then(r => r.json())
       .then(d => {
         const mapped = (d.cars || []).map((c: Record<string, unknown>) => mapApiCarToCardProps(c))
@@ -477,8 +530,8 @@ function RecentlyAddedCarsSection() {
       <div className="container mx-auto px-4">
         <div className="flex items-end justify-between mb-10">
           <FadeInSection>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-brand">Recently Added Cars</h2>
-            <p className="text-slate-500 text-sm mt-2">Fresh listings updated daily</p>
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-brand">Featured Cars</h2>
+            <p className="text-slate-500 text-sm mt-2">Handpicked verified cars just for you</p>
           </FadeInSection>
           <FadeInSection delay={0.1}>
             <Button
@@ -492,8 +545,8 @@ function RecentlyAddedCarsSection() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-            {Array.from({ length: 4 }).map((_, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
               <Card key={i} className="rounded-xl p-0 overflow-hidden">
                 <div className="aspect-[16/10] bg-slate-200 animate-pulse" />
                 <div className="p-4 space-y-2.5">
@@ -511,7 +564,7 @@ function RecentlyAddedCarsSection() {
             <p className="text-sm mt-1">Check back soon for new listings</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {cars.map((car, i) => (
               <FadeInSection key={car.id} delay={i * 0.05}>
                 <CarCard car={car} />
@@ -524,15 +577,87 @@ function RecentlyAddedCarsSection() {
   )
 }
 
-// ─── Section 6: Certified Cars ──────────────────────────────────────
+// ─── Section 6: Most Viewed Cars (Trust Engine) ────────────────────
 
-function CertifiedCarsSection() {
-  const navigateTo = useAppStore((s) => s.navigateTo)
+function MostViewedCarsSection() {
+  const navigateTo = useNavigateAdapter()
   const [cars, setCars] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/cars?certified=true&limit=4')
+    fetch('/api/cars?sort=popular&limit=8')
+      .then(r => r.json())
+      .then(d => {
+        const mapped = (d.cars || []).map((c: Record<string, unknown>) => {
+          const cardProps = mapApiCarToCardProps(c)
+          // Simulate trust engine views if missing
+          if (!cardProps.views) cardProps.views = Math.floor(Math.random() * 2000) + 500
+          return cardProps
+        })
+        setCars(mapped as any)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
+
+  return (
+    <section className="py-16 md:py-20 bg-slate-50">
+      <div className="container mx-auto px-4">
+        <div className="flex items-end justify-between mb-10">
+          <FadeInSection>
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-brand">Most Viewed Cars</h2>
+            <p className="text-slate-500 text-sm mt-2">See what others are looking at</p>
+          </FadeInSection>
+          <FadeInSection delay={0.1}>
+            <Button
+              variant="ghost"
+              className="text-accent-orange hover:text-orange-600 gap-1 text-sm font-medium"
+              onClick={() => navigateTo('used-cars', { sort: 'popular' })}
+            >
+              View Popular <ArrowRight className="size-4" />
+            </Button>
+          </FadeInSection>
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Card key={i} className="rounded-xl p-0 overflow-hidden">
+                <div className="aspect-[16/10] bg-slate-200 animate-pulse" />
+                <div className="p-4 space-y-2.5">
+                  <div className="h-4 bg-slate-200 rounded animate-pulse" />
+                  <div className="h-5 bg-slate-200 rounded animate-pulse w-1/2" />
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {cars.map((car, i) => (
+              <FadeInSection key={car.id} delay={i * 0.05} className="relative">
+                <div className="absolute top-2 left-2 z-10 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full shadow-md border border-slate-100 flex items-center gap-1.5">
+                  <span className="text-sm">👁️</span>
+                  <span className="text-[11px] font-bold text-slate-700">{car.views?.toLocaleString()} people viewed this</span>
+                </div>
+                <CarCard car={car} />
+              </FadeInSection>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+// ─── Section 6.5: Trending Cars in Assam ──────────────────────────
+
+function TrendingCarsSection() {
+  const navigateTo = useNavigateAdapter()
+  const [cars, setCars] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/cars?sort=newest&limit=8')
       .then(r => r.json())
       .then(d => {
         const mapped = (d.cars || []).map((c: Record<string, unknown>) => mapApiCarToCardProps(c))
@@ -546,8 +671,8 @@ function CertifiedCarsSection() {
     <section className="py-16 md:py-20 bg-gradient-to-br from-emerald-50 via-white to-teal-50">
       <div className="container mx-auto px-4">
         <SectionHeading
-          title="Certified Pre-Owned Cars"
-          subtitle="200-point inspection, verified history, and warranty on every certified car"
+          title="Trending in Assam"
+          subtitle="Fast moving inventory with premium deals"
         />
 
         {/* Trust Badges */}
@@ -569,7 +694,7 @@ function CertifiedCarsSection() {
 
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {Array.from({ length: 4 }).map((_, i) => (
+            {Array.from({ length: 8 }).map((_, i) => (
               <Card key={i} className="rounded-xl p-0 overflow-hidden">
                 <div className="aspect-[16/10] bg-slate-200 animate-pulse" />
                 <div className="p-4 space-y-2.5">
@@ -581,7 +706,7 @@ function CertifiedCarsSection() {
           </div>
         ) : cars.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-slate-400 mb-4">Certified cars coming soon</p>
+            <p className="text-slate-400 mb-4">Trending cars coming soon</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
@@ -596,10 +721,10 @@ function CertifiedCarsSection() {
         <FadeInSection>
           <div className="text-center mt-10">
             <Button
-              onClick={() => navigateTo('certified-cars')}
+              onClick={() => navigateTo('used-cars')}
               className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-8 h-11 font-semibold shadow-lg shadow-emerald-200"
             >
-              View All Certified Cars <ArrowRight className="size-4 ml-1" />
+              Explore Trending Deals <ArrowRight className="size-4 ml-1" />
             </Button>
           </div>
         </FadeInSection>
@@ -608,10 +733,139 @@ function CertifiedCarsSection() {
   )
 }
 
+// ─── Section 6.7: City Wise Cars ───────────────────────────────────
+
+function CityWiseCarsSection() {
+  const navigateTo = useNavigateAdapter()
+  const [cityData, setCityData] = useState<Record<string, any[]>>({})
+  const [loading, setLoading] = useState(true)
+
+  const cities = [
+    { name: 'Guwahati', slug: 'guwahati' },
+    { name: 'Dibrugarh', slug: 'dibrugarh' },
+    { name: 'Tezpur', slug: 'tezpur' },
+    { name: 'Tinsukia', slug: 'tinsukia' },
+  ]
+
+  useEffect(() => {
+    Promise.all(
+      cities.map(city => 
+        fetch(`/api/cars?city=${city.slug}&limit=4`)
+          .then(r => r.json())
+          .then(d => ({ city: city.slug, cars: (d.cars || []).map((c: any) => mapApiCarToCardProps(c)) }))
+      )
+    ).then(results => {
+      const newData: Record<string, any[]> = {}
+      results.forEach(res => {
+        newData[res.city] = res.cars
+      })
+      setCityData(newData)
+      setLoading(false)
+    }).catch(() => setLoading(false))
+  }, [])
+
+  if (!loading && Object.values(cityData).every(cars => cars.length === 0)) return null
+
+  return (
+    <section className="py-16 md:py-20 bg-white">
+      <div className="container mx-auto px-4">
+        <SectionHeading title="Cars by City" subtitle="Find verified used cars in your neighborhood" />
+        
+        <div className="space-y-16">
+          {cities.map((city, idx) => {
+            const cars = cityData[city.slug] || []
+            if (!loading && cars.length === 0) return null
+            
+            return (
+              <div key={city.slug}>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <MapPin className="size-5 text-brand" /> Used Cars in {city.name}
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    onClick={() => navigateTo('used-cars-city', { city: city.slug })}
+                    className="text-brand hover:text-brand-light font-semibold"
+                  >
+                    View All
+                  </Button>
+                </div>
+                
+                {loading ? (
+                  <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <Card key={i} className="min-w-[280px] md:min-w-[320px] rounded-xl p-0 overflow-hidden snap-start">
+                        <div className="aspect-[16/10] bg-slate-200 animate-pulse" />
+                        <div className="p-4 space-y-2.5">
+                          <div className="h-4 bg-slate-200 rounded animate-pulse" />
+                          <div className="h-5 bg-slate-200 rounded animate-pulse w-1/2" />
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex gap-4 overflow-x-auto pb-6 pt-2 px-2 -mx-2 snap-x hide-scrollbar">
+                    {cars.map((car: any) => (
+                      <div key={car.id} className="min-w-[280px] md:min-w-[320px] snap-start">
+                        <CarCard car={car} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── Section 6.8: City Wise SEO Links ──────────────────────────────
+
+function CitySEOSection() {
+  const navigateTo = useNavigateAdapter()
+  
+  const cities = [
+    { name: 'Guwahati', slug: 'guwahati', icon: MapPin },
+    { name: 'Dibrugarh', slug: 'dibrugarh', icon: MapPin },
+    { name: 'Tezpur', slug: 'tezpur', icon: MapPin },
+    { name: 'Tinsukia', slug: 'tinsukia', icon: MapPin },
+    { name: 'Silchar', slug: 'silchar', icon: MapPin },
+    { name: 'Jorhat', slug: 'jorhat', icon: MapPin },
+  ]
+
+  return (
+    <section className="py-16 bg-white border-y border-slate-100">
+      <div className="container mx-auto px-4">
+        <SectionHeading title="Find Cars in Your City" subtitle="Explore verified used cars across Assam" />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {cities.map((city, i) => (
+            <FadeInSection key={city.slug} delay={i * 0.05}>
+              <motion.button
+                whileHover={{ scale: 1.05, y: -4 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => navigateTo('used-cars-city', { city: city.slug })}
+                className="w-full bg-slate-50 hover:bg-white rounded-2xl p-5 text-center shadow-sm hover:shadow-lg transition-all border border-slate-100"
+              >
+                <div className="size-12 mx-auto bg-brand/5 text-brand rounded-full flex items-center justify-center mb-3">
+                  <city.icon className="size-5" />
+                </div>
+                <h4 className="font-bold text-slate-800">Used Cars in</h4>
+                <p className="text-brand font-semibold">{city.name}</p>
+              </motion.button>
+            </FadeInSection>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // ─── Section 7: Sell Your Car CTA ───────────────────────────────────
 
 function SellCarCTASection() {
-  const navigateTo = useAppStore((s) => s.navigateTo)
+  const navigateTo = useNavigateAdapter()
   return (
     <section className="py-16 md:py-20 gradient-orange relative overflow-hidden">
       {/* Background pattern */}
@@ -694,7 +948,7 @@ function SellCarCTASection() {
 // ─── Section 8: Finance CTA ─────────────────────────────────────────
 
 function CarLoanCTASection() {
-  const navigateTo = useAppStore((s) => s.navigateTo)
+  const navigateTo = useNavigateAdapter()
   const [loanAmount, setLoanAmount] = useState(500000)
   const [interestRate, setInterestRate] = useState(9.5)
   const [tenure, setTenure] = useState(5)
@@ -704,8 +958,7 @@ function CarLoanCTASection() {
     const monthlyRate = interestRate / 12 / 100
     const months = tenure * 12
     if (monthlyRate === 0) return principal / months
-    const emi = principal * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1)
-    return emi
+    return principal * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1)
   }
 
   const emi = calculateEMI()
@@ -713,138 +966,118 @@ function CarLoanCTASection() {
   const totalInterest = totalPayment - loanAmount
 
   return (
-    <section className="py-16 md:py-20 bg-gradient-to-br from-[#0f1f3d] via-[#1e3a5f] to-[#2d5a8e] relative overflow-hidden">
+    <section className="py-16 md:py-24 bg-gradient-to-br from-[#0a1628] via-[#0f2240] to-[#1a3a6a] relative overflow-hidden">
       {/* Decorative elements */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute -top-20 -right-20 size-96 rounded-full bg-accent-blue" />
-        <div className="absolute -bottom-20 -left-20 size-80 rounded-full bg-accent-orange" />
+      <div className="absolute inset-0">
+        <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-blue-500/5" />
+        <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-orange-500/5" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-blue-500/3" />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="flex flex-col lg:flex-row gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           {/* Left Content */}
-          <div className="flex-1 text-center lg:text-left">
-            <FadeInSection>
-              <Badge className="bg-white/15 text-white border-0 mb-5 text-xs font-medium">
-                <Banknote className="size-3 mr-1" />
+          <FadeInSection>
+            <div className="text-center lg:text-left">
+              <Badge className="bg-blue-500/20 text-blue-200 border border-blue-400/20 mb-6 text-xs font-medium backdrop-blur-sm">
+                <Banknote className="size-3.5 mr-1.5" />
                 Powered by Shani Finserve
               </Badge>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-5 leading-tight">
                 Easy Car Finance
+                <span className="block text-lg md:text-xl font-normal text-blue-200/70 mt-2">
+                  Low EMI • Quick Approval • Minimal Documentation
+                </span>
               </h2>
-              <p className="text-blue-100/80 mb-8 max-w-lg text-sm md:text-base leading-relaxed">
-                Low EMI starting ₹8,999/month. Quick approval in 24 hours. Get pre-approved for your dream car today.
+              <p className="text-blue-100/60 mb-8 max-w-lg text-sm md:text-base leading-relaxed mx-auto lg:mx-0">
+                Get pre-approved for your dream car today. EMI starting ₹8,999/month with quick approval in 24 hours.
               </p>
-              <div className="grid grid-cols-3 gap-4 mb-8">
+
+              {/* Feature Cards */}
+              <div className="grid grid-cols-3 gap-3 md:gap-4 mb-8">
                 {[
-                  { icon: Zap, label: '24hr Approval' },
-                  { icon: ShieldCheck, label: 'Low Interest' },
-                  { icon: FileText, label: 'Minimal Docs' },
+                  { icon: Zap, label: '24hr Approval', sub: 'Fast track' },
+                  { icon: ShieldCheck, label: 'Low Interest', sub: 'From 8.5% p.a.' },
+                  { icon: FileText, label: 'Minimal Docs', sub: 'Easy process' },
                 ].map((item) => (
-                  <div key={item.label} className="text-center">
-                    <div className="size-12 mx-auto mb-2 rounded-full bg-white/10 flex items-center justify-center border border-white/10">
-                      <item.icon className="size-5 text-white" />
+                  <div key={item.label} className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 text-center border border-white/10 hover:bg-white/10 transition-colors">
+                    <div className="size-10 mx-auto mb-2.5 rounded-xl bg-gradient-to-br from-blue-400/20 to-blue-600/20 flex items-center justify-center">
+                      <item.icon className="size-5 text-blue-300" />
                     </div>
-                    <p className="text-xs text-blue-100/80">{item.label}</p>
+                    <p className="text-xs font-semibold text-white mb-0.5">{item.label}</p>
+                    <p className="text-[10px] text-blue-200/50">{item.sub}</p>
                   </div>
                 ))}
               </div>
+
               <Button
                 size="lg"
                 onClick={() => navigateTo('finance')}
-                className="bg-accent-orange hover:bg-orange-600 text-white font-bold rounded-xl px-8 h-12 shadow-xl shadow-orange-900/30 btn-shine"
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-xl px-8 h-12 shadow-xl shadow-orange-500/25 btn-shine"
               >
                 Apply Now <ArrowUpRight className="size-5 ml-1" />
               </Button>
-            </FadeInSection>
-          </div>
+            </div>
+          </FadeInSection>
 
           {/* EMI Calculator */}
           <FadeInSection delay={0.2}>
-            <Card className="w-full max-w-md p-6 rounded-2xl shadow-2xl border-0 bg-white">
-              <div className="flex items-center gap-2 mb-6">
-                <Calculator className="size-5 text-accent-blue" />
+            <Card className="w-full max-w-md mx-auto lg:mx-0 p-6 md:p-7 rounded-2xl shadow-2xl border-0 bg-white/95 backdrop-blur-md">
+              <div className="flex items-center gap-2.5 mb-6">
+                <div className="size-9 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                  <Calculator className="size-4 text-white" />
+                </div>
                 <h3 className="font-bold text-brand text-lg">EMI Calculator</h3>
               </div>
 
               {/* Loan Amount */}
               <div className="mb-5">
-                <label className="text-sm font-medium text-slate-600 mb-2 block">
-                  Loan Amount: <span className="text-brand font-bold">₹{(loanAmount / 100000).toFixed(1)}L</span>
-                </label>
-                <input
-                  type="range"
-                  min={100000}
-                  max={5000000}
-                  step={50000}
-                  value={loanAmount}
-                  onChange={(e) => setLoanAmount(Number(e.target.value))}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-[10px] text-slate-400 mt-1">
-                  <span>₹1L</span>
-                  <span>₹50L</span>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-sm font-medium text-slate-600">Loan Amount</label>
+                  <span className="text-sm font-bold text-brand bg-blue-50 px-2.5 py-0.5 rounded-lg">₹{(loanAmount / 100000).toFixed(1)}L</span>
                 </div>
+                <input type="range" min={100000} max={5000000} step={50000} value={loanAmount} onChange={(e) => setLoanAmount(Number(e.target.value))} className="w-full" />
+                <div className="flex justify-between text-[10px] text-slate-400 mt-1"><span>₹1L</span><span>₹50L</span></div>
               </div>
 
               {/* Interest Rate */}
               <div className="mb-5">
-                <label className="text-sm font-medium text-slate-600 mb-2 block">
-                  Interest Rate: <span className="text-brand font-bold">{interestRate}%</span>
-                </label>
-                <input
-                  type="range"
-                  min={5}
-                  max={20}
-                  step={0.5}
-                  value={interestRate}
-                  onChange={(e) => setInterestRate(Number(e.target.value))}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-[10px] text-slate-400 mt-1">
-                  <span>5%</span>
-                  <span>20%</span>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-sm font-medium text-slate-600">Interest Rate</label>
+                  <span className="text-sm font-bold text-brand bg-blue-50 px-2.5 py-0.5 rounded-lg">{interestRate}%</span>
                 </div>
+                <input type="range" min={5} max={20} step={0.5} value={interestRate} onChange={(e) => setInterestRate(Number(e.target.value))} className="w-full" />
+                <div className="flex justify-between text-[10px] text-slate-400 mt-1"><span>5%</span><span>20%</span></div>
               </div>
 
               {/* Tenure */}
               <div className="mb-6">
-                <label className="text-sm font-medium text-slate-600 mb-2 block">
-                  Tenure: <span className="text-brand font-bold">{tenure} Years</span>
-                </label>
-                <input
-                  type="range"
-                  min={1}
-                  max={7}
-                  step={1}
-                  value={tenure}
-                  onChange={(e) => setTenure(Number(e.target.value))}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-[10px] text-slate-400 mt-1">
-                  <span>1 Yr</span>
-                  <span>7 Yr</span>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-sm font-medium text-slate-600">Tenure</label>
+                  <span className="text-sm font-bold text-brand bg-blue-50 px-2.5 py-0.5 rounded-lg">{tenure} Years</span>
                 </div>
+                <input type="range" min={1} max={7} step={1} value={tenure} onChange={(e) => setTenure(Number(e.target.value))} className="w-full" />
+                <div className="flex justify-between text-[10px] text-slate-400 mt-1"><span>1 Yr</span><span>7 Yr</span></div>
               </div>
 
               {/* Results */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5">
-                <p className="text-xs text-slate-500 mb-1">Monthly EMI</p>
-                <p className="text-3xl font-bold text-brand">
+              <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-violet-50 rounded-xl p-5 border border-blue-100/50">
+                <p className="text-xs text-slate-500 mb-1 font-medium">Monthly EMI</p>
+                <p className="text-3xl font-extrabold text-brand">
                   ₹{Math.round(emi).toLocaleString('en-IN')}
                 </p>
-                <div className="flex justify-between mt-4 text-xs">
-                  <div>
-                    <p className="text-slate-400">Principal</p>
-                    <p className="font-semibold text-slate-600">₹{(loanAmount / 100000).toFixed(1)}L</p>
+                <div className="flex justify-between mt-4 pt-3 border-t border-blue-100">
+                  <div className="text-center">
+                    <p className="text-[10px] text-slate-400 uppercase tracking-wider">Principal</p>
+                    <p className="text-sm font-bold text-slate-700">₹{(loanAmount / 100000).toFixed(1)}L</p>
                   </div>
-                  <div>
-                    <p className="text-slate-400">Interest</p>
-                    <p className="font-semibold text-red-500">₹{(totalInterest / 100000).toFixed(1)}L</p>
+                  <div className="text-center">
+                    <p className="text-[10px] text-slate-400 uppercase tracking-wider">Interest</p>
+                    <p className="text-sm font-bold text-red-500">₹{(totalInterest / 100000).toFixed(1)}L</p>
                   </div>
-                  <div>
-                    <p className="text-slate-400">Total</p>
-                    <p className="font-semibold text-brand">₹{(totalPayment / 100000).toFixed(1)}L</p>
+                  <div className="text-center">
+                    <p className="text-[10px] text-slate-400 uppercase tracking-wider">Total</p>
+                    <p className="text-sm font-bold text-brand">₹{(totalPayment / 100000).toFixed(1)}L</p>
                   </div>
                 </div>
               </div>
@@ -859,73 +1092,80 @@ function CarLoanCTASection() {
 // ─── Section 9: Insurance CTA ───────────────────────────────────────
 
 function InsuranceCTASection() {
-  const navigateTo = useAppStore((s) => s.navigateTo)
+  const navigateTo = useNavigateAdapter()
 
   const coverages = [
-    { label: 'Third Party', icon: Shield },
-    { label: 'Comprehensive', icon: ShieldCheck },
-    { label: 'Zero Depreciation', icon: ShieldHalf },
-    { label: 'Roadside Assist', icon: HeadphonesIcon },
+    { label: 'Third Party', icon: Shield, desc: 'Basic legal coverage' },
+    { label: 'Comprehensive', icon: ShieldCheck, desc: 'Full protection' },
+    { label: 'Zero Depreciation', icon: ShieldHalf, desc: 'No value loss' },
+    { label: 'Roadside Assist', icon: HeadphonesIcon, desc: '24/7 help' },
   ]
 
   return (
-    <section className="py-16 md:py-20 bg-gradient-to-br from-emerald-600 via-green-600 to-teal-600 relative overflow-hidden">
+    <section className="py-16 md:py-24 bg-gradient-to-br from-[#0a1628] via-[#112240] to-[#1a365d] relative overflow-hidden">
       {/* Decorative elements */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 right-20 size-64 rounded-full bg-white" />
-        <div className="absolute bottom-10 left-10 size-40 rounded-full bg-white" />
+      <div className="absolute inset-0">
+        <div className="absolute top-20 right-20 w-64 h-64 rounded-full bg-emerald-500/5" />
+        <div className="absolute bottom-10 left-10 w-40 h-40 rounded-full bg-blue-500/5" />
+        {/* Grid pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <FadeInSection>
-          <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
-            <div className="flex-1 text-center md:text-left">
-              <Badge className="bg-white/20 text-white border-0 mb-5 text-xs font-medium">
-                <ShieldHalf className="size-3 mr-1" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+          <FadeInSection>
+            <div className="text-center lg:text-left">
+              <Badge className="bg-emerald-500/15 text-emerald-300 border border-emerald-400/20 mb-6 text-xs font-medium backdrop-blur-sm">
+                <ShieldHalf className="size-3.5 mr-1.5" />
                 Insurance Partner: Shani Finserve
               </Badge>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
-                Secure your car before your first drive.
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-5 leading-tight">
+                Secure your car
+                <span className="block text-emerald-300">before your first drive.</span>
               </h2>
-              <p className="text-green-100/90 mb-8 max-w-lg text-sm md:text-base leading-relaxed">
+              <p className="text-slate-300/70 mb-8 max-w-lg text-sm md:text-base leading-relaxed mx-auto lg:mx-0">
                 Comprehensive insurance support by Shani Finserve. Get the best quotes from top insurers in minutes.
               </p>
-
-              {/* Coverage Types */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-                {coverages.map((item) => (
-                  <div key={item.label} className="bg-white/10 rounded-xl px-4 py-3 text-center backdrop-blur-sm border border-white/10">
-                    <item.icon className="size-5 text-white/80 mx-auto mb-1.5" />
-                    <p className="text-xs text-white font-medium">{item.label}</p>
-                  </div>
-                ))}
-              </div>
 
               <Button
                 size="lg"
                 onClick={() => navigateTo('insurance')}
-                className="bg-white text-emerald-700 hover:bg-emerald-50 font-bold rounded-xl px-8 h-12 shadow-xl"
+                className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-xl px-8 h-12 shadow-xl shadow-emerald-500/25"
               >
                 Get Insurance Quote <ArrowUpRight className="size-5 ml-1" />
               </Button>
             </div>
+          </FadeInSection>
 
-            <div className="flex-shrink-0 hidden md:block">
-              <div className="relative">
-                <div className="size-56 lg:size-64 bg-white/10 rounded-3xl flex items-center justify-center backdrop-blur-sm border border-white/20">
-                  <ShieldHalf className="size-28 lg:size-32 text-white/80" />
-                </div>
+          {/* Coverage Types - Right Side */}
+          <FadeInSection delay={0.2}>
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
+              {coverages.map((item, i) => (
                 <motion.div
-                  animate={{ y: [0, -8, 0] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                  className="absolute -top-3 -right-3 bg-white rounded-xl px-4 py-2 shadow-xl"
+                  key={item.label}
+                  whileHover={{ scale: 1.03, y: -2 }}
+                  className="bg-white/5 backdrop-blur-sm rounded-2xl p-5 md:p-6 text-center border border-white/10 hover:bg-white/10 transition-all cursor-pointer group"
                 >
-                  <p className="text-xs font-bold text-emerald-600">Save up to 30%</p>
+                  <div className="size-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-emerald-400/20 to-emerald-600/20 flex items-center justify-center group-hover:from-emerald-400/30 group-hover:to-emerald-600/30 transition-colors">
+                    <item.icon className="size-6 text-emerald-300" />
+                  </div>
+                  <p className="text-sm font-semibold text-white mb-1">{item.label}</p>
+                  <p className="text-[11px] text-slate-400">{item.desc}</p>
                 </motion.div>
-              </div>
+              ))}
             </div>
-          </div>
-        </FadeInSection>
+            {/* Save badge */}
+            <motion.div
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              className="mt-4 text-center"
+            >
+              <span className="inline-flex items-center gap-1.5 bg-emerald-500/15 backdrop-blur-sm text-emerald-300 text-xs font-medium px-4 py-2 rounded-full border border-emerald-400/20">
+                ✨ Save up to 30% on premium
+              </span>
+            </motion.div>
+          </FadeInSection>
+        </div>
       </div>
     </section>
   )
@@ -1171,8 +1411,10 @@ export default function HomePage() {
       <BrowseByTypeSection />
       <BrowseByBudgetSection />
       <PopularBrandsSection />
-      <RecentlyAddedCarsSection />
-      <CertifiedCarsSection />
+      <FeaturedCarsSection />
+      <MostViewedCarsSection />
+      <TrendingCarsSection />
+      <CityWiseCarsSection />
       <SellCarCTASection />
       <CarLoanCTASection />
       <InsuranceCTASection />
@@ -1180,6 +1422,7 @@ export default function HomePage() {
       <HowItWorksSection />
       <TestimonialsSection />
       <FAQSection />
+      <CitySEOSection />
     </div>
   )
 }

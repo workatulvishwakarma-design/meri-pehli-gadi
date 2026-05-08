@@ -3,7 +3,7 @@ import { db } from '@/lib/db'
 import { getUserFromRequest } from '@/lib/auth'
 import { z } from 'zod'
 
-// PATCH /api/leads/[id] - Update lead status
+// PATCH /api/leads/[id] - Update lead status, agent assignment, with activity tracking
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -19,6 +19,12 @@ export async function PATCH(
 
     const updateLeadSchema = z.object({
       status: z.enum(['NEW', 'CONTACTED', 'QUALIFIED', 'CONVERTED', 'LOST']).optional(),
+      assignedAgentId: z.string().optional(),
+      activity: z.object({
+        action: z.string(),
+        details: z.string().optional(),
+        authorName: z.string().optional(),
+      }).optional(),
     })
 
     const data = updateLeadSchema.parse(body)
@@ -28,14 +34,36 @@ export async function PATCH(
       return NextResponse.json({ error: 'Lead not found' }, { status: 404 })
     }
 
+    // Build update payload
+    const updateData: any = {}
+    if (data.status) updateData.status = data.status
+    if (data.assignedAgentId) updateData.assignedAgentId = data.assignedAgentId
+
     const lead = await db.lead.update({
       where: { id },
-      data,
+      data: updateData,
       include: {
         car: { select: { id: true, title: true, price: true } },
         user: { select: { id: true, name: true, email: true } },
       },
     })
+
+    // Create activity record if provided
+    if (data.activity) {
+      try {
+        await (db as any).leadActivity.create({
+          data: {
+            leadId: id,
+            action: data.activity.action,
+            details: data.activity.details || null,
+            authorName: data.activity.authorName || null,
+            authorId: (user as any).id || null,
+          },
+        })
+      } catch {
+        // Activity tracking is non-critical, don't fail the request
+      }
+    }
 
     return NextResponse.json({ lead })
   } catch (error) {

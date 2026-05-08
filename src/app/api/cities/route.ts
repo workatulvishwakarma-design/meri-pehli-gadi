@@ -5,6 +5,7 @@ import { db } from '@/lib/db'
 export async function GET() {
   try {
     const cities = await db.city.findMany({
+      where: { state: 'Assam' },  // HARD RULE: Assam-only cities
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
       include: {
         _count: {
