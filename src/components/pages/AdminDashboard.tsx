@@ -263,7 +263,7 @@ const sidebarGroups: { title: string; items: SidebarItem[] }[] = [
 // ═══════════════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════
-export function AdminDashboard() {
+export default function AdminDashboard() {
   const { setShowAuthModal } = useAppStore()
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
