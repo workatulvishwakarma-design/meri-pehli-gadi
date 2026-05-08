@@ -509,12 +509,13 @@ function PopularBrandsSection() {
 
 // ─── Section 5: Featured Cars ──────────────────────────────────────
 
-function FeaturedCarsSection() {
+function FeaturedCarsSection({ initialCars }: { initialCars?: any[] }) {
   const navigateTo = useNavigateAdapter()
-  const [cars, setCars] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [cars, setCars] = useState<any[]>(initialCars || [])
+  const [loading, setLoading] = useState(!initialCars || initialCars.length === 0)
 
   useEffect(() => {
+    if (initialCars && initialCars.length > 0) return
     fetch('/api/cars?isFeatured=true&limit=8')
       .then(r => r.json())
       .then(d => {
@@ -523,7 +524,7 @@ function FeaturedCarsSection() {
         setLoading(false)
       })
       .catch(() => setLoading(false))
-  }, [])
+  }, [initialCars])
 
   return (
     <section className="py-16 md:py-20 gradient-hero">
@@ -579,26 +580,31 @@ function FeaturedCarsSection() {
 
 // ─── Section 6: Most Viewed Cars (Trust Engine) ────────────────────
 
-function MostViewedCarsSection() {
+function MostViewedCarsSection({ initialCars }: { initialCars?: any[] }) {
   const navigateTo = useNavigateAdapter()
-  const [cars, setCars] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const hasSSR = initialCars && initialCars.length > 0
+  const [cars, setCars] = useState<any[]>(
+    hasSSR
+      ? initialCars.map((c: any) => ({ ...c, views: c.viewsCount || c.views || 1000 }))
+      : []
+  )
+  const [loading, setLoading] = useState(!hasSSR)
 
   useEffect(() => {
+    if (hasSSR) return
     fetch('/api/cars?sort=popular&limit=8')
       .then(r => r.json())
       .then(d => {
         const mapped = (d.cars || []).map((c: Record<string, unknown>) => {
           const cardProps = mapApiCarToCardProps(c)
-          // Simulate trust engine views if missing
-          if (!cardProps.views) cardProps.views = Math.floor(Math.random() * 2000) + 500
+          if (!cardProps.views) cardProps.views = (cardProps.viewsCount || 1000)
           return cardProps
         })
         setCars(mapped as any)
         setLoading(false)
       })
       .catch(() => setLoading(false))
-  }, [])
+  }, [hasSSR])
 
   return (
     <section className="py-16 md:py-20 bg-slate-50">
@@ -651,12 +657,13 @@ function MostViewedCarsSection() {
 
 // ─── Section 6.5: Trending Cars in Assam ──────────────────────────
 
-function TrendingCarsSection() {
+function TrendingCarsSection({ initialCars }: { initialCars?: any[] }) {
   const navigateTo = useNavigateAdapter()
-  const [cars, setCars] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [cars, setCars] = useState<any[]>(initialCars || [])
+  const [loading, setLoading] = useState(!initialCars || initialCars.length === 0)
 
   useEffect(() => {
+    if (initialCars && initialCars.length > 0) return
     fetch('/api/cars?sort=newest&limit=8')
       .then(r => r.json())
       .then(d => {
@@ -665,7 +672,7 @@ function TrendingCarsSection() {
         setLoading(false)
       })
       .catch(() => setLoading(false))
-  }, [])
+  }, [initialCars])
 
   return (
     <section className="py-16 md:py-20 bg-gradient-to-br from-emerald-50 via-white to-teal-50">
@@ -735,10 +742,11 @@ function TrendingCarsSection() {
 
 // ─── Section 6.7: City Wise Cars ───────────────────────────────────
 
-function CityWiseCarsSection() {
+function CityWiseCarsSection({ initialCityData }: { initialCityData?: Record<string, any[]> }) {
   const navigateTo = useNavigateAdapter()
-  const [cityData, setCityData] = useState<Record<string, any[]>>({})
-  const [loading, setLoading] = useState(true)
+  const hasSSR = initialCityData && Object.keys(initialCityData).length > 0
+  const [cityData, setCityData] = useState<Record<string, any[]>>(initialCityData || {})
+  const [loading, setLoading] = useState(!hasSSR)
 
   const cities = [
     { name: 'Guwahati', slug: 'guwahati' },
@@ -748,6 +756,7 @@ function CityWiseCarsSection() {
   ]
 
   useEffect(() => {
+    if (hasSSR) return
     Promise.all(
       cities.map(city => 
         fetch(`/api/cars?city=${city.slug}&limit=4`)
@@ -762,7 +771,7 @@ function CityWiseCarsSection() {
       setCityData(newData)
       setLoading(false)
     }).catch(() => setLoading(false))
-  }, [])
+  }, [hasSSR])
 
   if (!loading && Object.values(cityData).every(cars => cars.length === 0)) return null
 
@@ -1404,17 +1413,25 @@ function FAQSection() {
 
 // ─── Main HomePage Component ────────────────────────────────────────
 
-export default function HomePage() {
+interface HomePageProps {
+  ssrData?: {
+    featuredCars: any[]
+    trendingCars: any[]
+    cityData: Record<string, any[]>
+  }
+}
+
+export default function HomePage({ ssrData }: HomePageProps) {
   return (
     <div className="page-enter">
       <HeroSection />
       <BrowseByTypeSection />
       <BrowseByBudgetSection />
       <PopularBrandsSection />
-      <FeaturedCarsSection />
-      <MostViewedCarsSection />
-      <TrendingCarsSection />
-      <CityWiseCarsSection />
+      <FeaturedCarsSection initialCars={ssrData?.featuredCars} />
+      <MostViewedCarsSection initialCars={ssrData?.featuredCars} />
+      <TrendingCarsSection initialCars={ssrData?.trendingCars} />
+      <CityWiseCarsSection initialCityData={ssrData?.cityData} />
       <SellCarCTASection />
       <CarLoanCTASection />
       <InsuranceCTASection />

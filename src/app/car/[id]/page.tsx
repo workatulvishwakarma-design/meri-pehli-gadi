@@ -11,9 +11,7 @@ import CarCard from '@/components/shared/CarCard'
 export const revalidate = 3600
 
 interface PageProps {
-  params: {
-    id: string
-  }
+  params: Promise<{ id: string }>
 }
 
 async function getCar(id: string) {
@@ -47,7 +45,8 @@ async function getCar(id: string) {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const car = await getCar(params.id)
+  const p = await params
+  const car = await getCar(p.id)
   
   if (!car) {
     return { title: 'Car Not Found | MeriPehli Gadi' }
@@ -60,7 +59,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function CarDetailsPage({ params }: PageProps) {
-  const car = await getCar(params.id)
+  const p = await params
+  const car = await getCar(p.id)
 
   if (!car) {
     notFound()
@@ -158,7 +158,7 @@ export default async function CarDetailsPage({ params }: PageProps) {
 
               <InspectionReport score={car.conditionScore || 95} isCertified={car.isCertified} />
 
-              <div className="bg-white p-6 rounded-16 shadow-soft border border-slate-200/80 prose max-w-none">
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 prose max-w-none">
                 <h3 className="text-xl font-bold text-slate-800 mb-4">Why buy this {car.brand?.name || 'Car'}?</h3>
                 <p className="text-slate-600 leading-relaxed">
                   This {car.year} {car.title} is an excellent choice for navigating the diverse terrains of Assam, from Guwahati's city traffic to the highways of Dibrugarh. 
@@ -174,21 +174,21 @@ export default async function CarDetailsPage({ params }: PageProps) {
               <div className="sticky top-24 space-y-6">
                 
                 {/* Price Card */}
-                <div className="bg-white p-6 rounded-16 shadow-premium border border-slate-100 relative overflow-hidden">
+                <div className="bg-white p-6 rounded-2xl shadow-lg border border-slate-100 relative overflow-hidden">
                   <div className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">Asking Price</div>
                   <div className="text-4xl font-extrabold text-brand mb-4">
                     ₹{car.price.toLocaleString('en-IN')}
                   </div>
                   
                   <div className="flex flex-col gap-3">
-                    <button className="w-full bg-brand hover:bg-brand/90 text-white font-bold py-4 rounded-12 shadow-lg transition-transform active:scale-95">
+                    <button className="w-full bg-brand hover:bg-brand/90 text-white font-bold py-4 rounded-xl shadow-lg transition-transform active:scale-95">
                       Book Test Drive
                     </button>
                     <div className="flex gap-3">
-                      <button className="flex-1 bg-green-50 hover:bg-green-100 text-green-700 font-bold py-3 rounded-12 border border-green-200 transition-colors">
+                      <button className="flex-1 bg-green-50 hover:bg-green-100 text-green-700 font-bold py-3 rounded-xl border border-green-200 transition-colors">
                         WhatsApp
                       </button>
-                      <button className="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-3 rounded-12 border border-slate-200 transition-colors">
+                      <button className="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-3 rounded-xl border border-slate-200 transition-colors">
                         Call Seller
                       </button>
                     </div>

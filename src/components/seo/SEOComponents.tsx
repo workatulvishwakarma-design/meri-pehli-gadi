@@ -39,11 +39,15 @@ import { useAppStore } from '@/lib/store'
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface QuickAnswerBoxProps {
-  answer: string
+  answer?: string
+  text?: string
   className?: string
 }
 
-export function QuickAnswerBox({ answer, className }: QuickAnswerBoxProps) {
+export function QuickAnswerBox({ answer, text, className }: QuickAnswerBoxProps) {
+  const content = answer || text || ''
+  if (!content) return null
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -62,7 +66,7 @@ export function QuickAnswerBox({ answer, className }: QuickAnswerBoxProps) {
         Quick Answer
       </Badge>
       <p className="text-sm sm:text-base leading-relaxed text-white/95 font-medium">
-        {answer}
+        {content}
       </p>
     </motion.div>
   )
@@ -127,10 +131,11 @@ const TRUST_ITEMS = [
 ]
 
 interface LocalTrustBlockProps {
+  cityName?: string
   className?: string
 }
 
-export function LocalTrustBlock({ className }: LocalTrustBlockProps) {
+export function LocalTrustBlock({ cityName, className }: LocalTrustBlockProps) {
   return (
     <motion.section
       initial={{ opacity: 0, y: 16 }}
@@ -145,7 +150,7 @@ export function LocalTrustBlock({ className }: LocalTrustBlockProps) {
           Why Trust Us
         </Badge>
         <h2 className="text-xl sm:text-2xl font-bold text-foreground">
-          Trusted by Assam Car Buyers
+          Trusted by {cityName || 'Assam'} Car Buyers
         </h2>
         <p className="text-sm text-muted-foreground mt-1 max-w-xl mx-auto">
           Every listing is verified with local support, transparent pricing and end-to-end guidance.
@@ -716,16 +721,25 @@ export function StepByStepGuide({
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface AIReadableSummaryProps {
-  text: string
+  text?: string
+  title?: string
+  totalCars?: number
+  brands?: string[]
+  budgetRanges?: string[]
 }
 
-export function AIReadableSummary({ text }: AIReadableSummaryProps) {
-  if (!text) return null
+export function AIReadableSummary({ text, title, totalCars, brands, budgetRanges }: AIReadableSummaryProps) {
+  // Build summary from structured data if text is not provided
+  const summaryText = text || (title
+    ? `${title}: ${totalCars || 0}+ verified used cars available.${brands ? ` Popular brands: ${brands.join(', ')}.` : ''}${budgetRanges ? ` Budget ranges: ${budgetRanges.join(', ')}.` : ''} Powered by MeriPehli Gadi and Shani Finserve.`
+    : '')
+
+  if (!summaryText) return null
 
   return (
     <div className="sr-only" aria-hidden="true" data-ai-summary>
       <h2>Summary for AI</h2>
-      <p>{text}</p>
+      <p>{summaryText}</p>
     </div>
   )
 }

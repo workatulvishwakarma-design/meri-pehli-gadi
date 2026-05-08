@@ -63,6 +63,16 @@ interface AppState {
   setShowMobileMenu: (show: boolean) => void
 }
 
+// SSR-safe localStorage access helper
+function getSavedCity(): string {
+  if (typeof window === 'undefined') return 'dibrugarh'
+  try {
+    return localStorage.getItem('meripehli-city') || 'dibrugarh'
+  } catch {
+    return 'dibrugarh'
+  }
+}
+
 export const useAppStore = create<AppState>((set, get) => ({
   // Navigation
   currentPage: 'home',
@@ -79,7 +89,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         window.location.href = `/used-cars/brand/${params.brand}/assam`
         return
       }
-      if (page === 'used-cars-budget' && params.budget || params.range) {
+      if ((page === 'used-cars-budget' && params.budget) || params.range) {
         const budgetVal = params.budget || params.range
         window.location.href = `/used-cars/budget/${budgetVal}/assam`
         return
@@ -99,6 +109,24 @@ export const useAppStore = create<AppState>((set, get) => ({
         window.location.href = url
         return
       }
+      if (page === 'finance') {
+        const qp = new URLSearchParams()
+        if (params.carId) qp.set('carId', params.carId)
+        window.location.href = `/finance${qp.toString() ? '?' + qp.toString() : ''}`
+        return
+      }
+      if (page === 'insurance') {
+        window.location.href = '/insurance'
+        return
+      }
+      if (page === 'sell-car' || page === 'car-valuation') {
+        window.location.href = '/sell-car'
+        return
+      }
+      if (page === 'contact') {
+        window.location.href = '/contact'
+        return
+      }
     }
 
     const state = get()
@@ -108,7 +136,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       pageParams: params,
       showMobileMenu: false,
     })
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   },
   goBack: () => {
     const state = get()
@@ -117,19 +147,20 @@ export const useAppStore = create<AppState>((set, get) => ({
         currentPage: state.previousPage,
         previousPage: null,
       })
-      window.scrollTo({ top: 0, behavior: 'smooth' })
     } else {
       set({ currentPage: 'home' })
+    }
+    if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   },
 
-  // City
-  selectedCity: typeof window !== 'undefined'
-    ? (localStorage.getItem('meripehli-city') || 'dibrugarh')
-    : 'dibrugarh',
+  // City — SSR-safe initialization
+  selectedCity: 'dibrugarh',
   setSelectedCity: (city) => {
-    localStorage.setItem('meripehli-city', city)
+    if (typeof window !== 'undefined') {
+      try { localStorage.setItem('meripehli-city', city) } catch {}
+    }
     set({ selectedCity: city, showCityModal: false })
   },
   showCityModal: false,
