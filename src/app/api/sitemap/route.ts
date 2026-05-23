@@ -40,17 +40,17 @@ export async function GET() {
 
   // ─── Used Cars in Cities (22 cities) ─────────────────
   for (const city of ASSAM_CITIES) {
-    urls.push(entry(`used-cars-in-${city.slug}`, 'weekly', '0.9'))
+    urls.push(entry(`used-cars/in/${city.slug}`, 'weekly', '0.9'))
   }
 
   // ─── Used Cars by Brand (15 brands) ──────────────────
   for (const brand of CAR_BRANDS) {
-    urls.push(entry(`${brand.slug}-cars-in-assam`, 'weekly', '0.8'))
+    urls.push(entry(`used-cars/brand/${brand.slug}/assam`, 'weekly', '0.8'))
   }
 
   // ─── Used Cars by Budget (8 ranges) ──────────────────
   for (const budget of BUDGET_RANGES) {
-    urls.push(entry(`used-cars-${budget.slug}-in-assam`, 'weekly', '0.8'))
+    urls.push(entry(`used-cars/budget/${budget.slug}/assam`, 'weekly', '0.8'))
   }
 
   // ─── Finance Pages (5 pages) ─────────────────────────
@@ -70,17 +70,17 @@ export async function GET() {
 
   // ─── Fuel Type Pages (5 types) ───────────────────────
   for (const fuel of FUEL_SLUGS) {
-    urls.push(entry(`${fuel}-cars-in-assam`, 'weekly', '0.7'))
+    urls.push(entry(`used-cars/fuel/${fuel}/assam`, 'weekly', '0.7'))
   }
 
   // ─── Body Type Pages (8 types) ───────────────────────
   for (const body of BODY_SLUGS) {
-    urls.push(entry(`${body}-cars-in-assam`, 'weekly', '0.7'))
+    urls.push(entry(`used-cars/type/${body}/assam`, 'weekly', '0.7'))
   }
 
   // ─── Transmission Pages (2 types) ────────────────────
   for (const trans of TRANSMISSION_SLUGS) {
-    urls.push(entry(`${trans}-cars-in-assam`, 'weekly', '0.7'))
+    urls.push(entry(`used-cars/transmission/${trans}/assam`, 'weekly', '0.7'))
   }
 
   // ─── Blog ────────────────────────────────────────────

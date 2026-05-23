@@ -78,15 +78,15 @@ async function main() {
   const dibrugarhCity = await db.city.findUnique({ where: { slug: 'dibrugarh' } })
 
   const users = [
-    { email: 'admin@meripehligadi.com', name: 'Super Admin', role: 'SUPER_ADMIN' as const, cityId: dibrugarhCity?.id },
-    { email: 'dealer@meripehligadi.com', name: 'Raj Automobiles', role: 'DEALER' as const, cityId: dibrugarhCity?.id },
-    { email: 'user@meripehligadi.com', name: 'Amit Kumar', role: 'BUYER' as const, cityId: dibrugarhCity?.id },
+    { email: 'admin@shanifinserve.com', name: 'Super Admin', role: 'SUPER_ADMIN' as const, cityId: dibrugarhCity?.id },
+    { email: 'dealer@shanifinserve.com', name: 'Raj Automobiles', role: 'DEALER' as const, cityId: dibrugarhCity?.id },
+    { email: 'user@shanifinserve.com', name: 'Amit Kumar', role: 'BUYER' as const, cityId: dibrugarhCity?.id },
   ]
 
   for (const u of users) {
     await db.user.upsert({
       where: { email: u.email },
-      update: {},
+      update: { password: hashedPassword, role: u.role },
       create: {
         email: u.email,
         password: hashedPassword,
@@ -100,7 +100,7 @@ async function main() {
   console.log(`✅ ${users.length} users seeded`)
 
   // ─── Dealer ───────────────────────────────────────────
-  const dealerUser = await db.user.findUnique({ where: { email: 'dealer@meripehligadi.com' } })
+  const dealerUser = await db.user.findUnique({ where: { email: 'dealer@shanifinserve.com' } })
   if (dealerUser && dibrugarhCity) {
     await db.dealer.upsert({
       where: { slug: 'raj-automobiles' },
@@ -108,7 +108,7 @@ async function main() {
       create: {
         name: 'Raj Automobiles',
         slug: 'raj-automobiles',
-        email: 'dealer@meripehligadi.com',
+        email: 'dealer@shanifinserve.com',
         phone: '8721932757',
         address: 'Opposite Vishal Mega Mart, Kartic Para, Dibrugarh, Assam 786001',
         cityId: dibrugarhCity.id,
@@ -190,7 +190,7 @@ async function main() {
   console.log(`✅ ${modelData.length} models seeded`)
 
   // ─── Sample Cars ──────────────────────────────────────
-  const sellerUser = await db.user.findUnique({ where: { email: 'user@meripehligadi.com' } })
+  const sellerUser = await db.user.findUnique({ where: { email: 'user@shanifinserve.com' } })
   const dealer = await db.dealer.findUnique({ where: { slug: 'raj-automobiles' } })
 
   const marutiSwiftModel = await db.model.findFirst({ where: { slug: 'swift' } })
@@ -412,7 +412,7 @@ async function main() {
     { key: 'site_description', value: 'Buy, sell, finance and insure used cars with trust, transparency and local support from MeriPehli Gadi and Shani Finserve.', type: 'text' },
     { key: 'phone', value: '087219 32757', type: 'text' },
     { key: 'whatsapp_number', value: '918721932757', type: 'text' },
-    { key: 'email', value: 'info@meripehligadi.com', type: 'text' },
+    { key: 'email', value: 'info@shanifinserve.com', type: 'text' },
     { key: 'address', value: 'MUKUL SHAH, C/O, opposite Vishal Mega Mart, KARTIC PARA, Dibrugarh, Assam 786001', type: 'text' },
     { key: 'hero_title', value: 'Find Your Perfect Car', type: 'text' },
     { key: 'hero_subtitle', value: 'Buy, sell, finance and insure your car with trusted support from MeriPehli Gadi and Shani Finserve.', type: 'text' },

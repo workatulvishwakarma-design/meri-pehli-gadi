@@ -84,7 +84,7 @@ function PrivacyPolicyContent() {
       <section className="mb-8">
         <h3 className="text-lg font-bold text-brand mb-3">5. Your Rights</h3>
         <p className="text-sm text-slate-600 leading-relaxed">
-          You have the right to access, correct, or delete your personal information at any time. You can manage your data through your account settings or contact us at privacy@meripehligadi.com.
+          You have the right to access, correct, or delete your personal information at any time. You can manage your data through your account settings or contact us at privacy@shanifinserve.com.
         </p>
       </section>
 
@@ -98,7 +98,7 @@ function PrivacyPolicyContent() {
       <section className="mb-8">
         <h3 className="text-lg font-bold text-brand mb-3">7. Contact Us</h3>
         <p className="text-sm text-slate-600 leading-relaxed">
-          If you have any questions about this Privacy Policy, please contact us at privacy@meripehligadi.com or call us at +91 98765 43210.
+          If you have any questions about this Privacy Policy, please contact us at privacy@shanifinserve.com or call us at +91 98765 43210.
         </p>
       </section>
     </div>
@@ -173,7 +173,7 @@ function TermsContent() {
       <section className="mb-8">
         <h3 className="text-lg font-bold text-brand mb-3">8. Contact</h3>
         <p className="text-sm text-slate-600 leading-relaxed">
-          For questions about these Terms, contact us at legal@meripehligadi.com.
+          For questions about these Terms, contact us at legal@shanifinserve.com.
         </p>
       </section>
     </div>
@@ -221,7 +221,7 @@ function RefundPolicyContent() {
       <section className="mb-8">
         <h3 className="text-lg font-bold text-brand mb-3">4. How to Request a Refund</h3>
         <p className="text-sm text-slate-600 leading-relaxed">
-          To request a refund, please contact us at support@meripehligadi.com with your order details and reason for the refund. Our team will review your request and respond within 48 hours.
+          To request a refund, please contact us at support@shanifinserve.com with your order details and reason for the refund. Our team will review your request and respond within 48 hours.
         </p>
       </section>
 

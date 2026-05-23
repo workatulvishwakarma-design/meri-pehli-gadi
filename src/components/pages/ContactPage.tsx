@@ -72,7 +72,7 @@ const contactInfo = [
   {
     icon: Mail,
     title: 'Email Address',
-    detail: 'hello@meripehligadi.com',
+    detail: 'hello@shanifinserve.com',
     subDetail: 'We reply within 24 hours',
     color: 'bg-amber-100 text-amber-600',
   },

@@ -510,7 +510,7 @@ export default function AdminDashboard() {
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <Card className="p-8 text-center max-w-sm">
           <Shield size={40} className="mx-auto mb-4 text-red-400" />
-          <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
+          <h2 className="text-xl font-semibold mb-2">Access Denied (Role: {user?.role || 'UNDEFINED'})</h2>
           <p className="text-slate-500">You don't have permission to access this page.</p>
         </Card>
       </div>

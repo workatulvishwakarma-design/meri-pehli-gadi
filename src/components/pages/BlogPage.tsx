@@ -156,7 +156,7 @@ function BlogListing() {
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
                           <img
-                            src="/images/blog/blog-default.png"
+                            src="/images/blog/blog-default.svg"
                             alt={blog.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             onError={(e) => {
@@ -399,7 +399,7 @@ function BlogDetail() {
               ) : (
                 <div className="w-full h-64 md:h-80 bg-gradient-to-br from-brand/10 to-brand/5 flex items-center justify-center">
                   <img
-                    src="/images/blog/blog-default.png"
+                    src="/images/blog/blog-default.svg"
                     alt={blog.title}
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -540,7 +540,7 @@ export function BlogPage() {
                 Blog & Articles
               </Badge>
               <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
-                {isBlogDetail ? 'Article' : 'Our <span className="text-purple-300">Blog</span>'}
+                {isBlogDetail ? 'Article' : <>Our <span className="text-purple-300">Blog</span></>}
               </h1>
               <p className="text-white/90 text-lg md:text-xl">
                 {isBlogDetail

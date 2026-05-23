@@ -11,13 +11,16 @@ import {
   AIReadableSummary
 } from '@/components/seo/SEOComponents'
 
+// Prevent static prerendering — this is a dynamic route
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ bodyType: string }>
 }): Promise<Metadata> {
   const p = await params
-  const bodyParam = p.bodyType
+  const bodyParam = p.bodyType || ''
   const bodyName = bodyParam.toUpperCase()
   
   return {
@@ -41,7 +44,7 @@ export default async function UsedCarsByBodyTypeInAssamPage({
   const p = await params
   const s = await searchParams
   
-  const bodyParam = p.bodyType.toUpperCase()
+  const bodyParam = (p.bodyType || '').toUpperCase()
   
   // Parse Search Params
   const budgetMin = Number(s.budgetMin) || undefined

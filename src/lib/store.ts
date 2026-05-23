@@ -82,23 +82,27 @@ export const useAppStore = create<AppState>((set, get) => ({
     // ─── Intercept SEO pages to use native browser routing ───
     if (typeof window !== 'undefined') {
       if (page === 'used-cars-city' && params.city) {
-        window.location.href = `/used-cars/in/${params.city}`
+        window.location.href = `/used-cars/in/${params.city.toLowerCase()}`
         return
       }
       if (page === 'used-cars-brand' && params.brand) {
-        window.location.href = `/used-cars/brand/${params.brand}/assam`
+        window.location.href = `/used-cars/brand/${params.brand.toLowerCase()}/assam`
         return
       }
       if ((page === 'used-cars-budget' && params.budget) || params.range) {
         const budgetVal = params.budget || params.range
-        window.location.href = `/used-cars/budget/${budgetVal}/assam`
+        window.location.href = `/search?budget=under-${budgetVal}-lakh`
+        return
+      }
+      if (page === 'certified-cars' || params.certified) {
+        window.location.href = `/search?isCertified=true`
         return
       }
       if (page === 'used-cars' || (page === 'used-cars-city' && !params.city)) {
-        let url = '/used-cars/in/assam'
+        let url = '/search'
         const queryParams = new URLSearchParams()
         
-        if (params.search) queryParams.set('search', params.search)
+        if (params.search) queryParams.set('q', params.search)
         if (params.bodyType) queryParams.set('bodyType', params.bodyType)
         if (params.transmission) queryParams.set('transmission', params.transmission)
         if (params.fuel) queryParams.set('fuel', params.fuel)
@@ -125,6 +129,51 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
       if (page === 'contact') {
         window.location.href = '/contact'
+        return
+      }
+      if (page === 'blog') {
+        window.location.href = '/blog'
+        return
+      }
+      if (page === 'blog-detail' && params.id) {
+        window.location.href = `/blog/${params.id}`
+        return
+      }
+      if (page === 'about') {
+        window.location.href = '/about'
+        return
+      }
+      if (page === 'faq') {
+        window.location.href = '/faq'
+        return
+      }
+      if (page === 'privacy-policy') {
+        window.location.href = '/privacy-policy'
+        return
+      }
+      if (page === 'terms') {
+        window.location.href = '/terms'
+        return
+      }
+      if (page === 'refund-policy') {
+        window.location.href = '/refund-policy'
+        return
+      }
+      if (page === 'admin-dashboard') {
+        window.location.href = '/admin'
+        return
+      }
+      if (page === 'home') {
+        window.location.href = '/'
+        return
+      }
+      if (page === 'car-details' && params.id) {
+        window.location.href = `/car/${params.id}`
+        return
+      }
+      if (page === 'user-dashboard' || page === 'seller-dashboard' || page === 'dealer-dashboard') {
+        // For now, redirect to homepage since no user dashboard route exists yet
+        window.location.href = '/'
         return
       }
     }

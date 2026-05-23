@@ -11,13 +11,16 @@ import {
   AIReadableSummary
 } from '@/components/seo/SEOComponents'
 
+// Prevent static prerendering — this is a dynamic route
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ fuel: string }>
 }): Promise<Metadata> {
   const p = await params
-  const fuelParam = p.fuel
+  const fuelParam = p.fuel || ''
   const fuelName = fuelParam.toUpperCase()
   
   return {
@@ -41,7 +44,7 @@ export default async function UsedCarsByFuelInAssamPage({
   const p = await params
   const s = await searchParams
   
-  const fuelParam = p.fuel.toUpperCase()
+  const fuelParam = (p.fuel || '').toUpperCase()
   
   // Parse Search Params
   const budgetMin = Number(s.budgetMin) || undefined

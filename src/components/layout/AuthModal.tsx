@@ -288,7 +288,7 @@ function LoginForm({
       </Button>
 
       <p className="text-center text-xs text-muted-foreground">
-        Demo: user@meripehligadi.com / password123
+        Demo: user@shanifinserve.com / password123
       </p>
     </form>
   )

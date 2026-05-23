@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://new.shanifinserve.com'),
   title: "MeriPehli Gadi - Buy, Sell, Finance & Insure Used Cars in Assam | Trusted Marketplace",
   description:
     "MeriPehli Gadi helps customers in Assam buy, sell, finance and insure used cars with trust, transparency and local support. Pehli car ka sapna, ab aur aasaan. Powered by Shani Finserve.",
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     "used Hyundai cars Assam", "used Tata cars Assam",
     "used SUV Assam", "budget cars Assam", "first car Assam",
   ],
-  authors: [{ name: "MeriPehli Gadi", url: "https://meripehligadi.com" }],
+  authors: [{ name: "MeriPehli Gadi", url: "https://new.shanifinserve.com" }],
   creator: "MeriPehli Gadi",
   publisher: "MeriPehli Gadi",
   icons: {
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
     siteName: "MeriPehli Gadi",
     type: "website",
     locale: "en_IN",
-    url: "https://meripehligadi.com",
+    url: "https://new.shanifinserve.com",
     images: [
       {
         url: "/logo.png",
@@ -70,7 +71,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://meripehligadi.com",
+    canonical: "https://new.shanifinserve.com",
   },
   verification: {
     google: "your-google-verification-code",

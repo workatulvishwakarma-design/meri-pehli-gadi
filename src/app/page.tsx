@@ -1,6 +1,6 @@
 import React from 'react'
 import type { Metadata } from 'next'
-import { getCachedFeaturedCars, getCachedTrendingCars, getCachedCars } from '@/lib/cache/cars-cache'
+import { CarService } from '@/lib/services/car.service'
 import HomePage from '@/components/pages/HomePage'
 
 export const metadata: Metadata = {
@@ -13,25 +13,45 @@ export const metadata: Metadata = {
   ],
 }
 
-// Server-side data fetching for SEO
+// Server-side data fetching for SEO — gracefully degrades if DB is unavailable
 async function getHomePageData() {
-  const [featuredCars, trendingCars, guwahatiData, dibrugarhData, tezpurData, tinsukiaData] = await Promise.all([
-    getCachedFeaturedCars(8),
-    getCachedTrendingCars(8),
-    getCachedCars({ citySlug: 'guwahati', limit: 4 }),
-    getCachedCars({ citySlug: 'dibrugarh', limit: 4 }),
-    getCachedCars({ citySlug: 'tezpur', limit: 4 }),
-    getCachedCars({ citySlug: 'tinsukia', limit: 4 }),
-  ])
+  try {
+    const [
+      featuredCars, 
+      trendingCars, 
+      guwahatiData, 
+      dibrugarhData, 
+      tezpurData, 
+      tinsukiaData,
+      budgetCars
+    ] = await Promise.all([
+      CarService.getFeaturedCars(8),
+      CarService.getTrendingCars(8),
+      CarService.getCars({ citySlug: 'guwahati', limit: 4 }),
+      CarService.getCars({ citySlug: 'dibrugarh', limit: 4 }),
+      CarService.getCars({ citySlug: 'tezpur', limit: 4 }),
+      CarService.getCars({ citySlug: 'tinsukia', limit: 4 }),
+      CarService.getCars({ budgetMax: 500000, limit: 8 }),
+    ])
 
-  return {
-    featuredCars,
-    trendingCars,
-    cityData: {
-      guwahati: guwahatiData.cars,
-      dibrugarh: dibrugarhData.cars,
-      tezpur: tezpurData.cars,
-      tinsukia: tinsukiaData.cars,
+    return {
+      featuredCars,
+      trendingCars,
+      budgetCars: budgetCars.cars,
+      cityData: {
+        guwahati: guwahatiData.cars,
+        dibrugarh: dibrugarhData.cars,
+        tezpur: tezpurData.cars,
+        tinsukia: tinsukiaData.cars,
+      }
+    }
+  } catch (error) {
+    console.error('[homepage] Database unavailable:', error)
+    return {
+      featuredCars: [],
+      trendingCars: [],
+      budgetCars: [],
+      cityData: {},
     }
   }
 }

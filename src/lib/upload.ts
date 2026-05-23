@@ -2,7 +2,7 @@ import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import { randomUUID } from 'crypto'
 
-const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads')
+const UPLOAD_DIR = join(/* turbopackIgnore: true */ process.cwd(), 'public', 'uploads')
 
 const ALLOWED_MIME_TYPES = [
   'image/jpeg',

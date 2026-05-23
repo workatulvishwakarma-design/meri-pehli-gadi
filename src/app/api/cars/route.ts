@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
     if (sort === 'newest') orderBy = { createdAt: 'desc' as SortOrder }
     if (sort === 'popular') orderBy = { viewsCount: 'desc' as SortOrder }
 
-    const [cars, total] = await Promise.all([
+    let [cars, total] = await Promise.all([
       db.car.findMany({
         where,
         include: {
@@ -114,6 +114,29 @@ export async function GET(request: NextRequest) {
       }),
       db.car.count({ where }),
     ])
+
+    // Fallback: If they requested isFeatured but none exist, just return the latest active cars
+    if (isFeatured === 'true' && cars.length === 0) {
+      delete where.isFeatured
+      const [fallbackCars, fallbackTotal] = await Promise.all([
+        db.car.findMany({
+          where,
+          include: {
+            brand: { select: { id: true, name: true, slug: true, logo: true } },
+            model: { select: { id: true, name: true, slug: true } },
+            city: { select: { id: true, name: true, slug: true } },
+            images: { select: { id: true, url: true, alt: true, sortOrder: true }, orderBy: { sortOrder: 'asc' }, take: 1 },
+            dealer: { select: { id: true, name: true, slug: true, logo: true, rating: true } },
+          },
+          orderBy: { createdAt: 'desc' },
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+        db.car.count({ where }),
+      ])
+      cars = fallbackCars
+      total = fallbackTotal
+    }
 
     return NextResponse.json({
       cars,

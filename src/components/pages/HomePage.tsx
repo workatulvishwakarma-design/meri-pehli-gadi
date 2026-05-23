@@ -29,11 +29,11 @@ function useNavigateAdapter() {
   const router = useRouter()
   return (page: string, params: Record<string, string> = {}) => {
     let url = '/'
-    if (page === 'used-cars') url = '/used-cars'
-    else if (page === 'used-cars-brand') url = `/used-cars/brand/${params.brand}`
-    else if (page === 'used-cars-budget') url = `/used-cars/budget/${params.range}`
+    if (page === 'used-cars') url = '/search'
+    else if (page === 'used-cars-brand') url = `/used-cars/brand/${params.brand}/assam`
+    else if (page === 'used-cars-budget') url = `/used-cars/budget/${params.range}/assam`
     else if (page === 'used-cars-city') url = `/used-cars/in/${params.city}`
-    else if (page === 'certified-cars') url = '/used-cars?certified=true'
+    else if (page === 'certified-cars') url = '/search?isCertified=true'
     else if (page === 'sell-car' || page === 'car-valuation') url = '/sell-car'
     else if (page === 'finance') url = '/finance'
     else if (page === 'insurance') url = '/insurance'
@@ -1411,12 +1411,50 @@ function FAQSection() {
   )
 }
 
+// ─── Section 6.2: Budget Cars Section ────────────────────────────────
+
+function BudgetCarsSection({ initialCars }: { initialCars?: any[] }) {
+  const navigateTo = useNavigateAdapter()
+  if (!initialCars || initialCars.length === 0) return null
+
+  return (
+    <section className="py-16 md:py-20 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="flex items-end justify-between mb-10">
+          <FadeInSection>
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-brand">Budget Friendly Cars</h2>
+            <p className="text-slate-500 text-sm mt-2">Quality cars under ₹5 Lakh</p>
+          </FadeInSection>
+          <FadeInSection delay={0.1}>
+            <Button
+              variant="ghost"
+              className="text-accent-orange hover:text-orange-600 gap-1 text-sm font-medium"
+              onClick={() => navigateTo('used-cars-budget', { range: 'under-5-lakh' })}
+            >
+              View More <ArrowRight className="size-4" />
+            </Button>
+          </FadeInSection>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          {initialCars.slice(0, 8).map((car, i) => (
+            <FadeInSection key={car.id} delay={i * 0.05}>
+              <CarCard car={car} />
+            </FadeInSection>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // ─── Main HomePage Component ────────────────────────────────────────
 
 interface HomePageProps {
   ssrData?: {
     featuredCars: any[]
     trendingCars: any[]
+    budgetCars?: any[]
     cityData: Record<string, any[]>
   }
 }
@@ -1427,6 +1465,7 @@ export default function HomePage({ ssrData }: HomePageProps) {
       <HeroSection />
       <BrowseByTypeSection />
       <BrowseByBudgetSection />
+      <BudgetCarsSection initialCars={ssrData?.budgetCars} />
       <PopularBrandsSection />
       <FeaturedCarsSection initialCars={ssrData?.featuredCars} />
       <MostViewedCarsSection initialCars={ssrData?.featuredCars} />

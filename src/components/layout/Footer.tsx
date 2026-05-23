@@ -129,13 +129,13 @@ function getHref(page: string, params?: Record<string, string>): string {
     case 'home':
       return '/'
     case 'used-cars':
-      return '/used-cars'
+      return '/search'
     case 'used-cars-city':
       return `/used-cars/in/${params?.city || 'assam'}`
     case 'used-cars-brand':
       return `/used-cars/brand/${params?.brand || 'all'}/assam`
     case 'used-cars-budget':
-      return `/used-cars/budget/${params?.budget || 'all'}-lakh/assam`
+      return `/used-cars/budget/${params?.budget || '5'}/assam`
     case 'car-details':
       return `/car/${params?.id}`
     case 'sell-car':
@@ -145,11 +145,15 @@ function getHref(page: string, params?: Record<string, string>): string {
     case 'insurance':
       return '/insurance'
     case 'certified-cars':
-      return '/certified-cars'
+      return '/search?isCertified=true'
     case 'electric-cars':
-      return '/electric-cars'
+      return '/search?fuel=electric'
+    case 'blog':
+      return '/blog'
     case 'about':
       return '/about'
+    case 'faq':
+      return '/faq'
     case 'contact':
       return '/contact'
     case 'privacy-policy':
@@ -280,10 +284,10 @@ export function Footer() {
               <div className="flex items-center gap-2.5 text-sm text-white/60">
                 <Mail className="size-4 text-accent-orange shrink-0" />
                 <a
-                  href="mailto:info@meripehligadi.com"
+                  href="mailto:info@shanifinserve.com"
                   className="hover:text-white transition-colors"
                 >
-                  info@meripehligadi.com
+                  info@shanifinserve.com
                 </a>
               </div>
             </div>
@@ -380,13 +384,14 @@ export function Footer() {
           {/* Legal Links */}
           <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
             {legalLinks.map((link) => (
-              <button
+              <Link
                 key={link.label}
-                onClick={() => navigateTo(link.page)}
+                href={getHref(link.page)}
                 className="text-xs text-white/40 hover:text-white/80 transition-colors duration-200"
+                prefetch={false}
               >
                 {link.label}
-              </button>
+              </Link>
             ))}
           </nav>
 

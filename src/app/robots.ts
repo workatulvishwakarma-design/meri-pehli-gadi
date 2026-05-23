@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/admin/', '/private/'],
     },
-    sitemap: 'https://meripehligadi.com/sitemap.xml',
+    sitemap: 'https://new.shanifinserve.com/sitemap.xml',
   }
 }

@@ -107,11 +107,10 @@ export default function CarCard({ car, variant = 'default', priority = false }: 
       whileHover={{ y: -4, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
       className="h-full group relative"
     >
-      <Link href={`/car/${car.id}`} className="absolute inset-0 z-0 rounded-16" prefetch={false}>
-        <span className="sr-only">View {car.title}</span>
-      </Link>
-      
-      <Card className="overflow-hidden rounded-16 border border-slate-200/80 bg-white/80 backdrop-blur-md shadow-soft hover:shadow-premium hover:bg-white transition-all duration-300 h-full flex flex-col p-0 gap-0">
+      <Card className="relative overflow-hidden rounded-16 border border-slate-200/80 bg-white/80 backdrop-blur-md shadow-soft hover:shadow-premium hover:bg-white transition-all duration-300 h-full flex flex-col p-0 gap-0">
+        <Link href={`/car/${car.id}`} className="absolute inset-0 z-10" prefetch={false}>
+          <span className="sr-only">View {car.title}</span>
+        </Link>
         {/* ─── Image Section ─── */}
         <div className="relative overflow-hidden">
           {/* 16:10 Aspect Ratio Container */}
@@ -157,10 +156,11 @@ export default function CarCard({ car, variant = 'default', priority = false }: 
           {/* Heart Icon - Top Right */}
           <button
             onClick={(e) => {
+              e.preventDefault()
               e.stopPropagation()
               setIsWishlisted(!isWishlisted)
             }}
-            className="absolute top-3 right-3 z-10 size-8 flex items-center justify-center rounded-full bg-white/90 shadow-md hover:bg-white hover:shadow-lg transition-all"
+            className="absolute top-3 right-3 z-20 size-8 flex items-center justify-center rounded-full bg-white/90 shadow-md hover:bg-white hover:shadow-lg transition-all"
             aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           >
             <Heart
@@ -238,7 +238,7 @@ export default function CarCard({ car, variant = 'default', priority = false }: 
 
           {/* Action Buttons */}
           {!isCompact && (
-            <div className="flex gap-2 pt-1 relative z-10">
+            <div className="flex gap-2 pt-1 relative z-20">
               <Button
                 size="sm"
                 className="flex-1 bg-brand hover:bg-brand-light text-white text-xs h-8 rounded-lg pointer-events-none"
@@ -253,6 +253,7 @@ export default function CarCard({ car, variant = 'default', priority = false }: 
                   className="text-xs h-8 rounded-lg border-purple-200 text-purple-600 hover:bg-purple-50"
                   onClick={(e) => {
                     e.preventDefault()
+                    e.stopPropagation()
                     navigateTo('finance', { carId: car.id })
                   }}
                 >

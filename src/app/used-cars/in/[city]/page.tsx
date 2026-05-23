@@ -11,13 +11,16 @@ import {
 } from '@/components/seo/SEOComponents'
 import { CAR_BRANDS, BUDGET_RANGES, getQuickAnswer } from '@/lib/seo-data'
 
+// Prevent static prerendering — this is a dynamic route
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ city: string }>
 }): Promise<Metadata> {
   const p = await params
-  const citySlug = p.city
+  const citySlug = p.city || ''
   const cityData = await getCachedCityData(citySlug)
 
   const cityName = cityData ? cityData.name : citySlug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
@@ -54,7 +57,7 @@ export default async function UsedCarsInCityPage({
   const p = await params
   const s = await searchParams
   
-  const citySlug = p.city
+  const citySlug = p.city || ''
   
   // Parse Search Params
   const budgetMin = Number(s.budgetMin) || undefined

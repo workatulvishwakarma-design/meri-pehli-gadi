@@ -11,13 +11,16 @@ import {
 } from '@/components/seo/SEOComponents'
 import { CAR_BRANDS, BUDGET_RANGES, getQuickAnswer } from '@/lib/seo-data'
 
+// Prevent static prerendering — this is a dynamic route
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ brand: string }>
 }): Promise<Metadata> {
   const p = await params
-  const brandSlug = p.brand
+  const brandSlug = p.brand || ''
   const brandData = await getCachedBrandData(brandSlug)
 
   const brandName = brandData ? brandData.name : brandSlug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
@@ -45,7 +48,7 @@ export default async function UsedBrandCarsInAssamPage({
   const p = await params
   const s = await searchParams
   
-  const brandSlug = p.brand
+  const brandSlug = p.brand || ''
   
   // Parse Search Params
   const budgetMin = Number(s.budgetMin) || undefined

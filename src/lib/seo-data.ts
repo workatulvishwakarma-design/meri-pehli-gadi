@@ -4,12 +4,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const SITE_NAME = 'MeriPehli Gadi'
-export const SITE_URL = 'https://meripehligadi.com'
+export const SITE_URL = 'https://new.shanifinserve.com'
 export const PHONE = '087219 32757'
 export const PHONE_HREF = 'tel:+918721932757'
 export const WHATSAPP_NUMBER = '918721932757'
 export const WHATSAPP_MESSAGE = 'Hello MeriPehli Gadi, I want help with buying/selling/financing/insuring a used car in Assam.'
-export const EMAIL = 'info@meripehligadi.com'
+export const EMAIL = 'info@shanifinserve.com'
 export const PARTNER_NAME = 'Shani Finserve'
 
 export const BUSINESS_ADDRESS = {

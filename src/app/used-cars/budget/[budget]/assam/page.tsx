@@ -11,13 +11,16 @@ import {
 } from '@/components/seo/SEOComponents'
 import { CAR_BRANDS, BUDGET_RANGES } from '@/lib/seo-data'
 
+// Prevent static prerendering — this is a dynamic route
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ budget: string }>
 }): Promise<Metadata> {
   const p = await params
-  const budgetParam = p.budget
+  const budgetParam = p.budget || ''
   const budgetVal = budgetParam.replace('-lakh', '')
   
   return {
@@ -42,7 +45,7 @@ export default async function UsedCarsByBudgetInAssamPage({
   const p = await params
   const s = await searchParams
   
-  const budgetParam = p.budget
+  const budgetParam = p.budget || ''
   const budgetNum = parseInt(budgetParam.replace('-lakh', ''), 10)
   const budgetMax = !isNaN(budgetNum) ? budgetNum * 100000 : undefined
   
