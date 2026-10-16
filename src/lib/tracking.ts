@@ -3,7 +3,7 @@
 // Ready for Google Analytics 4, Meta Pixel, Google Tag Manager, Microsoft Clarity
 // ─────────────────────────────────────────────────────────────────────────────
 
-type EventParams = Record<string, string | number | boolean>
+type EventParams = Record<string, string | number | boolean | unknown[] | undefined>
 
 declare global {
   interface Window {
@@ -133,7 +133,7 @@ export function trackMetaPixel(event: string, params?: EventParams) {
 export const MetaEvents = {
   pageView: () => trackMetaPixel('PageView'),
   viewContent: (carTitle: string, carPrice?: number) =>
-    trackMetaPixel('ViewContent', { content_name: carTitle, currency: 'INR', value: carPrice }),
+    trackMetaPixel('ViewContent', { content_name: carTitle, currency: 'INR', value: carPrice ?? 0 }),
   lead: (leadType: string) =>
     trackMetaPixel('Lead', { content_name: leadType }),
   contact: () => trackMetaPixel('Contact'),

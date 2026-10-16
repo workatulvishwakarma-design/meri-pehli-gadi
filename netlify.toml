@@ -1,5 +1,5 @@
 [build]
-  command = "npx prisma db push && bun run build"
+  command = "npm run build"
   publish = ".next"
 
 [[plugins]]

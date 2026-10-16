@@ -14,7 +14,12 @@ export const metadata: Metadata = {
 }
 
 // Server-side data fetching for SEO — gracefully degrades if DB is unavailable
-async function getHomePageData() {
+async function getHomePageData(): Promise<{
+  featuredCars: any[]
+  trendingCars: any[]
+  budgetCars: any[]
+  cityData: Record<string, any[]>
+}> {
   try {
     const [
       featuredCars, 

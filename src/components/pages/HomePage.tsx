@@ -597,7 +597,7 @@ function MostViewedCarsSection({ initialCars }: { initialCars?: any[] }) {
       .then(d => {
         const mapped = (d.cars || []).map((c: Record<string, unknown>) => {
           const cardProps = mapApiCarToCardProps(c)
-          if (!cardProps.views) cardProps.views = (cardProps.viewsCount || 1000)
+          if (!cardProps.viewsCount) cardProps.viewsCount = 1000
           return cardProps
         })
         setCars(mapped as any)

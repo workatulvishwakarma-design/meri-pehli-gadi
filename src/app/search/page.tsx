@@ -29,8 +29,8 @@ export default async function SearchPage({ searchParams }: PageProps) {
   const citySlug = sp.city
   const bodyType = sp.bodyType
   
-  let budgetMin = undefined
-  let budgetMax = undefined
+  let budgetMin: number | undefined = undefined
+  let budgetMax: number | undefined = undefined
   
   if (sp.budget === 'under-2-lakh') budgetMax = 200000
   if (sp.budget === 'under-5-lakh') budgetMax = 500000

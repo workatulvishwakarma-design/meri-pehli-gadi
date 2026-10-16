@@ -260,7 +260,7 @@ const navItems: NavItemConfig[] = [
    Framer Motion Variants
    ═══════════════════════════════════════════════════════════════ */
 
-const megaMenuVariants = {
+const megaMenuVariants: any = {
   hidden: { opacity: 0, y: 10, scale: 0.96 },
   visible: {
     opacity: 1,
@@ -276,7 +276,7 @@ const megaMenuVariants = {
   },
 }
 
-const dropdownVariants = {
+const dropdownVariants: any = {
   hidden: { opacity: 0, y: 6, scale: 0.96 },
   visible: {
     opacity: 1,
@@ -523,7 +523,7 @@ function DesktopNavItem({ item }: { item: NavItemConfig }) {
     <div className="relative" onMouseEnter={enter} onMouseLeave={leave}>
       <button
         onClick={() => {
-          if (item.type === 'link') {
+          if (item.type === 'link' && item.page) {
             navigateTo(item.page)
           }
         }}

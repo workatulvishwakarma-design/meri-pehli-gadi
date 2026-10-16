@@ -208,8 +208,7 @@ export function CarDetailShell({ car }: CarDetailShellProps) {
             }}>
               <div className="space-y-4">
                 <input name="name" required placeholder="Your Name" className="w-full p-3 border rounded-xl" />
-                <input name="phone" required placeholder="Phone Number" className="w-full p-3 border rounded-xl" />
-                <Button type="submit" className="w-full">Submit</Button>
+                <button type="submit" className="w-full py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition">Submit</button>
               </div>
             </form>
           </div>

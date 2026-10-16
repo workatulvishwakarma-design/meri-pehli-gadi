@@ -29,8 +29,7 @@ export async function generateMetadata({
     ? "Used Cars in Assam | Buy Verified Second Hand Cars | MeriPehli Gadi"
     : `Used Cars in ${cityName}, Assam | Buy Verified Second Hand Cars`
   
-  const description = cityData?.metaDescription || 
-    `Buy verified used cars in ${cityName}, Assam with easy finance, insurance, test drive and local guidance. MeriPehli Gadi — Assam's trusted car marketplace powered by Shani Finserve.`
+  const description = `Buy verified used cars in ${cityName}, Assam with easy finance, insurance, test drive and local guidance. MeriPehli Gadi — Assam's trusted car marketplace powered by Shani Finserve.`
 
   return {
     title,
